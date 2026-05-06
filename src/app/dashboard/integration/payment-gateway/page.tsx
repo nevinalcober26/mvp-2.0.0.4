@@ -31,7 +31,8 @@ import {
   X,
   Save,
   Cog,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -110,6 +111,10 @@ export default function PaymentGatewayPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
   const [isRegionPopoverOpen, setIsRegionPopoverOpen] = useState(false);
+  
+  // Connection states
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Load from Local Storage on mount
   useEffect(() => {
@@ -143,7 +148,19 @@ export default function PaymentGatewayPage() {
     return COUNTRIES.filter(c => c.toLowerCase().includes(regionSearch.toLowerCase()));
   }, [regionSearch]);
 
-  const handleAddGateway = () => {
+  const handleAddGateway = async () => {
+    setIsProcessing(true);
+    
+    // 1. Simulate verification/preloader
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setIsProcessing(false);
+    setShowSuccess(true);
+    
+    // 2. Success message display
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // 3. Finalize and Save
     const provider = SUPPORTED_PROVIDERS.find(p => p.id === newGateway.providerId);
     const connection: GatewayConnection = {
       id: Date.now().toString(),
@@ -164,6 +181,7 @@ export default function PaymentGatewayPage() {
     updateConnections(updated);
     setIsAddModalOpen(false);
     resetForm();
+    setShowSuccess(false);
     toast({
       title: "Gateway Connected",
       description: `${connection.brand} has been added and saved successfully.`
@@ -195,6 +213,8 @@ export default function PaymentGatewayPage() {
 
   const resetForm = () => {
     setCurrentStep(1);
+    setIsProcessing(false);
+    setShowSuccess(false);
     setNewGateway({
       merchantId: '',
       region: '',
@@ -226,6 +246,8 @@ export default function PaymentGatewayPage() {
         return <Badge variant="secondary" className="font-bold">Disabled</Badge>;
     }
   };
+
+  const isNavigationDisabled = isProcessing || showSuccess;
 
   return (
     <>
@@ -344,216 +366,247 @@ export default function PaymentGatewayPage() {
               <DialogHeader className="text-left p-0">
                 <DialogTitle className="text-2xl font-bold text-foreground">Connect Gateway</DialogTitle>
                 <DialogDescription className="text-muted-foreground font-medium">
-                  {currentStep === 1 && "Step 1: Identity Information"}
-                  {currentStep === 2 && "Step 2: Regional Configuration"}
-                  {currentStep === 3 && "Step 3: Provider Selection"}
-                  {currentStep === 4 && "Step 4: API & Credentials"}
+                  {!isNavigationDisabled && (
+                    <>
+                      {currentStep === 1 && "Step 1: Identity Information"}
+                      {currentStep === 2 && "Step 2: Regional Configuration"}
+                      {currentStep === 3 && "Step 3: Provider Selection"}
+                      {currentStep === 4 && "Step 4: API & Credentials"}
+                    </>
+                  )}
+                  {isProcessing && "Verifying your details..."}
+                  {showSuccess && "Setup complete!"}
                 </DialogDescription>
               </DialogHeader>
             </div>
             
-            <div className="mt-6 flex items-center gap-2">
-              {[1, 2, 3, 4].map((s) => (
-                <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-colors", currentStep >= s ? "bg-primary" : "bg-muted")} />
-              ))}
-            </div>
+            {!isNavigationDisabled && (
+              <div className="mt-6 flex items-center gap-2">
+                {[1, 2, 3, 4].map((s) => (
+                  <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-colors", currentStep >= s ? "bg-primary" : "bg-muted")} />
+                ))}
+              </div>
+            )}
           </div>
 
-          <ScrollArea className="flex-1 max-h-[60vh]">
-            <div className="p-8 space-y-8">
-              {currentStep === 1 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-bold flex items-center gap-2">
-                      <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
-                    </Label>
-                    <Input 
-                      placeholder="e.g. MID_9428105" 
-                      value={newGateway.merchantId}
-                      onChange={(e) => setNewGateway(prev => ({ ...prev, merchantId: e.target.value }))}
-                      className="h-12 bg-background font-medium rounded-xl"
-                    />
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your unique merchant ID from the gateway provider.</p>
-                  </div>
+          <div className="flex-1 min-h-[300px] flex flex-col">
+            {isProcessing ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-4 animate-in fade-in duration-500">
+                <div className="relative">
+                   <Loader2 className="h-12 w-12 text-primary animate-spin" />
                 </div>
-              )}
-
-              {currentStep === 2 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
-                  <div className="space-y-4">
-                    <Label className="text-sm font-bold flex items-center gap-2">
-                      <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region (Optional)
-                    </Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Search countries..." 
-                        value={regionSearch}
-                        onChange={(e) => setRegionSearch(e.target.value)}
-                        className="h-12 pl-10 bg-background font-medium rounded-xl"
-                      />
-                    </div>
-                    <ScrollArea className="h-[200px] border rounded-xl bg-muted/10 p-2">
-                      <div className="space-y-1">
-                        {filteredCountries.map(country => (
-                          <button
-                            key={country}
-                            onClick={() => setNewGateway(prev => ({ ...prev, region: country }))}
-                            className={cn(
-                              "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
-                              newGateway.region === country ? "bg-primary text-white" : "hover:bg-muted"
-                            )}
-                          >
-                            {country}
-                          </button>
-                        ))}
+                <p className="font-bold text-lg text-foreground">Verifying with Gateway...</p>
+              </div>
+            ) : showSuccess ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-6 animate-in zoom-in duration-500">
+                <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center border-4 border-green-500/20">
+                  <CheckCircle2 className="h-10 w-10 text-green-600" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="font-bold text-2xl text-foreground">Connected Successfully!</p>
+                  <p className="text-muted-foreground font-medium">Saving configuration to workspace...</p>
+                </div>
+              </div>
+            ) : (
+              <ScrollArea className="flex-1 max-h-[60vh]">
+                <div className="p-8 space-y-8">
+                  {currentStep === 1 && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold flex items-center gap-2">
+                          <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
+                        </Label>
+                        <Input 
+                          placeholder="e.g. MID_9428105" 
+                          value={newGateway.merchantId}
+                          onChange={(e) => setNewGateway(prev => ({ ...prev, merchantId: e.target.value }))}
+                          className="h-12 bg-background font-medium rounded-xl"
+                        />
+                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your unique merchant ID from the gateway provider.</p>
                       </div>
-                    </ScrollArea>
-                  </div>
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {currentStep === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold">Select Gateway Provider</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {SUPPORTED_PROVIDERS.map((provider) => (
-                          <div
-                            key={provider.id}
-                            onClick={() => setNewGateway(prev => ({ ...prev, providerId: provider.id }))}
-                            className={cn(
-                              "cursor-pointer flex flex-col p-5 rounded-2xl border-2 transition-all duration-300 group",
-                              newGateway.providerId === provider.id
-                                ? "border-primary bg-primary/5 ring-4 ring-primary/10"
-                                : "border-muted hover:border-accent-foreground/20 bg-background"
-                            )}
-                          >
-                            <div className="flex items-center justify-between mb-4">
-                              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-110 bg-white")}>
-                                <provider.icon className={cn("h-5 w-5", provider.color)} />
-                              </div>
-                              {newGateway.providerId === provider.id && (
-                                <CheckCircle2 className="h-6 w-6 text-primary animate-in zoom-in duration-300" />
-                              )}
-                            </div>
-                            <p className="font-bold text-base text-foreground">{provider.name}</p>
+                  {currentStep === 2 && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
+                      <div className="space-y-4">
+                        <Label className="text-sm font-bold flex items-center gap-2">
+                          <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region (Optional)
+                        </Label>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Search countries..." 
+                            value={regionSearch}
+                            onChange={(e) => setRegionSearch(e.target.value)}
+                            className="h-12 pl-10 bg-background font-medium rounded-xl"
+                          />
+                        </div>
+                        <ScrollArea className="h-[200px] border rounded-xl bg-muted/10 p-2">
+                          <div className="space-y-1">
+                            {filteredCountries.map(country => (
+                              <button
+                                key={country}
+                                onClick={() => setNewGateway(prev => ({ ...prev, region: country }))}
+                                className={cn(
+                                  "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                                  newGateway.region === country ? "bg-primary text-white" : "hover:bg-muted"
+                                )}
+                              >
+                                {country}
+                              </button>
+                            ))}
                           </div>
-                        ))}
+                        </ScrollArea>
                       </div>
                     </div>
+                  )}
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold">Base Currency</Label>
-                      <Select 
-                        value={newGateway.currency} 
-                        onValueChange={(val) => setNewGateway(prev => ({ ...prev, currency: val }))}
-                      >
-                        <SelectTrigger className="h-12 bg-background font-medium rounded-xl">
-                          <SelectValue placeholder="Select currency" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                  {currentStep === 3 && (
+                    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold">Select Gateway Provider</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {SUPPORTED_PROVIDERS.map((provider) => (
+                              <div
+                                key={provider.id}
+                                onClick={() => setNewGateway(prev => ({ ...prev, providerId: provider.id }))}
+                                className={cn(
+                                  "cursor-pointer flex flex-col p-5 rounded-2xl border-2 transition-all duration-300 group",
+                                  newGateway.providerId === provider.id
+                                    ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                                    : "border-muted hover:border-accent-foreground/20 bg-background"
+                                )}
+                              >
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-110 bg-white")}>
+                                    <provider.icon className={cn("h-5 w-5", provider.color)} />
+                                  </div>
+                                  {newGateway.providerId === provider.id && (
+                                    <CheckCircle2 className="h-6 w-6 text-primary animate-in zoom-in duration-300" />
+                                  )}
+                                </div>
+                                <p className="font-bold text-base text-foreground">{provider.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold">Base Currency</Label>
+                          <Select 
+                            value={newGateway.currency} 
+                            onValueChange={(val) => setNewGateway(prev => ({ ...prev, currency: val }))}
+                          >
+                            <SelectTrigger className="h-12 bg-background font-medium rounded-xl">
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {currentStep === 4 && (
+                    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
+                      <div className="space-y-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold flex items-center gap-2">
+                            <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> Outlet Reference
+                          </Label>
+                          <Input 
+                            placeholder="e.g. STORE_RAK_01" 
+                            value={newGateway.outletReference}
+                            onChange={(e) => setNewGateway(prev => ({ ...prev, outletReference: e.target.value }))}
+                            className="h-12 bg-background font-medium rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold flex items-center gap-2">
+                            <Key className="h-3.5 w-3.5 text-muted-foreground" /> Service Account API Key
+                          </Label>
+                          <Input 
+                            type="password"
+                            placeholder="sk_live_••••••••••••••••••••" 
+                            value={newGateway.apiKey}
+                            onChange={(e) => setNewGateway(prev => ({ ...prev, apiKey: e.target.value }))}
+                            className="h-12 bg-background font-mono rounded-xl"
+                          />
+                          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your secret production key. Keep this private.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {currentStep === 4 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> Outlet Reference
-                      </Label>
-                      <Input 
-                        placeholder="e.g. STORE_RAK_01" 
-                        value={newGateway.outletReference}
-                        onChange={(e) => setNewGateway(prev => ({ ...prev, outletReference: e.target.value }))}
-                        className="h-12 bg-background font-medium rounded-xl"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-bold flex items-center gap-2">
-                        <Key className="h-3.5 w-3.5 text-muted-foreground" /> Service Account API Key
-                      </Label>
-                      <Input 
-                        type="password"
-                        placeholder="sk_live_••••••••••••••••••••" 
-                        value={newGateway.apiKey}
-                        onChange={(e) => setNewGateway(prev => ({ ...prev, apiKey: e.target.value }))}
-                        className="h-12 bg-background font-mono rounded-xl"
-                      />
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your secret production key. Keep this private.</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-
-          <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-between gap-4">
-            {currentStep === 1 && (
-              <>
-                <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                <Button 
-                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                  disabled={!newGateway.merchantId}
-                  onClick={() => setCurrentStep(2)}
-                >
-                  Next <ChevronRight className="h-4 w-4" />
-                </Button>
-              </>
+              </ScrollArea>
             )}
-            {currentStep === 2 && (
-              <>
-                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(1)}>
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <div className="flex gap-2">
-                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
+          </div>
+
+          {!isNavigationDisabled && (
+            <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-between gap-4">
+              {currentStep === 1 && (
+                <>
+                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
                   <Button 
                     className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                    onClick={() => setCurrentStep(3)}
+                    disabled={!newGateway.merchantId}
+                    onClick={() => setCurrentStep(2)}
                   >
                     Next <ChevronRight className="h-4 w-4" />
                   </Button>
-                </div>
-              </>
-            )}
-            {currentStep === 3 && (
-              <>
-                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(2)}>
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <Button 
-                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                  disabled={!newGateway.providerId}
-                  onClick={() => setCurrentStep(4)}
-                >
-                  Next <ChevronRight className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            {currentStep === 4 && (
-              <>
-                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(3)}>
-                  <ArrowLeft className="h-4 w-4" /> Back
-                </Button>
-                <Button 
-                  className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
-                  onClick={handleAddGateway}
-                  disabled={!newGateway.apiKey || !newGateway.outletReference}
-                >
-                  Add Payment Gateway
-                </Button>
-              </>
-            )}
-          </DialogFooter>
+                </>
+              )}
+              {currentStep === 2 && (
+                <>
+                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(1)}>
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
+                    <Button 
+                      className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                      onClick={() => setCurrentStep(3)}
+                    >
+                      Next <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </>
+              )}
+              {currentStep === 3 && (
+                <>
+                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(2)}>
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </Button>
+                  <Button 
+                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                    disabled={!newGateway.providerId}
+                    onClick={() => setCurrentStep(4)}
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+              {currentStep === 4 && (
+                <>
+                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(3)}>
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </Button>
+                  <Button 
+                    className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
+                    onClick={handleAddGateway}
+                    disabled={!newGateway.apiKey || !newGateway.outletReference}
+                  >
+                    Add Payment Gateway
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 

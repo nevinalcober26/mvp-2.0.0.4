@@ -20,7 +20,6 @@ import {
   AlertCircle, 
   ArrowLeft,
   ChevronRight,
-  RefreshCw,
   Building2,
   Network,
   Search,
@@ -29,7 +28,9 @@ import {
   Key,
   Globe,
   CreditCard,
-  X
+  X,
+  Save,
+  Cog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+  SheetClose,
+} from '@/components/ui/sheet';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -88,6 +98,8 @@ export default function PaymentGatewayPage() {
   
   const [connections, setConnections] = useState<GatewayConnection[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
+  const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
 
@@ -146,6 +158,28 @@ export default function PaymentGatewayPage() {
     toast({
       title: "Gateway Connected",
       description: `${connection.brand} has been added and saved successfully.`
+    });
+  };
+
+  const handleOpenSettings = (conn: GatewayConnection) => {
+    setEditingGateway({ ...conn });
+    setIsSettingsSheetOpen(true);
+  };
+
+  const handleUpdateGateway = () => {
+    if (!editingGateway) return;
+    const provider = SUPPORTED_PROVIDERS.find(p => p.id === editingGateway.providerId);
+    const updatedConn: GatewayConnection = {
+        ...editingGateway,
+        brand: provider?.name || editingGateway.brand
+    };
+
+    const updated = connections.map(c => c.id === updatedConn.id ? updatedConn : c);
+    updateConnections(updated);
+    setIsSettingsSheetOpen(false);
+    toast({
+      title: "Settings Saved",
+      description: "Gateway configuration has been updated."
     });
   };
 
@@ -268,6 +302,7 @@ export default function PaymentGatewayPage() {
                         variant="ghost" 
                         size="icon" 
                         className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
+                        onClick={() => handleOpenSettings(conn)}
                       >
                         <Settings className="h-4 w-4" />
                       </Button>
@@ -280,9 +315,6 @@ export default function PaymentGatewayPage() {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Badge variant="outline" className="h-10 px-4 rounded-xl border-primary/20 text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-                       <RefreshCw className="h-3 w-3" /> Sync Connected
-                    </Badge>
                   </CardFooter>
                 </Card>
               ))}
@@ -514,6 +546,124 @@ export default function PaymentGatewayPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Settings Sheet (Slide Drawer) */}
+      <Sheet open={isSettingsSheetOpen} onOpenChange={setIsSettingsSheetOpen}>
+        <SheetContent className="sm:max-w-xl p-0 overflow-hidden flex flex-col border-l shadow-2xl bg-white text-left">
+          <div className="bg-muted/30 p-8 border-b shrink-0">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <Cog className="h-5 w-5 text-primary" />
+              </div>
+              <SheetHeader className="text-left p-0">
+                <SheetTitle className="text-2xl font-bold text-foreground">Edit Gateway Settings</SheetTitle>
+                <SheetDescription className="text-muted-foreground font-medium">Update credentials and regional mappings for this connection.</SheetDescription>
+              </SheetHeader>
+            </div>
+          </div>
+
+          <ScrollArea className="flex-1">
+            <div className="p-8 space-y-10">
+              {editingGateway && (
+                <>
+                  <section className="space-y-6">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Identity & Label</h3>
+                    </div>
+                    
+                    <div className="space-y-2 text-left">
+                      <Label className="text-sm font-bold flex items-center gap-2">
+                        <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
+                      </Label>
+                      <Input 
+                        value={editingGateway.merchantId} 
+                        onChange={(e) => setEditingGateway({ ...editingGateway, merchantId: e.target.value })}
+                        className="h-11 bg-background font-medium"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6 pt-2">
+                      <div className="space-y-2 text-left">
+                        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Gateway Provider</Label>
+                        <Select 
+                            value={editingGateway.providerId} 
+                            onValueChange={(val) => setEditingGateway({ ...editingGateway, providerId: val })}
+                        >
+                            <SelectTrigger className="h-11 bg-background font-bold text-xs">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SUPPORTED_PROVIDERS.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2 text-left">
+                        <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Currency</Label>
+                        <Select 
+                            value={editingGateway.currency} 
+                            onValueChange={(val) => setEditingGateway({ ...editingGateway, currency: val })}
+                        >
+                            <SelectTrigger className="h-11 bg-background font-bold text-xs">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="space-y-6 pt-4 border-t border-muted">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Regional Configuration</h3>
+                    </div>
+
+                    <div className="grid gap-6">
+                      <div className="space-y-2 text-left">
+                        <Label className="text-sm font-bold flex items-center gap-2">
+                          <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region
+                        </Label>
+                        <Select 
+                            value={editingGateway.region || ""} 
+                            onValueChange={(val) => setEditingGateway({ ...editingGateway, region: val })}
+                        >
+                            <SelectTrigger className="h-11 bg-background font-medium">
+                                <SelectValue placeholder="Select region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2 text-left">
+                        <Label className="text-sm font-bold flex items-center gap-2">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> Outlet Reference
+                        </Label>
+                        <Input 
+                            value={editingGateway.outletReference || ""} 
+                            onChange={(e) => setEditingGateway({ ...editingGateway, outletReference: e.target.value })}
+                            className="h-11 bg-background font-medium"
+                        />
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
+            </div>
+          </ScrollArea>
+
+          <SheetFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-end gap-3">
+            <SheetClose asChild><Button variant="ghost" className="font-bold px-8 h-11">Cancel</Button></SheetClose>
+            <Button className="font-bold bg-primary text-primary-foreground px-10 h-11 shadow-lg" onClick={handleUpdateGateway}>
+              Save Changes
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

@@ -260,15 +260,6 @@ export default function PaymentGatewayPage() {
               <h1 className="text-3xl font-bold tracking-tight text-foreground">Payment Gateways</h1>
               <p className="text-muted-foreground text-sm font-medium">Link your gateway to automate your digital payments.</p>
             </div>
-            {connections.length > 0 && (
-              <Button 
-                className="gap-2 font-bold bg-primary hover:bg-primary/90 shadow-sm"
-                onClick={() => setIsAddModalOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Connect New Gateway
-              </Button>
-            )}
           </div>
 
           {connections.length === 0 ? (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DashboardHeader } from "@/components/dashboard/header";
 import { 
   Card, 
@@ -18,37 +18,21 @@ import {
   Settings, 
   CheckCircle2, 
   AlertCircle, 
-  ExternalLink,
   ArrowLeft,
   ChevronRight,
-  Loader2,
-  Check,
-  Globe,
-  Lock,
-  CreditCard,
-  Building2,
   RefreshCw,
-  Power,
-  PowerOff,
+  Building2,
   Network,
-  Sparkles,
-  Crown,
   Search,
   Trash2,
-  Database,
   Tag,
-  Key
+  Key,
+  Globe,
+  CreditCard,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetFooter,
-} from "@/components/ui/sheet";
 import {
   Dialog,
   DialogContent,
@@ -57,19 +41,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -116,8 +89,25 @@ export default function PaymentGatewayPage() {
   const [connections, setConnections] = useState<GatewayConnection[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
-  const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
+  const [regionSearch, setRegionSearch] = useState('');
+
+  // Load from Local Storage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('paymentGateways');
+    if (stored) {
+      try {
+        setConnections(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse payment gateways from local storage", e);
+      }
+    }
+  }, []);
+
+  // Helper to update state and storage
+  const updateConnections = (newConnections: GatewayConnection[]) => {
+    setConnections(newConnections);
+    localStorage.setItem('paymentGateways', JSON.stringify(newConnections));
+  };
   
   // New Gateway Form State
   const [newGateway, setNewGateway] = useState({
@@ -128,8 +118,6 @@ export default function PaymentGatewayPage() {
     outletReference: '',
     apiKey: ''
   });
-
-  const [regionSearch, setRegionSearch] = useState('');
 
   const filteredCountries = useMemo(() => {
     return COUNTRIES.filter(c => c.toLowerCase().includes(regionSearch.toLowerCase()));
@@ -151,12 +139,13 @@ export default function PaymentGatewayPage() {
       outletReference: newGateway.outletReference || undefined
     };
 
-    setConnections(prev => [connection, ...prev]);
+    const updated = [connection, ...connections];
+    updateConnections(updated);
     setIsAddModalOpen(false);
     resetForm();
     toast({
       title: "Gateway Connected",
-      description: `${connection.brand} has been added successfully.`
+      description: `${connection.brand} has been added and saved successfully.`
     });
   };
 
@@ -174,11 +163,12 @@ export default function PaymentGatewayPage() {
   };
 
   const handleDelete = (id: string) => {
-    setConnections(prev => prev.filter(c => c.id !== id));
+    const updated = connections.filter(c => c.id !== id);
+    updateConnections(updated);
     toast({
       variant: 'destructive',
       title: "Gateway Removed",
-      description: "The connection has been terminated."
+      description: "The connection has been removed from your account."
     });
   };
 

@@ -76,7 +76,7 @@ interface GatewayConnection {
   id: string;
   brand: string;
   status: GatewayStatus;
-  lastSync: string;
+  lastSync: string; // Used as connection date
   merchantId: string;
   environment: 'live' | 'sandbox';
   isEnabled: boolean;
@@ -149,7 +149,7 @@ export default function PaymentGatewayPage() {
       id: Date.now().toString(),
       brand: provider?.name || 'Unknown Gateway',
       status: 'active',
-      lastSync: 'just now',
+      lastSync: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       merchantId: newGateway.merchantId,
       environment: 'live',
       isEnabled: true,
@@ -231,12 +231,12 @@ export default function PaymentGatewayPage() {
     <>
       <DashboardHeader />
       <main className="p-4 sm:p-6 lg:p-10 bg-muted/20 min-h-[calc(100vh-4rem)]">
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-8 text-left">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground text-left">Payment Gateways</h1>
-              <p className="text-muted-foreground text-sm font-medium text-left">Link your gateway to automate your digital payments.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Payment Gateways</h1>
+              <p className="text-muted-foreground text-sm font-medium">Link your gateway to automate your digital payments.</p>
             </div>
             {connections.length > 0 && (
               <Button 
@@ -296,7 +296,7 @@ export default function PaymentGatewayPage() {
                         <p className="text-sm font-bold capitalize">{conn.status}</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Last Sync</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Connected Since</p>
                         <p className="text-sm font-bold">{conn.lastSync}</p>
                       </div>
                     </div>
@@ -362,7 +362,7 @@ export default function PaymentGatewayPage() {
           <ScrollArea className="flex-1 max-h-[60vh]">
             <div className="p-8 space-y-8">
               {currentStep === 1 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                   <div className="space-y-2">
                     <Label className="text-sm font-bold flex items-center gap-2">
                       <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
@@ -379,7 +379,7 @@ export default function PaymentGatewayPage() {
               )}
 
               {currentStep === 2 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                   <div className="space-y-4">
                     <Label className="text-sm font-bold flex items-center gap-2">
                       <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region (Optional)
@@ -414,7 +414,7 @@ export default function PaymentGatewayPage() {
               )}
 
               {currentStep === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-bold">Select Gateway Provider</Label>
@@ -463,7 +463,7 @@ export default function PaymentGatewayPage() {
               )}
 
               {currentStep === 4 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-bold flex items-center gap-2">
@@ -560,7 +560,7 @@ export default function PaymentGatewayPage() {
       {/* Settings Sheet (Slide Drawer) */}
       <Sheet open={isSettingsSheetOpen} onOpenChange={setIsSettingsSheetOpen}>
         <SheetContent className="sm:max-w-xl p-0 overflow-hidden flex flex-col border-l shadow-2xl bg-white text-left">
-          <div className="bg-muted/30 p-8 border-b shrink-0">
+          <div className="bg-muted/30 p-8 border-b shrink-0 text-left">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
                 <Cog className="h-5 w-5 text-primary" />
@@ -573,7 +573,7 @@ export default function PaymentGatewayPage() {
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-8 space-y-10">
+            <div className="p-8 space-y-10 text-left">
               {editingGateway && (
                 <>
                   <section className="space-y-6">
@@ -582,7 +582,7 @@ export default function PaymentGatewayPage() {
                       <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Identity & Label</h3>
                     </div>
                     
-                    <div className="space-y-2 text-left">
+                    <div className="space-y-2">
                       <Label className="text-sm font-bold flex items-center gap-2">
                         <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
                       </Label>
@@ -594,7 +594,7 @@ export default function PaymentGatewayPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-6 pt-2">
-                      <div className="space-y-2 text-left">
+                      <div className="space-y-2">
                         <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Gateway Provider</Label>
                         <Select 
                             value={editingGateway.providerId} 
@@ -608,7 +608,7 @@ export default function PaymentGatewayPage() {
                             </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2 text-left">
+                      <div className="space-y-2">
                         <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Currency</Label>
                         <Select 
                             value={editingGateway.currency} 
@@ -632,7 +632,7 @@ export default function PaymentGatewayPage() {
                     </div>
 
                     <div className="grid gap-6">
-                      <div className="space-y-2 text-left">
+                      <div className="space-y-2">
                         <Label className="text-sm font-bold flex items-center gap-2">
                           <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region
                         </Label>
@@ -684,7 +684,7 @@ export default function PaymentGatewayPage() {
                         </Popover>
                       </div>
 
-                      <div className="space-y-2 text-left">
+                      <div className="space-y-2">
                         <Label className="text-sm font-bold flex items-center gap-2">
                           <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> Outlet Reference
                         </Label>
@@ -703,7 +703,7 @@ export default function PaymentGatewayPage() {
                       <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Security Credentials</h3>
                     </div>
 
-                    <div className="space-y-2 text-left">
+                    <div className="space-y-2">
                       <Label className="text-sm font-bold flex items-center gap-2">
                         <Key className="h-3.5 w-3.5 text-muted-foreground" /> Service Account API Key
                       </Label>

@@ -44,6 +44,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -117,6 +127,7 @@ export default function PaymentGatewayPage() {
   const [connection, setConnection] = useState<GatewayConnection | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
@@ -241,6 +252,7 @@ export default function PaymentGatewayPage() {
 
   const handleDelete = () => {
     updateActiveConnection(null);
+    setIsDeleteDialogOpen(false);
     toast({
       variant: 'destructive',
       title: "Gateway Removed",
@@ -344,7 +356,7 @@ export default function PaymentGatewayPage() {
                       variant="ghost" 
                       size="icon" 
                       className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
-                      onClick={handleDelete}
+                      onClick={() => setIsDeleteDialogOpen(true)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -784,6 +796,27 @@ export default function PaymentGatewayPage() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-bold">Disconnect Gateway?</AlertDialogTitle>
+            <AlertDialogDescription className="text-base font-medium text-muted-foreground">
+              This action will immediately stop your ability to process digital payments for this outlet. This action cannot be undone easily.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="rounded-xl font-bold h-12 px-6">Keep Connected</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl font-bold h-12 px-6 shadow-lg shadow-destructive/20"
+            >
+              Confirm Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

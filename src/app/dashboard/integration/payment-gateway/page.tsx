@@ -377,10 +377,9 @@ export default function PaymentGatewayPage() {
                 <DialogDescription className="text-muted-foreground font-medium">
                   {!isNavigationDisabled && (
                     <>
-                      {currentStep === 1 && "Step 1: Identity Information"}
-                      {currentStep === 2 && "Step 2: Regional Configuration"}
-                      {currentStep === 3 && "Step 3: Provider Selection"}
-                      {currentStep === 4 && "Step 4: API & Credentials"}
+                      {currentStep === 1 && "Step 1: Region & Provider Selection"}
+                      {currentStep === 2 && "Step 2: Identity & Currency"}
+                      {currentStep === 3 && "Step 3: Outlet & Security Credentials"}
                     </>
                   )}
                   {isProcessing && "Verifying your details..."}
@@ -391,14 +390,14 @@ export default function PaymentGatewayPage() {
             
             {!isNavigationDisabled && (
               <div className="mt-6 flex items-center gap-2">
-                {[1, 2, 3, 4].map((s) => (
+                {[1, 2, 3].map((s) => (
                   <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-colors", currentStep >= s ? "bg-primary" : "bg-muted")} />
                 ))}
               </div>
             )}
           </div>
 
-          <div className="flex-1 min-h-[300px] flex flex-col">
+          <div className="flex-1 min-h-[350px] flex flex-col">
             {isProcessing ? (
               <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-4 animate-in fade-in duration-500">
                 <div className="relative">
@@ -420,24 +419,7 @@ export default function PaymentGatewayPage() {
               <ScrollArea className="flex-1 max-h-[60vh]">
                 <div className="p-8 space-y-8">
                   {currentStep === 1 && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
-                      <div className="space-y-2">
-                        <Label className="text-sm font-bold flex items-center gap-2">
-                          <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
-                        </Label>
-                        <Input 
-                          placeholder="e.g. MID_9428105" 
-                          value={newGateway.merchantId}
-                          onChange={(e) => setNewGateway(prev => ({ ...prev, merchantId: e.target.value }))}
-                          className="h-12 bg-background font-medium rounded-xl"
-                        />
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your unique merchant ID from the gateway provider.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {currentStep === 2 && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
+                    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                       <div className="space-y-4">
                         <Label className="text-sm font-bold flex items-center gap-2">
                           <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region (Optional)
@@ -451,7 +433,7 @@ export default function PaymentGatewayPage() {
                             className="h-12 pl-10 bg-background font-medium rounded-xl"
                           />
                         </div>
-                        <ScrollArea className="h-[200px] border rounded-xl bg-muted/10 p-2">
+                        <ScrollArea className="h-[140px] border rounded-xl bg-muted/10 p-2">
                           <div className="space-y-1">
                             {filteredCountries.map(country => (
                               <button
@@ -468,38 +450,50 @@ export default function PaymentGatewayPage() {
                           </div>
                         </ScrollArea>
                       </div>
+
+                      <div className="space-y-4">
+                        <Label className="text-sm font-bold">Select Gateway Provider</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {SUPPORTED_PROVIDERS.map((provider) => (
+                            <div
+                              key={provider.id}
+                              onClick={() => setNewGateway(prev => ({ ...prev, providerId: provider.id }))}
+                              className={cn(
+                                "cursor-pointer flex flex-col p-5 rounded-2xl border-2 transition-all duration-300 group",
+                                newGateway.providerId === provider.id
+                                  ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                                  : "border-muted hover:border-accent-foreground/20 bg-background"
+                              )}
+                            >
+                              <div className="flex items-center justify-between mb-4">
+                                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center bg-white shadow-sm transition-transform group-hover:scale-110")}>
+                                  <provider.icon className={cn("h-5 w-5", provider.color)} />
+                                </div>
+                                {newGateway.providerId === provider.id && (
+                                  <CheckCircle2 className="h-6 w-6 text-primary animate-in zoom-in duration-300" />
+                                )}
+                              </div>
+                              <p className="font-bold text-base text-foreground">{provider.name}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {currentStep === 3 && (
+                  {currentStep === 2 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                       <div className="space-y-6">
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold">Select Gateway Provider</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {SUPPORTED_PROVIDERS.map((provider) => (
-                              <div
-                                key={provider.id}
-                                onClick={() => setNewGateway(prev => ({ ...prev, providerId: provider.id }))}
-                                className={cn(
-                                  "cursor-pointer flex flex-col p-5 rounded-2xl border-2 transition-all duration-300 group",
-                                  newGateway.providerId === provider.id
-                                    ? "border-primary bg-primary/5 ring-4 ring-primary/10"
-                                    : "border-muted hover:border-accent-foreground/20 bg-background"
-                                )}
-                              >
-                                <div className="flex items-center justify-between mb-4">
-                                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-110 bg-white")}>
-                                    <provider.icon className={cn("h-5 w-5", provider.color)} />
-                                  </div>
-                                  {newGateway.providerId === provider.id && (
-                                    <CheckCircle2 className="h-6 w-6 text-primary animate-in zoom-in duration-300" />
-                                  )}
-                                </div>
-                                <p className="font-bold text-base text-foreground">{provider.name}</p>
-                              </div>
-                            ))}
-                          </div>
+                          <Label className="text-sm font-bold flex items-center gap-2">
+                            <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
+                          </Label>
+                          <Input 
+                            placeholder="e.g. MID_9428105" 
+                            value={newGateway.merchantId}
+                            onChange={(e) => setNewGateway(prev => ({ ...prev, merchantId: e.target.value }))}
+                            className="h-12 bg-background font-medium rounded-xl"
+                          />
                         </div>
 
                         <div className="space-y-2">
@@ -520,7 +514,7 @@ export default function PaymentGatewayPage() {
                     </div>
                   )}
 
-                  {currentStep === 4 && (
+                  {currentStep === 3 && (
                     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300 text-left">
                       <div className="space-y-6">
                         <div className="space-y-2">
@@ -561,7 +555,7 @@ export default function PaymentGatewayPage() {
               {currentStep === 1 && (
                 <Button 
                   className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                  disabled={!newGateway.merchantId}
+                  disabled={!newGateway.providerId}
                   onClick={() => setCurrentStep(2)}
                 >
                   Next <ChevronRight className="h-4 w-4" />
@@ -570,21 +564,13 @@ export default function PaymentGatewayPage() {
               {currentStep === 2 && (
                 <Button 
                   className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  disabled={!newGateway.merchantId}
                   onClick={() => setCurrentStep(3)}
                 >
                   Next <ChevronRight className="h-4 w-4" />
                 </Button>
               )}
               {currentStep === 3 && (
-                <Button 
-                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                  disabled={!newGateway.providerId}
-                  onClick={() => setCurrentStep(4)}
-                >
-                  Next <ChevronRight className="h-4 w-4" />
-                </Button>
-              )}
-              {currentStep === 4 && (
                 <Button 
                   className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
                   onClick={handleAddGateway}

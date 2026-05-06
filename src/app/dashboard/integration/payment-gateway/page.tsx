@@ -109,28 +109,8 @@ const SUPPORTED_GATEWAYS = [
 export default function PaymentGatewayPage() {
   const { toast } = useToast();
   
-  const [connections, setConnections] = useState<GatewayConnection[]>([
-    {
-      id: '1',
-      brand: 'Stripe',
-      status: 'active',
-      lastSync: '2 minutes ago',
-      merchantId: 'mch_STR_882910',
-      environment: 'live',
-      isEnabled: true,
-      providerId: 'stripe'
-    },
-    {
-      id: '2',
-      brand: 'Network International',
-      status: 'sandbox',
-      lastSync: '1 hour ago',
-      merchantId: 'mch_NI_441029',
-      environment: 'sandbox',
-      isEnabled: true,
-      providerId: 'network-international'
-    }
-  ]);
+  // Set connections to empty by default as requested
+  const [connections, setConnections] = useState<GatewayConnection[]>([]);
 
   const [isConnectDrawerOpen, setIsConnectDrawerOpen] = useState(false);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
@@ -225,6 +205,13 @@ export default function PaymentGatewayPage() {
                     Connect a gateway to enable seamless digital guest checkouts and start accepting digital payments.
                   </p>
                </div>
+               <Button 
+                  className="gap-2 font-bold bg-primary hover:bg-primary/90 shadow-xl px-10 h-14 rounded-2xl text-base"
+                  onClick={() => setIsUpgradeDialogOpen(true)}
+               >
+                  <Plus className="h-5 w-5" />
+                  Connect New Gateway
+               </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

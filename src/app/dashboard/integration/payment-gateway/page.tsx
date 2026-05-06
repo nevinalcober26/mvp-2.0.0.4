@@ -566,7 +566,7 @@ export default function PaymentGatewayPage() {
                 <>
                   <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
                   <Button 
-                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
                     disabled={!newGateway.merchantId}
                     onClick={() => setCurrentStep(2)}
                   >
@@ -576,27 +576,19 @@ export default function PaymentGatewayPage() {
               )}
               {currentStep === 2 && (
                 <>
-                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(1)}>
-                    <ArrowLeft className="h-4 w-4" /> Back
+                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
+                  <Button 
+                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
+                    onClick={() => setCurrentStep(3)}
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
                   </Button>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
-                    <Button 
-                      className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
-                      onClick={() => setCurrentStep(3)}
-                    >
-                      Next <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </>
               )}
               {currentStep === 3 && (
                 <>
-                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(2)}>
-                    <ArrowLeft className="h-4 w-4" /> Back
-                  </Button>
                   <Button 
-                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
                     disabled={!newGateway.providerId}
                     onClick={() => setCurrentStep(4)}
                   >
@@ -606,11 +598,8 @@ export default function PaymentGatewayPage() {
               )}
               {currentStep === 4 && (
                 <>
-                  <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(3)}>
-                    <ArrowLeft className="h-4 w-4" /> Back
-                  </Button>
                   <Button 
-                    className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
+                    className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl ml-auto" 
                     onClick={handleAddGateway}
                     disabled={!newGateway.apiKey || !newGateway.outletReference}
                   >

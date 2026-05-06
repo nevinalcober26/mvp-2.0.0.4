@@ -18,8 +18,6 @@ import {
   Settings, 
   CheckCircle2, 
   AlertCircle, 
-  ArrowLeft,
-  ChevronRight,
   Building2,
   Network,
   Search,
@@ -29,10 +27,11 @@ import {
   Globe,
   CreditCard,
   X,
-  Save,
   Cog,
   ChevronDown,
-  Loader2
+  Loader2,
+  ChevronRight,
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,7 +76,7 @@ interface GatewayConnection {
   id: string;
   brand: string;
   status: GatewayStatus;
-  lastSync: string; // Used as connection date
+  lastSync: string; // Used as "Connected Since"
   merchantId: string;
   environment: 'live' | 'sandbox';
   isEnabled: boolean;
@@ -104,7 +103,7 @@ const CURRENCIES = ["AED", "USD", "EUR", "GBP", "SAR", "QAR", "INR"];
 export default function PaymentGatewayPage() {
   const { toast } = useToast();
   
-  const [connections, setConnections] = useState<GatewayConnection[]>([]);
+  const [connection, setConnection] = useState<GatewayConnection | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
@@ -118,20 +117,24 @@ export default function PaymentGatewayPage() {
 
   // Load from Local Storage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('paymentGateways');
+    const stored = localStorage.getItem('activePaymentGateway');
     if (stored) {
       try {
-        setConnections(JSON.parse(stored));
+        setConnection(JSON.parse(stored));
       } catch (e) {
-        console.error("Failed to parse payment gateways from local storage", e);
+        console.error("Failed to parse payment gateway from local storage", e);
       }
     }
   }, []);
 
   // Helper to update state and storage
-  const updateConnections = (newConnections: GatewayConnection[]) => {
-    setConnections(newConnections);
-    localStorage.setItem('paymentGateways', JSON.stringify(newConnections));
+  const updateActiveConnection = (newConnection: GatewayConnection | null) => {
+    setConnection(newConnection);
+    if (newConnection) {
+      localStorage.setItem('activePaymentGateway', JSON.stringify(newConnection));
+    } else {
+      localStorage.removeItem('activePaymentGateway');
+    }
   };
   
   // New Gateway Form State
@@ -151,18 +154,17 @@ export default function PaymentGatewayPage() {
   const handleAddGateway = async () => {
     setIsProcessing(true);
     
-    // 1. Simulate verification/preloader
+    // Simulate verification
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     setIsProcessing(false);
     setShowSuccess(true);
     
-    // 2. Success message display
+    // Success message display
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // 3. Finalize and Save
     const provider = SUPPORTED_PROVIDERS.find(p => p.id === newGateway.providerId);
-    const connection: GatewayConnection = {
+    const conn: GatewayConnection = {
       id: Date.now().toString(),
       brand: provider?.name || 'Unknown Gateway',
       status: 'active',
@@ -177,19 +179,20 @@ export default function PaymentGatewayPage() {
       apiKey: newGateway.apiKey || undefined
     };
 
-    const updated = [connection, ...connections];
-    updateConnections(updated);
+    updateActiveConnection(conn);
     setIsAddModalOpen(false);
     resetForm();
     setShowSuccess(false);
+    
     toast({
       title: "Gateway Connected",
-      description: `${connection.brand} has been added and saved successfully.`
+      description: `${conn.brand} has been added and saved successfully.`
     });
   };
 
-  const handleOpenSettings = (conn: GatewayConnection) => {
-    setEditingGateway({ ...conn });
+  const handleOpenSettings = () => {
+    if (!connection) return;
+    setEditingGateway({ ...connection });
     setIsSettingsSheetOpen(true);
     setRegionSearch('');
   };
@@ -202,8 +205,7 @@ export default function PaymentGatewayPage() {
         brand: provider?.name || editingGateway.brand
     };
 
-    const updated = connections.map(c => c.id === updatedConn.id ? updatedConn : c);
-    updateConnections(updated);
+    updateActiveConnection(updatedConn);
     setIsSettingsSheetOpen(false);
     toast({
       title: "Settings Saved",
@@ -226,9 +228,8 @@ export default function PaymentGatewayPage() {
     setRegionSearch('');
   };
 
-  const handleDelete = (id: string) => {
-    const updated = connections.filter(c => c.id !== id);
-    updateConnections(updated);
+  const handleDelete = () => {
+    updateActiveConnection(null);
     toast({
       variant: 'destructive',
       title: "Gateway Removed",
@@ -257,18 +258,18 @@ export default function PaymentGatewayPage() {
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Payment Gateways</h1>
-              <p className="text-muted-foreground text-sm font-medium">Link your gateway to automate your digital payments.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Payment Gateway</h1>
+              <p className="text-muted-foreground text-sm font-medium">Configure your payment integration for secure digital transactions.</p>
             </div>
           </div>
 
-          {connections.length === 0 ? (
+          {!connection ? (
             <div className="flex flex-col items-center justify-center py-32 bg-background rounded-3xl border-2 border-dashed border-muted-foreground/20 space-y-8 animate-in fade-in zoom-in duration-500 w-full text-center px-6">
                <div className="h-24 w-24 rounded-[2rem] bg-muted/50 flex items-center justify-center">
                   <WalletCards className="h-12 w-12 text-muted-foreground opacity-30" />
                </div>
                <div className="space-y-3 max-w-md">
-                  <h3 className="text-2xl font-bold tracking-tight">No Gateways Connected</h3>
+                  <h3 className="text-2xl font-bold tracking-tight">No Gateway Connected</h3>
                   <p className="text-muted-foreground text-base font-medium leading-relaxed">
                     Connect a payment gateway to start accepting digital payments from your guests securely.
                   </p>
@@ -278,69 +279,67 @@ export default function PaymentGatewayPage() {
                   onClick={() => setIsAddModalOpen(true)}
                >
                   <Plus className="h-5 w-5" />
-                  Connect New Gateway
+                  Connect Gateway
                </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {connections.map((conn) => (
-                <Card key={conn.id} className={cn(
-                  "overflow-hidden border-2 transition-all hover:shadow-xl rounded-3xl border-border",
-                  !conn.isEnabled && "opacity-75 grayscale-[0.5] border-muted bg-muted/5"
-                )}>
-                  <CardHeader className="pb-4 bg-muted/10 border-b text-left">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-2xl bg-white shadow-md border flex items-center justify-center text-primary">
-                          <WalletCards className="h-6 w-6" />
-                        </div>
-                        <div className="min-w-0">
-                          <CardTitle className="text-xl font-bold truncate">{conn.brand}</CardTitle>
-                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.1em]">Payment Provider</p>
-                        </div>
+            <div className="flex justify-start animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <Card className={cn(
+                "overflow-hidden border-2 transition-all hover:shadow-xl rounded-3xl border-border w-full max-w-xl",
+                !connection.isEnabled && "opacity-75 grayscale-[0.5] border-muted bg-muted/5"
+              )}>
+                <CardHeader className="pb-4 bg-muted/10 border-b text-left">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-white shadow-md border flex items-center justify-center text-primary">
+                        <WalletCards className="h-6 w-6" />
                       </div>
-                      {getStatusBadge(conn.status)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-8 space-y-6">
-                    <div className="grid grid-cols-2 gap-4 text-left">
-                      <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Operational</p>
-                        <p className="text-sm font-bold capitalize">{conn.status}</p>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Connected Since</p>
-                        <p className="text-sm font-bold">{conn.lastSync}</p>
+                      <div className="min-w-0">
+                        <CardTitle className="text-xl font-bold truncate">{connection.brand}</CardTitle>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.1em]">Active Provider</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-6 px-1">
-                      <span className="font-semibold uppercase tracking-wider">Merchant ID</span>
-                      <span className="font-mono font-bold text-foreground bg-muted px-2 py-0.5 rounded">{conn.merchantId}</span>
+                    {getStatusBadge(connection.status)}
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-8 space-y-6">
+                  <div className="grid grid-cols-2 gap-4 text-left">
+                    <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Operational</p>
+                      <p className="text-sm font-bold capitalize">{connection.status}</p>
                     </div>
-                  </CardContent>
-                  <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
-                        onClick={() => handleOpenSettings(conn)}
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
-                        onClick={() => handleDelete(conn.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Connected Since</p>
+                      <p className="text-sm font-bold">{connection.lastSync}</p>
                     </div>
-                  </CardFooter>
-                </Card>
-              ))}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-6 px-1">
+                    <span className="font-semibold uppercase tracking-wider">Merchant ID</span>
+                    <span className="font-mono font-bold text-foreground bg-muted px-2 py-0.5 rounded">{connection.merchantId}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-end gap-4">
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
+                      onClick={handleOpenSettings}
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
             </div>
           )}
         </div>
@@ -601,7 +600,7 @@ export default function PaymentGatewayPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Settings Sheet (Slide Drawer) */}
+      {/* Settings Sheet */}
       <Sheet open={isSettingsSheetOpen} onOpenChange={setIsSettingsSheetOpen}>
         <SheetContent className="sm:max-w-xl p-0 overflow-hidden flex flex-col border-l shadow-2xl bg-white text-left">
           <div className="bg-muted/30 p-8 border-b shrink-0 text-left">

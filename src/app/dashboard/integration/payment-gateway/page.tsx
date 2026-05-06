@@ -30,6 +30,7 @@ import {
   ChevronDown,
   Loader2,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +97,7 @@ interface GatewayConnection {
 }
 
 const SUPPORTED_PROVIDERS = [
-  { id: 'stripe', name: 'Stripe', icon: Zap, color: 'text-blue-600' },
+  { id: 'dpo', name: 'DPO Payment Gateway', icon: CreditCard, color: 'text-blue-600' },
   { id: 'network-international', name: 'Network International', icon: Network, color: 'text-orange-600' },
 ];
 
@@ -426,11 +427,11 @@ export default function PaymentGatewayPage() {
                         </Label>
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
+                          <input 
                             placeholder="Search countries..." 
+                            className="flex h-12 w-full rounded-xl border border-input bg-background pl-10 pr-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={regionSearch}
                             onChange={(e) => setRegionSearch(e.target.value)}
-                            className="h-12 pl-10 bg-background font-medium rounded-xl"
                           />
                         </div>
                         <ScrollArea className="h-[140px] border rounded-xl bg-muted/10 p-2">
@@ -438,6 +439,7 @@ export default function PaymentGatewayPage() {
                             {filteredCountries.map(country => (
                               <button
                                 key={country}
+                                type="button"
                                 onClick={() => setNewGateway(prev => ({ ...prev, region: country }))}
                                 className={cn(
                                   "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
@@ -677,11 +679,11 @@ export default function PaymentGatewayPage() {
                             <div className="p-3 border-b bg-muted/20">
                               <div className="relative">
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
+                                <input 
                                   placeholder="Search countries..." 
+                                  className="flex h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                   value={regionSearch}
                                   onChange={(e) => setRegionSearch(e.target.value)}
-                                  className="h-9 pl-8 bg-background"
                                 />
                               </div>
                             </div>
@@ -690,6 +692,7 @@ export default function PaymentGatewayPage() {
                                 {filteredCountries.map(country => (
                                   <button
                                     key={country}
+                                    type="button"
                                     onClick={() => {
                                       setEditingGateway({ ...editingGateway, region: country });
                                       setIsRegionPopoverOpen(false);

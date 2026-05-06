@@ -30,7 +30,8 @@ import {
   CreditCard,
   X,
   Save,
-  Cog
+  Cog,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,11 @@ import {
   SheetFooter,
   SheetClose,
 } from '@/components/ui/sheet';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -78,6 +84,7 @@ interface GatewayConnection {
   currency: string;
   region?: string;
   outletReference?: string;
+  apiKey?: string;
 }
 
 const SUPPORTED_PROVIDERS = [
@@ -102,6 +109,7 @@ export default function PaymentGatewayPage() {
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
+  const [isRegionPopoverOpen, setIsRegionPopoverOpen] = useState(false);
 
   // Load from Local Storage on mount
   useEffect(() => {
@@ -148,7 +156,8 @@ export default function PaymentGatewayPage() {
       providerId: newGateway.providerId,
       currency: newGateway.currency,
       region: newGateway.region || undefined,
-      outletReference: newGateway.outletReference || undefined
+      outletReference: newGateway.outletReference || undefined,
+      apiKey: newGateway.apiKey || undefined
     };
 
     const updated = [connection, ...connections];
@@ -164,6 +173,7 @@ export default function PaymentGatewayPage() {
   const handleOpenSettings = (conn: GatewayConnection) => {
     setEditingGateway({ ...conn });
     setIsSettingsSheetOpen(true);
+    setRegionSearch('');
   };
 
   const handleUpdateGateway = () => {
@@ -626,17 +636,52 @@ export default function PaymentGatewayPage() {
                         <Label className="text-sm font-bold flex items-center gap-2">
                           <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region
                         </Label>
-                        <Select 
-                            value={editingGateway.region || ""} 
-                            onValueChange={(val) => setEditingGateway({ ...editingGateway, region: val })}
-                        >
-                            <SelectTrigger className="h-11 bg-background font-medium">
-                                <SelectValue placeholder="Select region" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                        <Popover open={isRegionPopoverOpen} onOpenChange={setIsRegionPopoverOpen}>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              className="h-11 w-full justify-between bg-background font-medium px-4"
+                            >
+                              {editingGateway.region || "Select region"}
+                              <ChevronDown className="h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                            <div className="p-3 border-b bg-muted/20">
+                              <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                  placeholder="Search countries..." 
+                                  value={regionSearch}
+                                  onChange={(e) => setRegionSearch(e.target.value)}
+                                  className="h-9 pl-8 bg-background"
+                                />
+                              </div>
+                            </div>
+                            <ScrollArea className="h-[200px]">
+                              <div className="p-1">
+                                {filteredCountries.map(country => (
+                                  <button
+                                    key={country}
+                                    onClick={() => {
+                                      setEditingGateway({ ...editingGateway, region: country });
+                                      setIsRegionPopoverOpen(false);
+                                    }}
+                                    className={cn(
+                                      "w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-muted",
+                                      editingGateway.region === country && "bg-primary/10 text-primary"
+                                    )}
+                                  >
+                                    {country}
+                                  </button>
+                                ))}
+                                {filteredCountries.length === 0 && (
+                                  <p className="text-xs text-center py-4 text-muted-foreground">No matches found</p>
+                                )}
+                              </div>
+                            </ScrollArea>
+                          </PopoverContent>
+                        </Popover>
                       </div>
 
                       <div className="space-y-2 text-left">
@@ -649,6 +694,27 @@ export default function PaymentGatewayPage() {
                             className="h-11 bg-background font-medium"
                         />
                       </div>
+                    </div>
+                  </section>
+
+                  <section className="space-y-6 pt-4 border-t border-muted">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Security Credentials</h3>
+                    </div>
+
+                    <div className="space-y-2 text-left">
+                      <Label className="text-sm font-bold flex items-center gap-2">
+                        <Key className="h-3.5 w-3.5 text-muted-foreground" /> Service Account API Key
+                      </Label>
+                      <Input 
+                        type="password"
+                        placeholder="sk_live_••••••••••••••••••••" 
+                        value={editingGateway.apiKey || ""} 
+                        onChange={(e) => setEditingGateway({ ...editingGateway, apiKey: e.target.value })}
+                        className="h-11 bg-background font-mono"
+                      />
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Leave blank to keep existing key.</p>
                     </div>
                   </section>
                 </>

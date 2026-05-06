@@ -25,13 +25,11 @@ import {
   Tag,
   Key,
   Globe,
-  CreditCard,
   X,
   Cog,
   ChevronDown,
   Loader2,
   ChevronRight,
-  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -99,9 +97,7 @@ interface GatewayConnection {
 
 const SUPPORTED_PROVIDERS = [
   { id: 'stripe', name: 'Stripe', icon: Zap, color: 'text-blue-600' },
-  { id: 'adyen', name: 'Adyen', icon: Building2, color: 'text-green-600' },
   { id: 'network-international', name: 'Network International', icon: Network, color: 'text-orange-600' },
-  { id: 'checkout', name: 'Checkout.com', icon: CreditCard, color: 'text-purple-600' },
 ];
 
 const COUNTRIES = [
@@ -561,51 +557,41 @@ export default function PaymentGatewayPage() {
           </div>
 
           {!isNavigationDisabled && (
-            <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-between gap-4">
+            <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-end gap-4">
               {currentStep === 1 && (
-                <>
-                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                  <Button 
-                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
-                    disabled={!newGateway.merchantId}
-                    onClick={() => setCurrentStep(2)}
-                  >
-                    Next <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  disabled={!newGateway.merchantId}
+                  onClick={() => setCurrentStep(2)}
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
               )}
               {currentStep === 2 && (
-                <>
-                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
-                  <Button 
-                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
-                    onClick={() => setCurrentStep(3)}
-                  >
-                    Next <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  onClick={() => setCurrentStep(3)}
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
               )}
               {currentStep === 3 && (
-                <>
-                  <Button 
-                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl ml-auto" 
-                    disabled={!newGateway.providerId}
-                    onClick={() => setCurrentStep(4)}
-                  >
-                    Next <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  disabled={!newGateway.providerId}
+                  onClick={() => setCurrentStep(4)}
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
               )}
               {currentStep === 4 && (
-                <>
-                  <Button 
-                    className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl ml-auto" 
-                    onClick={handleAddGateway}
-                    disabled={!newGateway.apiKey || !newGateway.outletReference}
-                  >
-                    Add Payment Gateway
-                  </Button>
-                </>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
+                  onClick={handleAddGateway}
+                  disabled={!newGateway.apiKey || !newGateway.outletReference}
+                >
+                  Add Payment Gateway
+                </Button>
               )}
             </DialogFooter>
           )}
@@ -788,7 +774,7 @@ export default function PaymentGatewayPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl">
+        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl text-left">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-bold">Disconnect Gateway?</AlertDialogTitle>
             <AlertDialogDescription className="text-base font-medium text-muted-foreground">

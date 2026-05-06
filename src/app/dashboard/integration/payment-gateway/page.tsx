@@ -32,7 +32,12 @@ import {
   PowerOff,
   Network,
   Sparkles,
-  Crown
+  Crown,
+  Search,
+  Trash2,
+  Database,
+  Tag,
+  Key
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +55,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -64,12 +70,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Progress } from '@/components/ui/progress';
 
-type GatewayStatus = 'active' | 'sandbox' | 'error' | 'disabled';
+type GatewayStatus = 'active' | 'error' | 'disabled';
 
 interface GatewayConnection {
   id: string;
@@ -80,96 +92,104 @@ interface GatewayConnection {
   environment: 'live' | 'sandbox';
   isEnabled: boolean;
   providerId: string;
+  currency: string;
+  region?: string;
+  outletReference?: string;
 }
 
-const SUPPORTED_GATEWAYS = [
-  { 
-    id: 'stripe', 
-    name: 'Stripe', 
-    description: 'Accept Apple Pay, Google Pay, and major credit cards globally.', 
-    color: 'bg-blue-50 text-blue-600',
-    icon: Zap
-  },
-  { 
-    id: 'network-international', 
-    name: 'Network International', 
-    description: 'Leading enabler of digital commerce in the Middle East and Africa.', 
-    color: 'bg-orange-50 text-orange-600',
-    icon: Network
-  },
-  { 
-    id: 'adyen', 
-    name: 'Adyen', 
-    description: 'Enterprise-grade payment processing for high-volume venues.', 
-    color: 'bg-green-50 text-green-600',
-    icon: Building2
-  },
+const SUPPORTED_PROVIDERS = [
+  { id: 'stripe', name: 'Stripe', icon: Zap, color: 'text-blue-600' },
+  { id: 'adyen', name: 'Adyen', icon: Building2, color: 'text-green-600' },
+  { id: 'network-international', name: 'Network International', icon: Network, color: 'text-orange-600' },
+  { id: 'checkout', name: 'Checkout.com', icon: CreditCard, color: 'text-purple-600' },
 ];
+
+const COUNTRIES = [
+  "United Arab Emirates", "United States", "United Kingdom", "Saudi Arabia", "Qatar", "Kuwait", "Oman", "Bahrain", "India", "Germany", "France", "Singapore"
+];
+
+const CURRENCIES = ["AED", "USD", "EUR", "GBP", "SAR", "QAR", "INR"];
 
 export default function PaymentGatewayPage() {
   const { toast } = useToast();
   
-  // Set connections to empty by default as requested
   const [connections, setConnections] = useState<GatewayConnection[]>([]);
-
-  const [isConnectDrawerOpen, setIsConnectDrawerOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false);
-  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const [confirmToggleData, setConfirmToggleData] = useState<{ id: string, enabled: boolean, brand: string } | null>(null);
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  
-  // Settings Temp State
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
-  const [tempSettings, setTempSettings] = useState<Partial<GatewayConnection>>({});
+  
+  // New Gateway Form State
+  const [newGateway, setNewGateway] = useState({
+    merchantId: '',
+    region: '',
+    providerId: '',
+    currency: 'AED',
+    outletReference: '',
+    apiKey: ''
+  });
 
-  const getStatusBadge = (gateway: GatewayConnection) => {
-    if (!gateway.isEnabled) {
-      return <Badge variant="secondary" className="gap-1.5 font-bold opacity-60"><PowerOff className="h-3 w-3" /> Deactivated</Badge>;
-    }
-    switch (gateway.status) {
+  const [regionSearch, setRegionSearch] = useState('');
+
+  const filteredCountries = useMemo(() => {
+    return COUNTRIES.filter(c => c.toLowerCase().includes(regionSearch.toLowerCase()));
+  }, [regionSearch]);
+
+  const handleAddGateway = () => {
+    const provider = SUPPORTED_PROVIDERS.find(p => p.id === newGateway.providerId);
+    const connection: GatewayConnection = {
+      id: Date.now().toString(),
+      brand: provider?.name || 'Unknown Gateway',
+      status: 'active',
+      lastSync: 'just now',
+      merchantId: newGateway.merchantId,
+      environment: 'live',
+      isEnabled: true,
+      providerId: newGateway.providerId,
+      currency: newGateway.currency,
+      region: newGateway.region || undefined,
+      outletReference: newGateway.outletReference || undefined
+    };
+
+    setConnections(prev => [connection, ...prev]);
+    setIsAddModalOpen(false);
+    resetForm();
+    toast({
+      title: "Gateway Connected",
+      description: `${connection.brand} has been added successfully.`
+    });
+  };
+
+  const resetForm = () => {
+    setCurrentStep(1);
+    setNewGateway({
+      merchantId: '',
+      region: '',
+      providerId: '',
+      currency: 'AED',
+      outletReference: '',
+      apiKey: ''
+    });
+    setRegionSearch('');
+  };
+
+  const handleDelete = (id: string) => {
+    setConnections(prev => prev.filter(c => c.id !== id));
+    toast({
+      variant: 'destructive',
+      title: "Gateway Removed",
+      description: "The connection has been terminated."
+    });
+  };
+
+  const getStatusBadge = (status: GatewayStatus) => {
+    switch (status) {
       case 'active':
         return <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none gap-1.5 font-bold"><CheckCircle2 className="h-3 w-3" /> Live</Badge>;
-      case 'sandbox':
-        return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none gap-1.5 font-bold">Sandbox</Badge>;
       case 'error':
         return <Badge variant="destructive" className="gap-1.5 font-bold"><AlertCircle className="h-3 w-3" /> Error</Badge>;
       default:
-        return <Badge variant="secondary" className="font-bold">Disconnected</Badge>;
-    }
-  };
-
-  const confirmToggleStatus = (id: string, enabled: boolean, brand: string) => {
-    setConfirmToggleData({ id, enabled, brand });
-  };
-
-  const handleToggleAction = () => {
-    if (!confirmToggleData) return;
-    
-    const { id, enabled } = confirmToggleData;
-    setConnections(prev => prev.map(c => c.id === id ? { ...c, isEnabled: enabled } : c));
-    
-    toast({
-      title: enabled ? "Gateway Enabled" : "Gateway Disabled",
-      description: `The gateway is now ${enabled ? 'accepting' : 'no longer accepting'} payments.`
-    });
-    
-    setConfirmToggleData(null);
-  };
-
-  const handleOpenSettings = (gateway: GatewayConnection) => {
-    setEditingGateway(gateway);
-    setTempSettings({ ...gateway });
-    setIsSettingsDrawerOpen(true);
-  };
-
-  const handleSaveSettings = () => {
-    if (editingGateway) {
-      setConnections(prev => prev.map(c => c.id === editingGateway.id ? { ...c, ...tempSettings } : c));
-      setIsSettingsDrawerOpen(false);
-      toast({
-        title: "Configuration Saved",
-        description: "Your gateway settings have been updated successfully."
-      });
+        return <Badge variant="secondary" className="font-bold">Disabled</Badge>;
     }
   };
 
@@ -182,32 +202,33 @@ export default function PaymentGatewayPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-3xl font-bold tracking-tight text-foreground text-left">Payment Gateways</h1>
-              <p className="text-muted-foreground text-sm font-medium text-left">Securely process customer payments via web and QR codes.</p>
+              <p className="text-muted-foreground text-sm font-medium text-left">Link your gateway to automate your digital payments.</p>
             </div>
-            
-            <Button 
-              className="gap-2 font-bold bg-primary hover:bg-primary/90 shadow-sm"
-              onClick={() => setIsUpgradeDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Connect New Gateway
-            </Button>
+            {connections.length > 0 && (
+              <Button 
+                className="gap-2 font-bold bg-primary hover:bg-primary/90 shadow-sm"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Connect New Gateway
+              </Button>
+            )}
           </div>
 
           {connections.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 bg-background rounded-3xl border-2 border-dashed border-muted-foreground/20 space-y-8 animate-in fade-in zoom-in duration-500 w-full text-center px-6">
                <div className="h-24 w-24 rounded-[2rem] bg-muted/50 flex items-center justify-center">
-                  <CreditCard className="h-12 w-12 text-muted-foreground opacity-30" />
+                  <WalletCards className="h-12 w-12 text-muted-foreground opacity-30" />
                </div>
                <div className="space-y-3 max-w-md">
                   <h3 className="text-2xl font-bold tracking-tight">No Gateways Connected</h3>
                   <p className="text-muted-foreground text-base font-medium leading-relaxed">
-                    Connect a gateway to enable seamless digital guest checkouts and start accepting digital payments.
+                    Connect a payment gateway to start accepting digital payments from your guests securely.
                   </p>
                </div>
                <Button 
                   className="gap-2 font-bold bg-primary hover:bg-primary/90 shadow-xl px-10 h-14 rounded-2xl text-base"
-                  onClick={() => setIsUpgradeDialogOpen(true)}
+                  onClick={() => setIsAddModalOpen(true)}
                >
                   <Plus className="h-5 w-5" />
                   Connect New Gateway
@@ -215,240 +236,294 @@ export default function PaymentGatewayPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {connections.map((conn) => {
-                const provider = SUPPORTED_GATEWAYS.find(p => p.id === conn.providerId);
-                return (
-                  <Card key={conn.id} className={cn(
-                    "overflow-hidden border-2 transition-all hover:shadow-xl rounded-3xl border-border",
-                    !conn.isEnabled && "opacity-75 grayscale-[0.5] border-muted bg-muted/5"
-                  )}>
-                    <CardHeader className="pb-4 bg-muted/10 border-b text-left">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "h-12 w-12 rounded-2xl bg-white shadow-md border flex items-center justify-center",
-                            !conn.isEnabled && "opacity-50"
-                          )}>
-                            {provider ? <provider.icon className={cn("h-6 w-6", provider.color.split(' ')[1])} /> : <CreditCard className="h-6 w-6 text-muted-foreground" />}
-                          </div>
-                          <div className="min-w-0">
-                            <CardTitle className="text-xl font-bold truncate">{conn.brand}</CardTitle>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.1em]">Payment Provider</p>
-                          </div>
+              {connections.map((conn) => (
+                <Card key={conn.id} className={cn(
+                  "overflow-hidden border-2 transition-all hover:shadow-xl rounded-3xl border-border",
+                  !conn.isEnabled && "opacity-75 grayscale-[0.5] border-muted bg-muted/5"
+                )}>
+                  <CardHeader className="pb-4 bg-muted/10 border-b text-left">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 rounded-2xl bg-white shadow-md border flex items-center justify-center text-primary">
+                          <WalletCards className="h-6 w-6" />
                         </div>
-                        {getStatusBadge(conn)}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-8 space-y-6">
-                      <div className="flex items-center justify-between p-4 rounded-2xl border bg-card/50">
-                        <div className="space-y-0.5 text-left">
-                          <Label htmlFor={`status-${conn.id}`} className="text-sm font-bold">Gateway Operational</Label>
-                          <p className="text-[10px] text-muted-foreground font-medium">Toggle this gateway on or off for guests.</p>
-                        </div>
-                        <Switch 
-                          id={`status-${conn.id}`}
-                          checked={conn.isEnabled} 
-                          onCheckedChange={(checked) => confirmToggleStatus(conn.id, checked, conn.brand)}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-left">
-                        <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Environment</p>
-                          <p className="text-sm font-bold capitalize">{conn.environment}</p>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Status</p>
-                          <p className={cn("text-sm font-bold capitalize", conn.isEnabled ? "text-primary" : "text-muted-foreground")}>
-                            {conn.isEnabled ? 'Active' : 'Disabled'}
-                          </p>
+                        <div className="min-w-0">
+                          <CardTitle className="text-xl font-bold truncate">{conn.brand}</CardTitle>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.1em]">Payment Provider</p>
                         </div>
                       </div>
-                    </CardContent>
-                    <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
-                          onClick={() => handleOpenSettings(conn)}
-                        >
-                          <Settings className="h-4 w-4" />
-                        </Button>
+                      {getStatusBadge(conn.status)}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-8 space-y-6">
+                    <div className="grid grid-cols-2 gap-4 text-left">
+                      <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Operational</p>
+                        <p className="text-sm font-bold capitalize">{conn.status}</p>
                       </div>
+                      <div className="p-4 rounded-2xl bg-muted/30 border space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Last Sync</p>
+                        <p className="text-sm font-bold">{conn.lastSync}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-6 px-1">
+                      <span className="font-semibold uppercase tracking-wider">Merchant ID</span>
+                      <span className="font-mono font-bold text-foreground bg-muted px-2 py-0.5 rounded">{conn.merchantId}</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-1">
                       <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-10 text-xs font-bold uppercase tracking-wide px-4 gap-2 border-primary/20 text-primary hover:bg-primary/5 rounded-xl bg-background shadow-sm flex-shrink-0" 
-                        asChild
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
                       >
-                        <a href={`https://dashboard.${conn.providerId}.com`} target="_blank" rel="noopener noreferrer">
-                          Go to {conn.brand}
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
+                        <Settings className="h-4 w-4" />
                       </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
+                        onClick={() => handleDelete(conn.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Badge variant="outline" className="h-10 px-4 rounded-xl border-primary/20 text-primary font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+                       <RefreshCw className="h-3 w-3" /> Sync Connected
+                    </Badge>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           )}
         </div>
       </main>
 
-      {/* Confirmation Dialog for Enable/Disable */}
-      <AlertDialog open={!!confirmToggleData} onOpenChange={(open) => !open && setConfirmToggleData(null)}>
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold">
-              {confirmToggleData?.enabled ? `Enable ${confirmToggleData?.brand}?` : `Disable ${confirmToggleData?.brand}?`}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
-              {confirmToggleData?.enabled 
-                ? `This will immediately allow guests to process payments through ${confirmToggleData?.brand}.`
-                : `This will stop accepting all new guest payments through ${confirmToggleData?.brand}. Active checkouts may be interrupted.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleToggleAction}
-              className={cn(
-                "rounded-xl font-bold",
-                confirmToggleData?.enabled ? "bg-primary" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              )}
-            >
-              {confirmToggleData?.enabled ? "Confirm Enable" : "Confirm Disable"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Upgrade Required Dialog */}
-      <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl bg-white text-center">
-          <div className="bg-primary/5 p-10 flex flex-col items-center space-y-6">
-            <div className="relative">
-              <div className="h-20 w-20 rounded-3xl bg-primary flex items-center justify-center shadow-lg transform rotate-3">
-                <Crown className="h-10 w-10 text-white" />
-              </div>
-              <div className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-orange-400 flex items-center justify-center border-4 border-white shadow-md">
-                <Sparkles className="h-4 w-4 text-white" />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <DialogTitle className="text-3xl font-black tracking-tight text-foreground leading-tight">
-                Unlock Multi-Gateway Processing
-              </DialogTitle>
-              <Badge variant="secondary" className="bg-primary/10 text-primary font-bold px-4 py-1 rounded-full border-none">
-                PREMIUM FEATURE
-              </Badge>
-            </div>
-          </div>
-
-          <div className="p-10 space-y-8">
-            <div className="space-y-4 text-center">
-              <p className="text-muted-foreground text-base font-medium leading-relaxed max-w-[320px] mx-auto">
-                Power your growth with unlimited payment options. Simultaneous regional and global gateways ensure <span className="text-foreground font-bold">100% uptime</span> and higher conversion rates.
-              </p>
-              
-              <div className="grid gap-3 text-left max-w-[280px] mx-auto">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                  <span className="text-sm font-bold text-foreground/80">Connect 5+ Gateways</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                  <span className="text-sm font-bold text-foreground/80">Redundant Payment Routing</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                  <span className="text-sm font-bold text-foreground/80">Regional Multi-Currency support</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Button className="w-full h-14 font-black uppercase tracking-widest bg-primary text-white hover:bg-primary/90 shadow-xl rounded-2xl text-base group">
-                Upgrade to Premium
-                <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button variant="ghost" className="w-full font-bold text-muted-foreground" onClick={() => setIsUpgradeDialogOpen(false)}>
-                Maybe Later
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Gateway Settings Drawer */}
-      <Sheet open={isSettingsDrawerOpen} onOpenChange={setIsSettingsDrawerOpen}>
-        <SheetContent className="sm:max-w-xl p-0 overflow-hidden flex flex-col border-l shadow-2xl bg-white text-left">
+      {/* Onboarding Dialog */}
+      <Dialog open={isAddModalOpen} onOpenChange={(open) => { if(!open) resetForm(); setIsAddModalOpen(open); }}>
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden flex flex-col border-0 shadow-2xl bg-white text-left rounded-3xl">
           <div className="bg-muted/30 p-8 border-b shrink-0">
             <div className="flex items-center gap-4 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                <Settings className="h-5 w-5 text-primary" />
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
+                <ShieldCheck className="h-5 w-5" />
               </div>
-              <SheetHeader className="text-left p-0">
-                <SheetTitle className="text-2xl font-bold text-foreground">Gateway Settings</SheetTitle>
-                <SheetDescription className="text-muted-foreground font-medium">Manage active configuration for {tempSettings.brand}.</SheetDescription>
-              </SheetHeader>
+              <DialogHeader className="text-left p-0">
+                <DialogTitle className="text-2xl font-bold text-foreground">Connect Gateway</DialogTitle>
+                <DialogDescription className="text-muted-foreground font-medium">
+                  {currentStep === 1 && "Step 1: Identity Information"}
+                  {currentStep === 2 && "Step 2: Regional Configuration"}
+                  {currentStep === 3 && "Step 3: Provider Selection"}
+                  {currentStep === 4 && "Step 4: API & Credentials"}
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            <div className="mt-6 flex items-center gap-2">
+              {[1, 2, 3, 4].map((s) => (
+                <div key={s} className={cn("h-1.5 flex-1 rounded-full transition-colors", currentStep >= s ? "bg-primary" : "bg-muted")} />
+              ))}
             </div>
           </div>
 
-          <ScrollArea className="flex-1">
-            <div className="p-8 space-y-10">
-              <section className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Operational Mode</h3>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 rounded-2xl border bg-card">
-                  <div className="space-y-0.5 text-left">
-                    <Label className="text-sm font-bold">Production Mode</Label>
-                    <p className="text-[10px] text-muted-foreground font-medium leading-none">Toggle between sandbox and live environments.</p>
+          <ScrollArea className="flex-1 max-h-[60vh]">
+            <div className="p-8 space-y-8">
+              {currentStep === 1 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold flex items-center gap-2">
+                      <Tag className="h-3.5 w-3.5 text-muted-foreground" /> Merchant Identifier
+                    </Label>
+                    <Input 
+                      placeholder="e.g. MID_9428105" 
+                      value={newGateway.merchantId}
+                      onChange={(e) => setNewGateway(prev => ({ ...prev, merchantId: e.target.value }))}
+                      className="h-12 bg-background font-medium rounded-xl"
+                    />
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your unique merchant ID from the gateway provider.</p>
                   </div>
-                  <Switch 
-                    checked={tempSettings.environment === 'live'} 
-                    onCheckedChange={(checked) => setTempSettings(prev => ({ ...prev, environment: checked ? 'live' : 'sandbox', status: checked ? 'active' : 'sandbox' }))}
-                  />
                 </div>
+              )}
 
-                <div className="grid grid-cols-2 gap-6 pt-2">
-                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Gateway Provider</Label>
-                    <div className="h-11 flex items-center px-4 rounded-xl bg-muted/30 border border-dashed font-bold text-xs">
-                      {tempSettings.brand}
+              {currentStep === 2 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-4">
+                    <Label className="text-sm font-bold flex items-center gap-2">
+                      <Globe className="h-3.5 w-3.5 text-muted-foreground" /> Business Region (Optional)
+                    </Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Search countries..." 
+                        value={regionSearch}
+                        onChange={(e) => setRegionSearch(e.target.value)}
+                        className="h-12 pl-10 bg-background font-medium rounded-xl"
+                      />
+                    </div>
+                    <ScrollArea className="h-[200px] border rounded-xl bg-muted/10 p-2">
+                      <div className="space-y-1">
+                        {filteredCountries.map(country => (
+                          <button
+                            key={country}
+                            onClick={() => setNewGateway(prev => ({ ...prev, region: country }))}
+                            className={cn(
+                              "w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                              newGateway.region === country ? "bg-primary text-white" : "hover:bg-muted"
+                            )}
+                          >
+                            {country}
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Select Gateway Provider</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {SUPPORTED_PROVIDERS.map((provider) => (
+                          <div
+                            key={provider.id}
+                            onClick={() => setNewGateway(prev => ({ ...prev, providerId: provider.id }))}
+                            className={cn(
+                              "cursor-pointer flex flex-col p-5 rounded-2xl border-2 transition-all duration-300 group",
+                              newGateway.providerId === provider.id
+                                ? "border-primary bg-primary/5 ring-4 ring-primary/10"
+                                : "border-muted hover:border-accent-foreground/20 bg-background"
+                            )}
+                          >
+                            <div className="flex items-center justify-between mb-4">
+                              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:scale-110 bg-white")}>
+                                <provider.icon className={cn("h-5 w-5", provider.color)} />
+                              </div>
+                              {newGateway.providerId === provider.id && (
+                                <CheckCircle2 className="h-6 w-6 text-primary animate-in zoom-in duration-300" />
+                              )}
+                            </div>
+                            <p className="font-bold text-base text-foreground">{provider.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold">Base Currency</Label>
+                      <Select 
+                        value={newGateway.currency} 
+                        onValueChange={(val) => setNewGateway(prev => ({ ...prev, currency: val }))}
+                      >
+                        <SelectTrigger className="h-12 bg-background font-medium rounded-xl">
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                  <div className="space-y-2 text-left">
-                    <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Merchant ID</Label>
-                    <div className="h-11 flex items-center px-4 rounded-xl bg-muted/30 border border-dashed font-mono text-[10px] font-bold text-muted-foreground">
-                      {tempSettings.merchantId}
+                </div>
+              )}
+
+              {currentStep === 4 && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold flex items-center gap-2">
+                        <Building2 className="h-3.5 w-3.5 text-muted-foreground" /> Outlet Reference
+                      </Label>
+                      <Input 
+                        placeholder="e.g. STORE_RAK_01" 
+                        value={newGateway.outletReference}
+                        onChange={(e) => setNewGateway(prev => ({ ...prev, outletReference: e.target.value }))}
+                        className="h-12 bg-background font-medium rounded-xl"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-bold flex items-center gap-2">
+                        <Key className="h-3.5 w-3.5 text-muted-foreground" /> Service Account API Key
+                      </Label>
+                      <Input 
+                        type="password"
+                        placeholder="sk_live_••••••••••••••••••••" 
+                        value={newGateway.apiKey}
+                        onChange={(e) => setNewGateway(prev => ({ ...prev, apiKey: e.target.value }))}
+                        className="h-12 bg-background font-mono rounded-xl"
+                      />
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your secret production key. Keep this private.</p>
                     </div>
                   </div>
                 </div>
-              </section>
-
-              <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100 flex items-start gap-3">
-                <AlertCircle className="h-4 w-4 text-orange-600 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-orange-800 font-medium leading-tight text-left">
-                  Note: Switching environments will instantly affect how payments are processed. Always verify your keys in Sandbox before going Live.
-                </p>
-              </div>
+              )}
             </div>
           </ScrollArea>
 
-          <SheetFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-end gap-3">
-            <Button variant="ghost" className="font-bold px-8 h-11" onClick={() => setIsSettingsDrawerOpen(false)}>Cancel</Button>
-            <Button className="font-bold bg-primary text-primary-foreground px-10 h-11 shadow-lg" onClick={handleSaveSettings}>
-              Save Changes
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+          <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-between gap-4">
+            {currentStep === 1 && (
+              <>
+                <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  disabled={!newGateway.merchantId}
+                  onClick={() => setCurrentStep(2)}
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {currentStep === 2 && (
+              <>
+                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(1)}>
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setCurrentStep(3)}>Skip</Button>
+                  <Button 
+                    className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                    onClick={() => setCurrentStep(3)}
+                  >
+                    Next <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
+            {currentStep === 3 && (
+              <>
+                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(2)}>
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
+                  disabled={!newGateway.providerId}
+                  onClick={() => setCurrentStep(4)}
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            {currentStep === 4 && (
+              <>
+                <Button variant="outline" className="font-bold px-8 h-12 gap-2 rounded-xl" onClick={() => setCurrentStep(3)}>
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </Button>
+                <Button 
+                  className="font-bold bg-primary text-primary-foreground px-12 h-12 shadow-lg rounded-xl" 
+                  onClick={handleAddGateway}
+                  disabled={!newGateway.apiKey || !newGateway.outletReference}
+                >
+                  Add Payment Gateway
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

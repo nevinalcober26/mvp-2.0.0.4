@@ -95,7 +95,18 @@ const SUPPORTED_PROVIDERS = [
 ];
 
 const COUNTRIES = [
-  "United Arab Emirates", "United States", "United Kingdom", "Saudi Arabia", "Qatar", "Kuwait", "Oman", "Bahrain", "India", "Germany", "France", "Singapore"
+  "United Arab Emirates (AE)",
+  "United States (US)",
+  "United Kingdom (GB)",
+  "Saudi Arabia (SA)",
+  "Qatar (QA)",
+  "Kuwait (KW)",
+  "Oman (OM)",
+  "Bahrain (BH)",
+  "India (IN)",
+  "Germany (DE)",
+  "France (FR)",
+  "Singapore (SG)"
 ];
 
 const CURRENCIES = ["AED", "USD", "EUR", "GBP", "SAR", "QAR", "INR"];
@@ -351,7 +362,7 @@ export default function PaymentGatewayPage() {
           <div className="bg-muted/30 p-8 border-b shrink-0">
             <div className="flex items-center gap-4 mb-4">
               <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
-                <ShieldCheck className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <DialogHeader className="text-left p-0">
                 <DialogTitle className="text-2xl font-bold text-foreground">Connect Gateway</DialogTitle>

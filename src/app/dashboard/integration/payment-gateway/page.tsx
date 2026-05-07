@@ -35,7 +35,9 @@ import {
   X,
   PlusCircle,
   Hash,
-  Monitor
+  Monitor,
+  Maximize2,
+  Minimize2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -140,6 +142,7 @@ export default function PaymentGatewayPage() {
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isWhitelistOpen, setIsWhitelistOpen] = useState(false);
+  const [isWhitelistExpanded, setIsWhitelistExpanded] = useState(false);
   const [isAddTerminalModalOpen, setIsAddTerminalModalOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -437,7 +440,10 @@ export default function PaymentGatewayPage() {
 
       {/* Whitelisting Dialog */}
       <Dialog open={isWhitelistOpen} onOpenChange={setIsWhitelistOpen}>
-        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden bg-white rounded-3xl shadow-2xl text-left">
+        <DialogContent className={cn(
+            "p-0 overflow-hidden bg-white shadow-2xl text-left transition-all duration-300",
+            isWhitelistExpanded ? "sm:max-w-[95vw] w-[95vw] h-[90vh]" : "sm:max-w-4xl"
+        )}>
           <div className="bg-muted/30 p-8 border-b shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
@@ -448,28 +454,38 @@ export default function PaymentGatewayPage() {
                 <DialogDescription className="font-medium text-muted-foreground">Authorize specific hardware devices for this outlet.</DialogDescription>
               </div>
             </div>
-            <Button 
-              className="font-bold rounded-xl gap-2 shadow-lg h-11 px-6 bg-primary hover:bg-primary/90"
-              onClick={() => setIsAddTerminalModalOpen(true)}
-            >
-              <Plus className="h-4 w-4" /> Add Terminal
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-10 w-10 rounded-xl hidden sm:flex"
+                onClick={() => setIsWhitelistExpanded(!isWhitelistExpanded)}
+              >
+                {isWhitelistExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+              <Button 
+                className="font-bold rounded-xl gap-2 shadow-lg h-11 px-6 bg-primary hover:bg-primary/90"
+                onClick={() => setIsAddTerminalModalOpen(true)}
+              >
+                <Plus className="h-4 w-4" /> Add Terminal
+              </Button>
+            </div>
           </div>
 
-          <div className="p-0">
-             <ScrollArea className="max-h-[60vh]">
+          <div className="flex-1 overflow-hidden">
+             <ScrollArea className="h-full max-h-[60vh]">
                <Table>
                  <TableHeader className="bg-muted/10 sticky top-0 z-10 shadow-sm border-b">
-                   <TableRow className="hover:bg-transparent h-14 border-0">
-                     <TableHead className="text-[11px] font-bold uppercase tracking-widest pl-8">Terminal ID (TID)</TableHead>
-                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">Device Model</TableHead>
-                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">IMEI / Serial</TableHead>
+                   <TableRow className="hover:bg-transparent h-14 border-0 text-left">
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest pl-8">Terminal ID(TID)</TableHead>
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">Device</TableHead>
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">IMEI</TableHead>
                      <TableHead className="text-[11px] font-bold uppercase tracking-widest text-right pr-8">Actions</TableHead>
                    </TableRow>
                  </TableHeader>
                  <TableBody>
                    {terminals.map((t) => (
-                     <TableRow key={t.id} className="group transition-colors h-16">
+                     <TableRow key={t.id} className="group transition-colors h-16 text-left">
                        <TableCell className="pl-8 font-bold font-mono text-sm text-foreground">{t.tid}</TableCell>
                        <TableCell>
                          <div className="flex items-center gap-2">

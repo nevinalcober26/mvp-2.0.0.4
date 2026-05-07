@@ -61,8 +61,6 @@ import { Search } from 'lucide-react';
 import type { VariationGroup, ProductVariationGroup } from '@/app/dashboard/catalog/variations/types';
 import { mockCategories, mockVariationGroups, mockComboGroupNames } from '@/lib/mock-data-store';
 import { getCategoryNameOptions } from '@/app/dashboard/categories/utils';
-import dynamic from 'next/dynamic';
-
 
 const BuilderSidebar = ({ onCreateMenuClick }: { onCreateMenuClick: () => void }) => {
     return (
@@ -99,7 +97,6 @@ const BuilderSidebar = ({ onCreateMenuClick }: { onCreateMenuClick: () => void }
     );
 };
 
-
 const TemplateCard = ({ name, imageHint, isLocked, status, onDelete, onEdit, onPreview }: {
     name: string;
     imageHint: string;
@@ -109,9 +106,7 @@ const TemplateCard = ({ name, imageHint, isLocked, status, onDelete, onEdit, onP
     onEdit?: () => void;
     onPreview?: () => void;
 }) => {
-    const router = useRouter();
     const image = PlaceHolderImages.find(img => img.id === imageHint);
-
     const isOnline = status === 'Online';
     const isDraft = status === 'Draft';
 
@@ -120,7 +115,7 @@ const TemplateCard = ({ name, imageHint, isLocked, status, onDelete, onEdit, onP
 
     return (
         <Card
-            onClick={(e) => {
+            onClick={() => {
                 if (!isLocked && onEdit) {
                     onEdit();
                 }
@@ -214,15 +209,6 @@ const TemplateCard = ({ name, imageHint, isLocked, status, onDelete, onEdit, onP
         </Card>
     );
 };
-
-
-const SUPPORTED_POS = [
-  { id: 'oracle-simphony', name: 'Oracle Micros Simphony' },
-  { id: 'toast', name: 'Toast' },
-  { id: 'square', name: 'Square' },
-  { id: 'revel', name: 'Revel Systems' },
-  { id: 'clover', name: 'Clover' },
-];
 
 const getImageUrl = (id: string) => {
     const image = PlaceHolderImages.find(img => img.id === id);
@@ -419,7 +405,6 @@ const mockMenuItems: MenuItem[] = [
     }
 ];
 
-
 const mockMenuData = [
     { id: 'bestsellers', name: 'Bestsellers', items: mockMenuItems.filter(i => i.category === 'Bestsellers') },
     { id: 'pizza', name: 'Pizza', items: mockMenuItems.filter(i => i.category === 'Pizza') },
@@ -440,8 +425,7 @@ const initialNutritionItems: { id: string; name: string; unit: 'g' | 'mg' | 'kca
 
 const mockProperties = ['Spicy', 'Vegetarian', 'Gluten-Free', 'New', 'Halal', 'Organic', 'Gluten', 'Dairy'];
 
-
-const SortableSectionItem = ({ id, name, onEditClick, itemCount }: { id: string; name: string; onEditClick: () => void; itemCount: number; }) => {
+const SortableSectionItem = ({ id, name, onEditClick, itemCount, onEditDetails, onDelete, isDeletable }: { id: string; name: string; onEditClick: () => void; itemCount: number; onEditDetails: () => void; onDelete: () => void; isDeletable: boolean; }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -449,15 +433,27 @@ const SortableSectionItem = ({ id, name, onEditClick, itemCount }: { id: string;
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="touch-none">
-      <Card className="p-3 flex items-center justify-between cursor-pointer bg-white hover:bg-muted/50" onClick={onEditClick}>
+    <div ref={setNodeRef} style={style} className="touch-none group">
+      <Card className="p-3 flex items-center justify-between cursor-pointer bg-white hover:bg-muted/50 transition-colors" onClick={onEditClick}>
         <div className="flex items-center gap-3">
           <div {...attributes} {...listeners} className="cursor-grab p-1" onClick={(e) => e.stopPropagation()}>
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </div>
-          <span className="font-semibold text-sm">{name}</span>
+          <span className="font-semibold text-sm truncate max-w-[120px]">{name}</span>
         </div>
-        <Badge variant="secondary">{itemCount} items</Badge>
+        <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="group-hover:opacity-0 transition-opacity">{itemCount} items</Badge>
+            {isDeletable && (
+                <div className="absolute right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); onEditDetails(); }}>
+                        <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                </div>
+            )}
+        </div>
       </Card>
     </div>
   );
@@ -550,7 +546,6 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
             setEditingGroupName(null);
         }
     };
-
 
     if (!item) {
         return (
@@ -828,7 +823,6 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 </CardContent>
             </Card>
 
-
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg"><Leaf className="h-5 w-5" /> Nutritional Facts</CardTitle>
@@ -904,7 +898,6 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
       </Form>
     );
 };
-
 
 const ItemPreviewer = ({ item }: { item: MenuItem | null }) => {
     const [quantity, setQuantity] = useState(1);
@@ -1000,7 +993,6 @@ const ItemPreviewer = ({ item }: { item: MenuItem | null }) => {
 
         return finalPrice * quantity;
     }, [item, selections, quantity]);
-
 
     if (!item) {
         return (
@@ -1132,7 +1124,6 @@ const ItemPreviewer = ({ item }: { item: MenuItem | null }) => {
     );
 };
 
-
 const CategoryItemsSheet = ({ category, isOpen, onOpenChange, onSave, onOpenEditDialog }: any) => {
 
     const [items, setItems] = useState<MenuItem[]>([]);
@@ -1246,18 +1237,20 @@ const CategoryItemsSheet = ({ category, isOpen, onOpenChange, onSave, onOpenEdit
                     <SheetHeader className="p-6 border-b shrink-0">
                         <div className="flex items-center gap-2">
                             <SheetTitle>Manage: {category.name} ({items.length} items)</SheetTitle>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenEditDialog(category)}>
-                                            <Edit className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Edit Section Details</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                            {category.id.toString().startsWith('section_') && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenEditDialog(category)}>
+                                                <Edit className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Edit Section Details</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
                         </div>
                         <SheetDescription>Drag to reorder, click a row to edit details, and toggle availability.</SheetDescription>
                     </SheetHeader>
@@ -1347,7 +1340,6 @@ type AddSectionFormValues = z.infer<typeof addSectionSchema>;
 const editSectionSchema = addSectionSchema.extend({ id: z.string() });
 type EditSectionFormValues = z.infer<typeof editSectionSchema>;
 
-
 const AddSectionDetailsDialog = ({ isOpen, onOpenChange, onConfirm }: { isOpen: boolean; onOpenChange: (open: boolean) => void; onConfirm: (data: AddSectionFormValues) => void; }) => {
   const form = useForm<AddSectionFormValues>({
     resolver: zodResolver(addSectionSchema),
@@ -1424,7 +1416,6 @@ const AddSectionDetailsDialog = ({ isOpen, onOpenChange, onConfirm }: { isOpen: 
     </Dialog>
   );
 };
-
 
 const AddSectionSheet = ({
     isOpen,
@@ -1658,7 +1649,6 @@ const FloatingActionMenu = ({ onQrClick }: { onQrClick: () => void }) => {
   return (
     <div className="fixed bottom-8 right-8 z-50">
       <div className="relative flex flex-col items-center gap-4">
-        {/* Secondary Buttons (visible when open) */}
         <div className={cn("flex flex-col items-center gap-4 transition-all duration-300 ease-in-out", isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none")}>
           <TooltipProvider>
             <Tooltip>
@@ -1695,7 +1685,6 @@ const FloatingActionMenu = ({ onQrClick }: { onQrClick: () => void }) => {
           </TooltipProvider>
         </div>
         
-        {/* Main FAB */}
         <Button
           size="icon"
           className="h-16 w-16 rounded-2xl bg-primary text-white shadow-xl transition-all duration-300 hover:scale-105 active:scale-100"
@@ -1882,9 +1871,8 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
   const [activeTab, setActiveTab] = useState('');
   const [posFlowStep, setPosFlowStep] = useState<'select' | 'sync' | 'customize' | ''>('');
   const [selectedPos, setSelectedPos] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncProgress, setSyncProgress] = useState(0);
   const [isSyncComplete, setIsSyncComplete] = useState(false);
+  const [syncProgress, setSyncProgress] = useState(0);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   const [isConfirmingPublish, setIsConfirmingPublish] = useState(false);
@@ -2116,7 +2104,6 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
     });
   };
 
-
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -2151,17 +2138,6 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
     setMenuItems(uniqueItems);
   };
 
-  const handleProductUpdate = (updatedProduct: MenuItem) => {
-    const updateItems = (items: MenuItem[]): MenuItem[] =>
-        items.map(item => item.id === updatedProduct.id ? { ...item, ...updatedProduct } : item);
-
-    setMenuItems(prev => updateItems(prev));
-    setMenuSections(prev => prev.map(sec => ({
-        ...sec,
-        items: updateItems(sec.items)
-    })));
-  };
-
   const handleAddNewSection = (data: AddSectionFormValues, productIds: string[]) => {
     const newSection = {
         id: `section_${Date.now()}`,
@@ -2193,6 +2169,15 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
           title: "Section Updated",
           description: `"${updatedData.name}" has been updated.`,
       });
+  };
+
+  const handleDeleteSection = (id: string) => {
+    setMenuSections(prev => prev.filter(s => s.id !== id));
+    toast({
+        title: "Section Deleted",
+        description: "The menu section has been removed.",
+        variant: "destructive",
+    });
   };
 
   return (
@@ -2455,6 +2440,9 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
                         name={section.name}
                         itemCount={section.items.length}
                         onEditClick={() => handleEditCategory(section)}
+                        onEditDetails={() => handleOpenSectionDetailsDialog(section)}
+                        onDelete={() => handleDeleteSection(section.id)}
+                        isDeletable={section.id.toString().startsWith('section_')}
                       />
                     ))}
                   </div>
@@ -2625,13 +2613,11 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
 
 export default function MenuBuilderPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const [showBuilder, setShowBuilder] = useState(false);
   const [isAddMenuModalOpen, setIsAddMenuModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsLoading(false);
     }, 2500);
     return () => clearTimeout(timer);
   }, []);
@@ -2659,4 +2645,3 @@ export default function MenuBuilderPage() {
     </div>
   );
 }
-

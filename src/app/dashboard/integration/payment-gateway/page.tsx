@@ -29,6 +29,9 @@ import {
   ChevronRight,
   CreditCard,
   Network,
+  ListChecks,
+  Smartphone,
+  Info as InfoIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +42,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -64,6 +68,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -123,6 +135,7 @@ export default function PaymentGatewayPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isWhitelistOpen, setIsWhitelistOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
@@ -131,6 +144,13 @@ export default function PaymentGatewayPage() {
   // Connection states
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Mock whitelisted terminals
+  const [terminals, setTerminals] = useState([
+    { id: '1', tid: 'TID-44281', device: 'Verifone P400', imei: '358291039485712' },
+    { id: '2', tid: 'TID-44282', device: 'Ingenico Move/5000', imei: '358291039485713' },
+    { id: '3', tid: 'TID-44283', device: 'Pax A920', imei: '358291039485714' },
+  ]);
 
   // Load from Local Storage on mount
   useEffect(() => {
@@ -337,7 +357,16 @@ export default function PaymentGatewayPage() {
                     <span className="font-mono font-bold text-foreground bg-muted px-2 py-0.5 rounded">{connection.merchantId}</span>
                   </div>
                 </CardContent>
-                <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-end gap-4">
+                <CardFooter className="bg-muted/20 border-t p-4 flex items-center justify-between gap-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-10 text-xs font-bold uppercase tracking-wide px-4 gap-2 border-primary/20 text-primary hover:bg-primary/5 rounded-xl bg-background shadow-sm"
+                    onClick={() => setIsWhitelistOpen(true)}
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    Whitelisting
+                  </Button>
                   <div className="flex items-center gap-1">
                     <Button 
                       variant="ghost" 
@@ -362,6 +391,78 @@ export default function PaymentGatewayPage() {
           )}
         </div>
       </main>
+
+      {/* Whitelisting Dialog */}
+      <Dialog open={isWhitelistOpen} onOpenChange={setIsWhitelistOpen}>
+        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-white rounded-3xl shadow-2xl text-left">
+          <div className="bg-muted/30 p-8 border-b shrink-0 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
+                <ListChecks className="h-6 w-6" />
+              </div>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-2xl font-bold text-foreground">Manage White Listed Terminals</DialogTitle>
+                <DialogDescription className="font-medium text-muted-foreground">Authorize specific hardware devices for this outlet.</DialogDescription>
+              </div>
+            </div>
+            <Button className="font-bold rounded-xl gap-2 shadow-lg h-11 px-6 bg-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4" /> Add Terminal
+            </Button>
+          </div>
+
+          <div className="p-0">
+             <ScrollArea className="max-h-[60vh]">
+               <Table>
+                 <TableHeader className="bg-muted/10 sticky top-0 z-10 shadow-sm border-b">
+                   <TableRow className="hover:bg-transparent h-14 border-0">
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest pl-8">Terminal ID (TID)</TableHead>
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">Device Model</TableHead>
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest">IMEI / Serial</TableHead>
+                     <TableHead className="text-[11px] font-bold uppercase tracking-widest text-right pr-8">Actions</TableHead>
+                   </TableRow>
+                 </TableHeader>
+                 <TableBody>
+                   {terminals.map((t) => (
+                     <TableRow key={t.id} className="group transition-colors h-16">
+                       <TableCell className="pl-8 font-bold font-mono text-sm text-foreground">{t.tid}</TableCell>
+                       <TableCell>
+                         <div className="flex items-center gap-2">
+                           <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
+                           <span className="font-semibold text-sm">{t.device}</span>
+                         </div>
+                       </TableCell>
+                       <TableCell className="font-mono text-xs text-muted-foreground">{t.imei}</TableCell>
+                       <TableCell className="text-right pr-8">
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg">
+                           <Trash2 className="h-4 w-4" />
+                         </Button>
+                       </TableCell>
+                     </TableRow>
+                   ))}
+                 </TableBody>
+               </Table>
+               {terminals.length === 0 && (
+                 <div className="py-20 text-center space-y-4">
+                   <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto">
+                     <Smartphone className="h-8 w-8 text-muted-foreground opacity-20" />
+                   </div>
+                   <p className="text-sm font-medium text-muted-foreground">No terminals whitelisted for this gateway.</p>
+                 </div>
+               )}
+             </ScrollArea>
+          </div>
+
+          <div className="p-6 bg-muted/30 border-t flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+               <InfoIcon className="h-4 w-4 text-primary" />
+               Only authorized terminals can process transactions.
+            </div>
+            <DialogClose asChild>
+              <Button variant="ghost" className="font-bold px-8 h-10 rounded-xl">Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Onboarding Dialog */}
       <Dialog open={isAddModalOpen} onOpenChange={(open) => { if(!open) resetForm(); setIsAddModalOpen(open); }}>

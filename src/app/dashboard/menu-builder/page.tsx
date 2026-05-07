@@ -6,10 +6,63 @@ import { MenuBuilderPreloader } from '@/components/dashboard/menu-builder/preloa
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { List, LayoutGrid, X, Plus, Palette, Database, CheckCircle2, Loader2, GripVertical, Home, Receipt, ArrowLeft, ChevronDown, Wand, RefreshCw, Lock, MoreHorizontal, Trash2, PlusCircle, Plug, Leaf, Package, Rocket, Tag, AlertTriangle, Wheat, Milk, Sprout, Sparkles, Minus, ArrowRight, Check, Flame, ChevronRight, ShoppingCart, Edit, ImageIcon, GalleryHorizontal, Upload, QrCode, ExternalLink, Eye, HelpCircle } from 'lucide-react';
+import { 
+  List, 
+  LayoutGrid, 
+  X, 
+  Plus, 
+  Palette, 
+  Database, 
+  CheckCircle2, 
+  Loader2, 
+  GripVertical, 
+  Home, 
+  Receipt, 
+  ArrowLeft, 
+  ChevronDown, 
+  Wand, 
+  RefreshCw, 
+  Lock, 
+  MoreHorizontal, 
+  Trash2, 
+  PlusCircle, 
+  Plug, 
+  Leaf, 
+  Package, 
+  Rocket, 
+  Tag, 
+  AlertTriangle, 
+  Wheat, 
+  Milk, 
+  Sprout, 
+  Sparkles, 
+  Minus, 
+  ArrowRight, 
+  Check, 
+  Flame, 
+  ChevronRight, 
+  ShoppingCart, 
+  Edit, 
+  ImageIcon, 
+  GalleryHorizontal, 
+  Upload, 
+  QrCode, 
+  ExternalLink, 
+  Eye, 
+  HelpCircle,
+  Search
+} from 'lucide-react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogClose 
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,

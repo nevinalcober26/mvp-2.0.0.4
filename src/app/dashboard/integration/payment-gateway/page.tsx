@@ -101,7 +101,7 @@ interface GatewayConnection {
   id: string;
   brand: string;
   status: GatewayStatus;
-  lastSync: string; // Used as "Connected Since"
+  lastSync: string;
   merchantId: string;
   environment: 'live' | 'sandbox';
   isEnabled: boolean;
@@ -149,11 +149,9 @@ export default function PaymentGatewayPage() {
   const [regionSearch, setRegionSearch] = useState('');
   const [isRegionPopoverOpen, setIsRegionPopoverOpen] = useState(false);
   
-  // Connection states
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Mock whitelisted terminals
   const [terminals, setTerminals] = useState([
     { id: '1', tid: 'TID-44281', device: 'Verifone P400', imei: '358291039485712' },
     { id: '2', tid: 'TID-44282', device: 'Ingenico Move/5000', imei: '358291039485713' },
@@ -166,7 +164,6 @@ export default function PaymentGatewayPage() {
     imei: ''
   });
 
-  // Load from Local Storage on mount
   useEffect(() => {
     const stored = localStorage.getItem('activePaymentGateway');
     if (stored) {
@@ -178,7 +175,6 @@ export default function PaymentGatewayPage() {
     }
   }, []);
 
-  // Helper to update state and storage
   const updateActiveConnection = (newConnection: GatewayConnection | null) => {
     setConnection(newConnection);
     if (newConnection) {
@@ -188,7 +184,6 @@ export default function PaymentGatewayPage() {
     }
   };
   
-  // New Gateway Form State
   const [newGateway, setNewGateway] = useState({
     merchantId: '',
     region: '',
@@ -204,14 +199,9 @@ export default function PaymentGatewayPage() {
 
   const handleAddGateway = async () => {
     setIsProcessing(true);
-    
-    // Simulate verification
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
     setIsProcessing(false);
     setShowSuccess(true);
-    
-    // Success message display
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const provider = SUPPORTED_PROVIDERS.find(p => p.id === newGateway.providerId);
@@ -441,8 +431,8 @@ export default function PaymentGatewayPage() {
       {/* Whitelisting Dialog */}
       <Dialog open={isWhitelistOpen} onOpenChange={setIsWhitelistOpen}>
         <DialogContent className={cn(
-            "p-0 overflow-hidden bg-white shadow-2xl text-left transition-all duration-300",
-            isWhitelistExpanded ? "sm:max-w-[95vw] w-[95vw] h-[90vh]" : "sm:max-w-4xl"
+            "p-0 overflow-hidden bg-white shadow-2xl text-left transition-all duration-300 flex flex-col",
+            isWhitelistExpanded ? "sm:max-w-[95vw] w-[95vw] h-[90vh]" : "sm:max-w-4xl h-[80vh]"
         )}>
           <div className="bg-muted/30 p-8 border-b shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -473,7 +463,7 @@ export default function PaymentGatewayPage() {
           </div>
 
           <div className="flex-1 overflow-hidden">
-             <ScrollArea className="h-full max-h-[60vh]">
+             <ScrollArea className="h-full">
                <Table>
                  <TableHeader className="bg-muted/10 sticky top-0 z-10 shadow-sm border-b">
                    <TableRow className="hover:bg-transparent h-14 border-0 text-left">
@@ -519,7 +509,7 @@ export default function PaymentGatewayPage() {
              </ScrollArea>
           </div>
 
-          <div className="p-6 bg-muted/30 border-t flex items-center justify-between gap-4">
+          <div className="p-6 bg-muted/30 border-t flex items-center justify-between gap-4 shrink-0">
             <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                <InfoIcon className="h-4 w-4 text-primary" />
                Only authorized terminals can process transactions.
@@ -581,7 +571,6 @@ export default function PaymentGatewayPage() {
                 onChange={(e) => setNewTerminal(prev => ({ ...prev, imei: e.target.value }))}
                 className="h-12 rounded-xl bg-muted/10 border-muted-foreground/20 font-mono"
               />
-              <p className="text-[10px] text-muted-foreground font-medium italic">Found on the back or in device settings.</p>
             </div>
           </div>
 
@@ -630,9 +619,7 @@ export default function PaymentGatewayPage() {
           <div className="flex-1 min-h-[350px] flex flex-col">
             {isProcessing ? (
               <div className="flex-1 flex flex-col items-center justify-center p-12 space-y-4 animate-in fade-in duration-500">
-                <div className="relative">
-                   <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                </div>
+                <Loader2 className="h-12 w-12 text-primary animate-spin" />
                 <p className="font-bold text-lg text-foreground">Verifying with Gateway...</p>
               </div>
             ) : showSuccess ? (
@@ -658,7 +645,7 @@ export default function PaymentGatewayPage() {
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <input 
                             placeholder="Search countries..." 
-                            className="flex h-12 w-full rounded-xl border border-input bg-background pl-10 pr-4 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="flex h-12 w-full rounded-xl border border-input bg-background pl-10 pr-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             value={regionSearch}
                             onChange={(e) => setRegionSearch(e.target.value)}
                           />
@@ -771,7 +758,6 @@ export default function PaymentGatewayPage() {
                             onChange={(e) => setNewGateway(prev => ({ ...prev, apiKey: e.target.value }))}
                             className="h-12 bg-background font-mono rounded-xl"
                           />
-                          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Your secret production key. Keep this private.</p>
                         </div>
                       </div>
                     </div>
@@ -783,6 +769,7 @@ export default function PaymentGatewayPage() {
 
           {!isNavigationDisabled && (
             <DialogFooter className="p-6 bg-muted/30 border-t shrink-0 flex flex-row items-center justify-end gap-4">
+              <Button variant="ghost" className="font-bold px-8 h-12 rounded-xl" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
               {currentStep === 1 && (
                 <Button 
                   className="font-bold bg-primary text-primary-foreground px-10 h-12 shadow-lg gap-2 rounded-xl" 
@@ -896,10 +883,7 @@ export default function PaymentGatewayPage() {
                         </Label>
                         <Popover open={isRegionPopoverOpen} onOpenChange={setIsRegionPopoverOpen}>
                           <PopoverTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              className="h-11 w-full justify-between bg-background font-medium px-4"
-                            >
+                            <Button variant="outline" className="h-11 w-full justify-between bg-background font-medium px-4">
                               {editingGateway.region || "Select region"}
                               <ChevronDown className="h-4 w-4 opacity-50" />
                             </Button>
@@ -910,7 +894,7 @@ export default function PaymentGatewayPage() {
                                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <input 
                                   placeholder="Search countries..." 
-                                  className="flex h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="flex h-9 w-full rounded-md border bg-background pl-8 pr-3 py-1 text-sm focus-visible:outline-none"
                                   value={regionSearch}
                                   onChange={(e) => setRegionSearch(e.target.value)}
                                 />
@@ -934,9 +918,6 @@ export default function PaymentGatewayPage() {
                                     {country}
                                   </button>
                                 ))}
-                                {filteredCountries.length === 0 && (
-                                  <p className="text-xs text-center py-4 text-muted-foreground">No matches found</p>
-                                )}
                               </div>
                             </ScrollArea>
                           </PopoverContent>
@@ -973,7 +954,6 @@ export default function PaymentGatewayPage() {
                         onChange={(e) => setEditingGateway({ ...editingGateway, apiKey: e.target.value })}
                         className="h-11 bg-background font-mono"
                       />
-                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Leave blank to keep existing key.</p>
                     </div>
                   </section>
                 </>
@@ -996,14 +976,14 @@ export default function PaymentGatewayPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-bold">Disconnect Gateway?</AlertDialogTitle>
             <AlertDialogDescription className="text-base font-medium text-muted-foreground">
-              This action will immediately stop your ability to process digital payments for this outlet. This action cannot be undone easily.
+              This action will immediately stop your ability to process digital payments for this outlet.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6 gap-3">
             <AlertDialogCancel className="rounded-xl font-bold h-12 px-6">Keep Connected</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl font-bold h-12 px-6 shadow-lg shadow-destructive/20"
+              className="bg-destructive hover:bg-destructive/90 rounded-xl font-bold h-12 px-6 shadow-lg"
             >
               Confirm Disconnect
             </AlertDialogAction>

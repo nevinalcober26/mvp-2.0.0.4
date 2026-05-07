@@ -31,7 +31,11 @@ import {
   Network,
   ListChecks,
   Smartphone,
-  Info as InfoIcon
+  Info as InfoIcon,
+  X,
+  PlusCircle,
+  Hash,
+  Monitor
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -136,6 +140,7 @@ export default function PaymentGatewayPage() {
   const [isSettingsSheetOpen, setIsSettingsSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isWhitelistOpen, setIsWhitelistOpen] = useState(false);
+  const [isAddTerminalModalOpen, setIsAddTerminalModalOpen] = useState(false);
   const [editingGateway, setEditingGateway] = useState<GatewayConnection | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [regionSearch, setRegionSearch] = useState('');
@@ -151,6 +156,12 @@ export default function PaymentGatewayPage() {
     { id: '2', tid: 'TID-44282', device: 'Ingenico Move/5000', imei: '358291039485713' },
     { id: '3', tid: 'TID-44283', device: 'Pax A920', imei: '358291039485714' },
   ]);
+
+  const [newTerminal, setNewTerminal] = useState({
+    tid: '',
+    device: '',
+    imei: ''
+  });
 
   // Load from Local Storage on mount
   useEffect(() => {
@@ -247,6 +258,38 @@ export default function PaymentGatewayPage() {
     toast({
       title: "Settings Saved",
       description: "Gateway configuration has been updated."
+    });
+  };
+
+  const handleAddTerminal = () => {
+    if (!newTerminal.tid || !newTerminal.device) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please enter both Terminal ID and Device Model."
+      });
+      return;
+    }
+
+    const terminalToAdd = {
+      id: Date.now().toString(),
+      ...newTerminal
+    };
+
+    setTerminals(prev => [...prev, terminalToAdd]);
+    setNewTerminal({ tid: '', device: '', imei: '' });
+    setIsAddTerminalModalOpen(false);
+    toast({
+      title: "Terminal Authorized",
+      description: `Terminal ${terminalToAdd.tid} has been whitelisted.`
+    });
+  };
+
+  const handleDeleteTerminal = (id: string) => {
+    setTerminals(prev => prev.filter(t => t.id !== id));
+    toast({
+      title: "Terminal Removed",
+      description: "The hardware authorization has been revoked."
     });
   };
 
@@ -394,7 +437,7 @@ export default function PaymentGatewayPage() {
 
       {/* Whitelisting Dialog */}
       <Dialog open={isWhitelistOpen} onOpenChange={setIsWhitelistOpen}>
-        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-white rounded-3xl shadow-2xl text-left">
+        <DialogContent className="sm:max-w-4xl p-0 overflow-hidden bg-white rounded-3xl shadow-2xl text-left">
           <div className="bg-muted/30 p-8 border-b shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
@@ -405,7 +448,10 @@ export default function PaymentGatewayPage() {
                 <DialogDescription className="font-medium text-muted-foreground">Authorize specific hardware devices for this outlet.</DialogDescription>
               </div>
             </div>
-            <Button className="font-bold rounded-xl gap-2 shadow-lg h-11 px-6 bg-primary hover:bg-primary/90">
+            <Button 
+              className="font-bold rounded-xl gap-2 shadow-lg h-11 px-6 bg-primary hover:bg-primary/90"
+              onClick={() => setIsAddTerminalModalOpen(true)}
+            >
               <Plus className="h-4 w-4" /> Add Terminal
             </Button>
           </div>
@@ -431,9 +477,14 @@ export default function PaymentGatewayPage() {
                            <span className="font-semibold text-sm">{t.device}</span>
                          </div>
                        </TableCell>
-                       <TableCell className="font-mono text-xs text-muted-foreground">{t.imei}</TableCell>
+                       <TableCell className="font-mono text-xs text-muted-foreground">{t.imei || 'Not Set'}</TableCell>
                        <TableCell className="text-right pr-8">
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg">
+                         <Button 
+                           variant="ghost" 
+                           size="icon" 
+                           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg"
+                           onClick={() => handleDeleteTerminal(t.id)}
+                         >
                            <Trash2 className="h-4 w-4" />
                          </Button>
                        </TableCell>
@@ -460,6 +511,69 @@ export default function PaymentGatewayPage() {
             <DialogClose asChild>
               <Button variant="ghost" className="font-bold px-8 h-10 rounded-xl">Close</Button>
             </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Terminal Modal */}
+      <Dialog open={isAddTerminalModalOpen} onOpenChange={setIsAddTerminalModalOpen}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-white rounded-3xl shadow-2xl text-left">
+          <div className="bg-primary/5 p-8 border-b">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
+                <PlusCircle className="h-6 w-6" />
+              </div>
+              <div className="space-y-0.5">
+                <DialogTitle className="text-xl font-bold text-foreground">Authorize Terminal</DialogTitle>
+                <DialogDescription className="font-medium text-muted-foreground">Register new hardware for secure transactions.</DialogDescription>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Hash className="h-3 w-3" /> Terminal ID (TID)
+              </Label>
+              <Input 
+                placeholder="e.g. TID-552910" 
+                value={newTerminal.tid}
+                onChange={(e) => setNewTerminal(prev => ({ ...prev, tid: e.target.value }))}
+                className="h-12 rounded-xl bg-muted/10 border-muted-foreground/20 font-mono font-bold"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Monitor className="h-3 w-3" /> Device Model
+              </Label>
+              <Input 
+                placeholder="e.g. Verifone V200c" 
+                value={newTerminal.device}
+                onChange={(e) => setNewTerminal(prev => ({ ...prev, device: e.target.value }))}
+                className="h-12 rounded-xl bg-muted/10 border-muted-foreground/20 font-semibold"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Smartphone className="h-3 w-3" /> IMEI / Serial Number
+              </Label>
+              <Input 
+                placeholder="Enter hardware identifier..." 
+                value={newTerminal.imei}
+                onChange={(e) => setNewTerminal(prev => ({ ...prev, imei: e.target.value }))}
+                className="h-12 rounded-xl bg-muted/10 border-muted-foreground/20 font-mono"
+              />
+              <p className="text-[10px] text-muted-foreground font-medium italic">Found on the back or in device settings.</p>
+            </div>
+          </div>
+
+          <div className="p-6 bg-muted/30 border-t flex flex-row items-center justify-end gap-3">
+             <Button variant="ghost" className="font-bold rounded-xl h-11 px-6" onClick={() => setIsAddTerminalModalOpen(false)}>Cancel</Button>
+             <Button className="font-bold bg-primary hover:bg-primary/90 rounded-xl h-11 px-10 shadow-lg" onClick={handleAddTerminal}>
+               Add Terminal
+             </Button>
           </div>
         </DialogContent>
       </Dialog>

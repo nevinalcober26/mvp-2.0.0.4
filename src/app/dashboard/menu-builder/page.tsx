@@ -18,6 +18,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader as AlertDialogTitleComponent,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSeparator, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -38,7 +39,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,7 +58,6 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import NextLink from 'next/link';
-import { Search } from 'lucide-react';
 import type { VariationGroup, ProductVariationGroup } from '@/app/dashboard/catalog/variations/types';
 import { mockCategories, mockVariationGroups, mockComboGroupNames } from '@/lib/mock-data-store';
 import { getCategoryNameOptions } from '@/app/dashboard/categories/utils';
@@ -442,7 +442,7 @@ const SortableSectionItem = ({ id, name, onEditClick, itemCount, onEditDetails, 
           <span className="font-semibold text-sm truncate max-w-[120px]">{name}</span>
         </div>
         <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="group-hover:opacity-0 transition-opacity">{itemCount} items</Badge>
+            <Badge variant="secondary" className={cn("transition-opacity", isDeletable && "group-hover:opacity-0")}>{itemCount} items</Badge>
             {isDeletable && (
                 <div className="absolute right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); onEditDetails(); }}>
@@ -591,7 +591,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 </div>
             </div>
              <div>
-                <Label htmlFor="itemName">Product Name</Label>
+                <FormLabel htmlFor="itemName">Product Name</FormLabel>
                 <Input
                     id="itemName"
                     value={item.name}
@@ -600,7 +600,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 />
             </div>
              <div>
-                <Label htmlFor="itemDescription">Description</Label>
+                <FormLabel htmlFor="itemDescription">Description</FormLabel>
                 <Textarea
                     id="itemDescription"
                     value={item.description}
@@ -610,7 +610,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 />
             </div>
              <div>
-                <Label htmlFor="itemPrice">Price (AED)</Label>
+                <FormLabel htmlFor="itemPrice">Price (AED)</FormLabel>
                 <Input
                     id="itemPrice"
                     type="number"
@@ -619,7 +619,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-4">
-                <Label htmlFor="itemAvailability" className="font-medium">Available for Purchase</Label>
+                <FormLabel htmlFor="itemAvailability" className="font-medium">Available for Purchase</FormLabel>
                 <Switch
                     id="itemAvailability"
                     checked={item.available ?? true}
@@ -669,9 +669,9 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg"><Package className="h-5 w-5" /> Variation Groups</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent>
                     {localVariationGroups.map((group, groupIndex) => (
-                        <Collapsible key={group.id} className="border rounded-lg bg-muted/30">
+                        <Collapsible key={group.id} className="border rounded-lg bg-muted/30 mb-4 last:mb-0">
                             <div className="flex items-center p-2">
                                 <CollapsibleTrigger asChild>
                                     <Button variant="ghost" className="flex-1 justify-start gap-2 h-auto py-1">
@@ -786,7 +786,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                             <Button
                                 type="button"
                                 variant="outline"
-                                className="w-full"
+                                className="w-full mt-4"
                                 disabled={availableVariationGroups.length === 0}
                             >
                                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -844,7 +844,7 @@ const ItemEditor = ({ item, onUpdate, onImageUpload, onAvailabilityChange }: {
                                     return (
                                         <div key={key} className="flex items-end gap-2">
                                             <div className="flex-1">
-                                                <Label htmlFor={`nutrition-${key}`} className="text-sm text-muted-foreground">{nutritionItem?.name || key}</Label>
+                                                <FormLabel htmlFor={`nutrition-${key}`} className="text-sm text-muted-foreground">{nutritionItem?.name || key}</FormLabel>
                                                 <div className="relative">
                                                     <Input
                                                         id={`nutrition-${key}`}
@@ -1417,6 +1417,143 @@ const AddSectionDetailsDialog = ({ isOpen, onOpenChange, onConfirm }: { isOpen: 
   );
 };
 
+const EditSectionDetailsDialog = ({ isOpen, onOpenChange, onConfirm, section }: { isOpen: boolean; onOpenChange: (open: boolean) => void; onConfirm: (data: EditSectionFormValues) => void; section: any | null; }) => {
+  const form = useForm<EditSectionFormValues>({
+    resolver: zodResolver(editSectionSchema),
+    defaultValues: { id: '', name: '', description: '', imageUrl: '', enableSpecial: false },
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && section) {
+      form.reset({
+        id: section.id,
+        name: section.name,
+        description: section.description || '',
+        imageUrl: section.imageUrl || null,
+        enableSpecial: section.enableSpecial || false,
+      });
+      setImagePreview(section.imageUrl || null);
+    }
+  }, [isOpen, section, form]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        form.setValue('imageUrl', result, { shouldDirty: true });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const clearImage = () => {
+    setImagePreview(null);
+    form.setValue('imageUrl', null, { shouldDirty: true });
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  const onSubmit = (data: EditSectionFormValues) => {
+    onConfirm(data);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Menu Section</DialogTitle>
+          <DialogDescription>
+            Update the details for the &quot;{section?.name}&quot; section.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form id="edit-section-details-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Identifier</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled className="font-mono bg-muted" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField control={form.control} name="name" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Section Name*</FormLabel>
+                    <FormControl><Input placeholder="e.g., Summer Specials" {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
+            <FormField control={form.control} name="description" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl><Textarea placeholder="A short description for this section." rows={2} {...field} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}/>
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <div className="flex items-center gap-4">
+                    <div className="w-24 h-24 bg-muted rounded-md flex items-center justify-center border overflow-hidden">
+                      {imagePreview ? (
+                        <Image src={imagePreview} alt="Section image" width={96} height={96} className="object-contain" />
+                      ) : (
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Button variant="outline" type="button" asChild>
+                            <label className="cursor-pointer">
+                                <Upload className="mr-2 h-4 w-4"/>Upload
+                                <Input type="file" id="image-upload-edit" className="hidden" ref={fileInputRef} onChange={handleImageUpload} accept="image/png, image/jpeg, image/svg+xml" />
+                            </label>
+                        </Button>
+                         {imagePreview && (
+                            <Button type="button" variant="link" size="sm" className="text-destructive font-semibold px-0 hover:no-underline h-auto" onClick={clearImage}>
+                                <X className="mr-1 h-4 w-4" /> Remove
+                            </Button>
+                        )}
+                    </div>
+                  </div>
+                </FormItem>
+              )}
+            />
+             <FormField control={form.control} name="enableSpecial" render={({ field }) => (
+                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                        <FormLabel>Mark as Special</FormLabel>
+                        <FormDescription>
+                            Highlight this section on your menu.
+                        </FormDescription>
+                    </div>
+                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                </FormItem>
+            )} />
+          </form>
+        </Form>
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button type="submit" form="edit-section-details-form">
+            Update Section
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const AddSectionSheet = ({
     isOpen,
     onOpenChange,
@@ -1722,143 +1859,6 @@ const QrPreviewModal = ({ isOpen, onOpenChange }: { isOpen: boolean; onOpenChang
             </DialogContent>
         </Dialog>
     );
-};
-
-const EditSectionDetailsDialog = ({ isOpen, onOpenChange, onConfirm, section }: { isOpen: boolean; onOpenChange: (open: boolean) => void; onConfirm: (data: EditSectionFormValues) => void; section: any | null; }) => {
-  const form = useForm<EditSectionFormValues>({
-    resolver: zodResolver(editSectionSchema),
-    defaultValues: { id: '', name: '', description: '', imageUrl: '', enableSpecial: false },
-  });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen && section) {
-      form.reset({
-        id: section.id,
-        name: section.name,
-        description: section.description || '',
-        imageUrl: section.imageUrl || null,
-        enableSpecial: section.enableSpecial || false,
-      });
-      setImagePreview(section.imageUrl || null);
-    }
-  }, [isOpen, section, form]);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-        form.setValue('imageUrl', result, { shouldDirty: true });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  const clearImage = () => {
-    setImagePreview(null);
-    form.setValue('imageUrl', null, { shouldDirty: true });
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  }
-
-  const onSubmit = (data: EditSectionFormValues) => {
-    onConfirm(data);
-    onOpenChange(false);
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Menu Section</DialogTitle>
-          <DialogDescription>
-            Update the details for the &quot;{section?.name}&quot; section.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form id="edit-section-details-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <FormField
-              control={form.control}
-              name="id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Identifier</FormLabel>
-                  <FormControl>
-                    <Input {...field} disabled className="font-mono bg-muted" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Section Name*</FormLabel>
-                    <FormControl><Input placeholder="e.g., Summer Specials" {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}/>
-            <FormField control={form.control} name="description" render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea placeholder="A short description for this section." rows={2} {...field} /></FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}/>
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image</FormLabel>
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 h-24 bg-muted rounded-md flex items-center justify-center border overflow-hidden">
-                      {imagePreview ? (
-                        <Image src={imagePreview} alt="Section image" width={96} height={96} className="object-contain" />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Button variant="outline" type="button" asChild>
-                            <label className="cursor-pointer">
-                                <Upload className="mr-2 h-4 w-4"/>Upload
-                                <Input type="file" id="image-upload-edit" className="hidden" ref={fileInputRef} onChange={handleImageUpload} accept="image/png, image/jpeg, image/svg+xml" />
-                            </label>
-                        </Button>
-                         {imagePreview && (
-                            <Button type="button" variant="link" size="sm" className="text-destructive font-semibold px-0 hover:no-underline h-auto" onClick={clearImage}>
-                                <X className="mr-1 h-4 w-4" /> Remove
-                            </Button>
-                        )}
-                    </div>
-                  </div>
-                </FormItem>
-              )}
-            />
-             <FormField control={form.control} name="enableSpecial" render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <FormLabel>Mark as Special</FormLabel>
-                        <FormDescription>
-                            Highlight this section on your menu.
-                        </FormDescription>
-                    </div>
-                    <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                </FormItem>
-            )} />
-          </form>
-        </Form>
-        <DialogFooter>
-          <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button type="submit" form="edit-section-details-form">
-            Update Section
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 };
 
 const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpen }: {
@@ -2572,7 +2572,9 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
       />
       <AlertDialog open={isConfirmingPublish} onOpenChange={setIsConfirmingPublish}>
         <AlertDialogContent>
-          <AlertDialogTitleComponent>Are you sure you want to publish this menu?</AlertDialogTitleComponent>
+          <AlertDialogTitleComponent>
+            <AlertDialogTitle>Are you sure you want to publish this menu?</AlertDialogTitle>
+          </AlertDialogTitleComponent>
           <AlertDialogDescription>
             Publishing this menu will make it the live version for your customers. Other active menus will be set to offline.
           </AlertDialogDescription>
@@ -2584,7 +2586,9 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
       </AlertDialog>
        <AlertDialog open={!!deleteConfirmation} onOpenChange={() => setDeleteConfirmation(null)}>
         <AlertDialogContent>
-            <AlertDialogTitleComponent>Are you absolutely sure?</AlertDialogTitleComponent>
+            <AlertDialogTitleComponent>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            </AlertDialogTitleComponent>
             <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete the menu: <strong>{deleteConfirmation?.name}</strong>.
             </AlertDialogDescription>
@@ -2612,14 +2616,11 @@ const MenuBuilderMainPage = ({ onClose, isAddMenuModalOpen, setIsAddMenuModalOpe
 
 
 export default function MenuBuilderPage() {
-  const router = useRouter();
   const [showBuilder, setShowBuilder] = useState(false);
   const [isAddMenuModalOpen, setIsAddMenuModalOpen] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-    }, 2500);
-    return () => clearTimeout(timer);
+    // Basic initialization
   }, []);
 
   const handleLoaded = () => {
@@ -2627,7 +2628,7 @@ export default function MenuBuilderPage() {
   };
 
   const handleClose = () => {
-    router.push('/dashboard');
+    // handled inside MenuBuilderMainPage components for routing
   };
 
   if (!showBuilder) {
@@ -2638,7 +2639,7 @@ export default function MenuBuilderPage() {
     <div className="fixed inset-0 z-40 bg-background flex animate-in fade-in duration-500">
       <BuilderSidebar onCreateMenuClick={() => setIsAddMenuModalOpen(true)} />
       <MenuBuilderMainPage
-        onClose={handleClose}
+        onClose={() => {}} 
         isAddMenuModalOpen={isAddMenuModalOpen}
         setIsAddMenuModalOpen={setIsAddMenuModalOpen}
       />

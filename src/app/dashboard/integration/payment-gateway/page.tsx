@@ -13,24 +13,22 @@ import {
 import { 
   Plus, 
   ShieldCheck, 
-  Zap, 
   WalletCards, 
   Settings, 
   CheckCircle2, 
   AlertCircle, 
   Building2,
-  Network,
   Search,
   Trash2,
   Tag,
   Key,
   Globe,
-  X,
   Cog,
   ChevronDown,
   Loader2,
   ChevronRight,
   CreditCard,
+  Network,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

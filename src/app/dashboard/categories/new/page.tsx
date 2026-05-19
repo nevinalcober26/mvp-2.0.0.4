@@ -75,7 +75,7 @@ export default function AddNewBranchPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('basic');
 
-  // States for new branding fields
+  // States for branding
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#18B4A6');
 
@@ -187,7 +187,7 @@ export default function AddNewBranchPage() {
     <>
       <DashboardHeader />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-muted/30 min-h-[calc(100vh-4rem)]">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto text-left">
           <Breadcrumbs items={breadcrumbItems} />
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -215,7 +215,7 @@ export default function AddNewBranchPage() {
             </div>
           </div>
 
-          <Card className="shadow-smooth border-0 overflow-hidden">
+          <Card className="shadow-smooth border-0 overflow-hidden text-left">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-background p-0 h-14 sticky top-0 z-20">
                 <TabsTrigger 
@@ -266,7 +266,7 @@ export default function AddNewBranchPage() {
                         </div>
                       </div>
                       
-                      <div className="space-y-2">
+                      <div className="space-y-2 text-left">
                         <Label className="text-sm font-semibold">Description</Label>
                         <Textarea 
                           placeholder="Enter outlet description..." 
@@ -275,38 +275,75 @@ export default function AddNewBranchPage() {
                       </div>
                     </div>
                   </div>
+                </section>
 
-                  <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Featured Image</Label>
-                      <div className="relative aspect-[21/9] w-full rounded-2xl bg-muted border-2 border-dashed flex items-center justify-center overflow-hidden group">
-                          {featuredImage ? (
-                              <Image src={featuredImage} alt="Featured" fill className="object-cover" />
-                          ) : (
-                              <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                  <ImageIcon className="h-10 w-10 opacity-30" />
-                                  <p className="text-xs font-bold uppercase tracking-widest">Widescreen Header Image</p>
-                                  <p className="text-[10px] opacity-60">Recommended: 1200 x 400px</p>
-                              </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                              <Button variant="secondary" size="sm" className="font-bold h-10 px-6 rounded-xl">
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Upload Banner
-                              </Button>
-                              {featuredImage && (
-                                  <Button variant="destructive" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setFeaturedImage(null)}>
-                                      <X className="h-5 w-5" />
-                                  </Button>
-                              )}
-                          </div>
-                      </div>
+                {/* Branding & Identity Section */}
+                <section className="space-y-6 pt-8 border-t">
+                  <h3 className="text-lg font-bold">Branding & Identity</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div className="space-y-2">
+                        <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                        <div className="relative aspect-[21/9] w-full rounded-2xl bg-muted border-2 border-dashed flex items-center justify-center overflow-hidden group">
+                            {featuredImage ? (
+                                <Image src={featuredImage} alt="Featured" fill className="object-cover" />
+                            ) : (
+                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                    <ImageIcon className="h-10 w-10 opacity-30" />
+                                    <p className="text-xs font-bold uppercase tracking-widest text-center px-4">Widescreen Header Image</p>
+                                    <p className="text-[10px] opacity-60">Recommended: 1200 x 400px</p>
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <Button variant="secondary" size="sm" className="font-bold h-10 px-6 rounded-xl">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload Banner
+                                </Button>
+                                {featuredImage && (
+                                    <Button variant="destructive" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setFeaturedImage(null)}>
+                                        <X className="h-5 w-5" />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold flex items-center gap-2">
+                                <Palette className="h-4 w-4 text-primary" /> Primary Brand Color
+                            </Label>
+                            <div className="flex items-center gap-3">
+                                <div 
+                                    className="w-14 h-14 rounded-xl border-2 shadow-sm shrink-0" 
+                                    style={{ backgroundColor: primaryColor }}
+                                />
+                                <div className="flex-1 relative">
+                                    <Input 
+                                        type="color" 
+                                        value={primaryColor} 
+                                        onChange={(e) => setPrimaryColor(e.target.value)}
+                                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                                    />
+                                    <Input 
+                                        value={primaryColor} 
+                                        onChange={(e) => setPrimaryColor(e.target.value)}
+                                        className="h-11 bg-background font-mono font-bold uppercase pr-10"
+                                    />
+                                    <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed text-left">
+                                This color will be used for primary buttons, links, and highlighted states on your digital menu.
+                            </p>
+                        </div>
+                    </div>
                   </div>
                 </section>
 
                 {/* Address & Location Section */}
                 <section className="space-y-6 pt-8 border-t">
                   <h3 className="text-lg font-bold">Address & Location</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
                       <Input placeholder="Street name and number" className="bg-background h-11" />
@@ -317,7 +354,7 @@ export default function AddNewBranchPage() {
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-left">
                     <Label className="text-sm font-semibold">Menu url</Label>
                     <div className="relative">
                       <Input placeholder="Enter URL for your online menu (optional)" className="bg-background h-11 pr-10" />
@@ -325,7 +362,7 @@ export default function AddNewBranchPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                       <div className="flex gap-2">
@@ -350,7 +387,7 @@ export default function AddNewBranchPage() {
                 </section>
 
                 {/* Additional Settings Section */}
-                <section className="space-y-6 pt-8 border-t">
+                <section className="space-y-6 pt-8 border-t text-left">
                   <h3 className="text-lg font-bold">Additional Settings</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -365,35 +402,6 @@ export default function AddNewBranchPage() {
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-sm font-semibold flex items-center gap-2">
-                            <Palette className="h-4 w-4 text-primary" /> Primary Brand Color
-                        </Label>
-                        <div className="flex items-center gap-3">
-                            <div 
-                                className="w-11 h-11 rounded-xl border-2 shadow-sm shrink-0" 
-                                style={{ backgroundColor: primaryColor }}
-                            />
-                            <div className="flex-1 relative">
-                                <Input 
-                                    type="color" 
-                                    value={primaryColor} 
-                                    onChange={(e) => setPrimaryColor(e.target.value)}
-                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-                                />
-                                <Input 
-                                    value={primaryColor} 
-                                    onChange={(e) => setPrimaryColor(e.target.value)}
-                                    className="h-11 bg-background font-mono font-bold uppercase pr-10"
-                                />
-                                <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                            </div>
-                        </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
                       <Select defaultValue="United Arab Emirates">
@@ -407,6 +415,9 @@ export default function AddNewBranchPage() {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
                       <Input placeholder="e.g. Dubai" className="bg-background h-11" />
@@ -430,7 +441,7 @@ export default function AddNewBranchPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3 pt-4">
+                  <div className="flex items-center space-x-3 pt-4 text-left">
                     <Checkbox id="show-maps-new" />
                     <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
                       Show map on outlet page
@@ -461,7 +472,7 @@ export default function AddNewBranchPage() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 text-left">
                     <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Clock className="h-4 w-4 text-primary" />
                     </div>
@@ -469,23 +480,23 @@ export default function AddNewBranchPage() {
                   </div>
 
                   <Card className="border shadow-none overflow-hidden bg-muted/10">
-                    <CardHeader className="bg-white border-b py-4 px-8 flex flex-row items-center justify-between space-y-0">
+                    <CardHeader className="bg-white border-b py-4 px-8 flex flex-row items-center justify-between space-y-0 text-left">
                       <div className="space-y-0.5">
                         <CardTitle className="text-sm font-bold text-foreground">Standard Hours</CardTitle>
                         <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-0 divide-y bg-white">
+                    <CardContent className="p-0 divide-y bg-white text-left">
                       {regularHours.map((hour, index) => (
                         <div key={hour.day} className={cn(
                           "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
                           hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
                         )}>
-                          <div className="w-32 shrink-0">
+                          <div className="w-32 shrink-0 text-left">
                             <span className="font-bold text-base text-foreground">{hour.day}</span>
                           </div>
                           
-                          <div className="flex-1 flex flex-wrap items-center gap-4">
+                          <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
                             <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                               <div className="space-y-1.5 text-left">
                                 <Label className="text-xs font-semibold text-muted-foreground ml-1">Open At</Label>
@@ -539,7 +550,7 @@ export default function AddNewBranchPage() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between text-left">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center">
                         <CalendarDays className="h-4 w-4 text-orange-600" />
@@ -561,7 +572,7 @@ export default function AddNewBranchPage() {
                     <CardContent className="p-0 divide-y bg-white text-left">
                       {specialHours.length > 0 ? specialHours.map((item) => (
                         <div key={item.id} className={cn(
-                          "flex flex-col md:flex-row md:items-center gap-8 py-6 px-8 transition-colors",
+                          "flex flex-col md:flex-row md:items-center gap-8 py-6 px-8 transition-colors text-left",
                           item.closed ? "bg-destructive/[0.02]" : "hover:bg-muted/5"
                         )}>
                           <div className="w-48 shrink-0 text-left space-y-1">
@@ -577,13 +588,13 @@ export default function AddNewBranchPage() {
                             />
                           </div>
                           
-                          <div className="flex-1 flex items-center gap-4">
+                          <div className="flex-1 flex items-center gap-4 text-left">
                             {item.closed ? (
                               <div className="flex items-center gap-3 px-4 py-2 bg-destructive/10 rounded-xl border border-destructive/20">
                                 <span className="text-xs font-bold text-destructive italic">Closed All Day</span>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-3 text-left">
                                 <div className="space-y-1.5 text-left">
                                   <Label className="text-xs font-semibold text-muted-foreground ml-1">From</Label>
                                   <Select value={item.from} onValueChange={(val) => handleUpdateSpecialHour(item.id, 'from', val)}>
@@ -638,7 +649,7 @@ export default function AddNewBranchPage() {
 
               <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background text-left">
                 <section className="space-y-8">
-                  <div className="flex items-center justify-between border-b pb-6">
+                  <div className="flex items-center justify-between border-b pb-6 text-left">
                     <div>
                       <h3 className="text-xl font-bold">Gratuity Settings</h3>
                       <p className="text-sm text-muted-foreground">Configure how customers can add tips to their orders.</p>
@@ -786,7 +797,7 @@ export default function AddNewBranchPage() {
             </Tabs>
           </Card>
 
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="mt-8 flex justify-end gap-3 text-right">
             <Button variant="outline" className="px-8 h-12 font-bold rounded-xl" onClick={() => router.back()}>
               Cancel
             </Button>

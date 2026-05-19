@@ -338,7 +338,7 @@ export default function EditBranchPage() {
                         ) : (
                           <div className="flex flex-col items-center gap-2 text-center p-4">
                             <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Widescreen Header Image</p>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
                             <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
                           </div>
                         )}
@@ -366,7 +366,7 @@ export default function EditBranchPage() {
                                 />
                               </div>
                               <div className="flex-1 space-y-1.5">
-                                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Brand Hex Code</Label>
+                                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
                                 <div className="relative">
                                   <Input 
                                     value={primaryColor} 

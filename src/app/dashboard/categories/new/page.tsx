@@ -54,8 +54,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import Image from 'next/image';
 
-const cuisines = ['Italian', 'Boutique Café', 'Signature Store', 'Japanese', 'Mexican', 'Indian', 'French'];
+const cuisines = ['Italian', 'Boutique Café', 'Signature Store', 'Japanese', 'Mexican', 'Indian', 'French', 'Middle Eastern', 'American'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 const TIME_OPTIONS = [
@@ -198,11 +199,11 @@ export default function AddNewBranchPage() {
               </Button>
               <Button variant="outline" className="gap-2 font-semibold" onClick={handleSave}>
                 <Save className="h-4 w-4" />
-                Save
+                Save Draft
               </Button>
               <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold" onClick={handlePublish}>
                 <Rocket className="h-4 w-4" />
-                Publish
+                Publish Branch
               </Button>
             </div>
           </div>
@@ -224,88 +225,159 @@ export default function AddNewBranchPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="basic" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background">
+              <TabsContent value="basic" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
+                
+                {/* Outlet Details Section */}
                 <section className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold">Restaurant Details</h3>
-                    <div className="flex items-center gap-3">
-                      <Label htmlFor="branch-active" className="text-sm font-medium">Active Status</Label>
-                      <Switch id="branch-active" defaultChecked />
+                  <h3 className="text-lg font-bold">Outlet Details</h3>
+                  <div className="flex flex-col md:flex-row gap-8">
+                    <div className="flex flex-col items-center gap-3 shrink-0">
+                      <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                      </div>
+                      <div className="flex flex-col items-center gap-1.5">
+                        <Button variant="outline" className="gap-2 h-9 px-4 text-xs font-bold" size="sm">
+                          <Upload className="h-3.5 w-3.5" />
+                          Upload Logo
+                        </Button>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
+                          <Input placeholder="Enter outlet name" className="bg-background h-11" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
+                          <div className="relative">
+                            <Input placeholder="outlet-slug" className="bg-background h-11 pr-10" />
+                            <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">Description</Label>
+                        <Textarea 
+                          placeholder="Enter outlet description..." 
+                          className="min-h-[120px] resize-none bg-background"
+                        />
+                      </div>
                     </div>
                   </div>
+                </section>
 
-                  <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center border-2 border-dashed">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                {/* Address & Location Section */}
+                <section className="space-y-6 pt-8 border-t">
+                  <h3 className="text-lg font-bold">Address & Location</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
+                      <Input placeholder="Street name and number" className="bg-background h-11" />
                     </div>
-                    <div className="space-y-1.5 text-left">
-                      <Button variant="outline" className="gap-2" size="sm">
-                        <Upload className="h-4 w-4" />
-                        Upload Logo
-                      </Button>
-                      <p className="text-xs text-muted-foreground">PNG, JPG, or GIF up to 1MB</p>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
+                      <Input placeholder="e.g. Dubai" className="bg-background h-11" />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Menu url</Label>
+                    <div className="relative">
+                      <Input placeholder="Enter URL for your online menu (optional)" className="bg-background h-11 pr-10" />
+                      <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2 text-left">
-                      <Label className="font-semibold text-muted-foreground text-xs">Restaurant Name</Label>
-                      <Input placeholder="e.g. Bella Cucina Italian" className="bg-background" />
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
+                      <div className="flex gap-2">
+                        <Select defaultValue="+971">
+                          <SelectTrigger className="w-24 h-11 bg-background font-medium">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="+971">+971</SelectItem>
+                            <SelectItem value="+1">+1</SelectItem>
+                            <SelectItem value="+44">+44</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input placeholder="581111111" className="flex-1 bg-background h-11" />
+                      </div>
                     </div>
-                    <div className="space-y-2 text-left">
-                      <Label className="font-semibold text-muted-foreground text-xs">Cuisine Type</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Email address</Label>
+                      <Input placeholder="raffi.uae7@gmail.com" type="email" className="bg-background h-11" />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Additional Settings Section */}
+                <section className="space-y-6 pt-8 border-t">
+                  <h3 className="text-lg font-bold">Additional Settings</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Cuisine type</Label>
                       <Select>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Select cuisine" />
+                        <SelectTrigger className="bg-background h-11">
+                          <SelectValue placeholder="Select cuisine type" />
                         </SelectTrigger>
                         <SelectContent>
                           {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
+                      <Select defaultValue="United Arab Emirates">
+                        <SelectTrigger className="bg-background h-11">
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                          <SelectItem value="United States">United States</SelectItem>
+                          <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
+                      <Input placeholder="e.g. Dubai" className="bg-background h-11" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
+                      <Select defaultValue="Asia/Dubai (GMT+04:00)">
+                        <SelectTrigger className="bg-background h-11">
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
+                          <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
+                          <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
+                      <Input placeholder="e.g. 99999" className="bg-background h-11" />
+                    </div>
                   </div>
-
-                  <div className="space-y-2 text-left">
-                    <Label className="font-semibold text-muted-foreground text-xs">Description</Label>
-                    <Textarea 
-                      placeholder="Enter restaurant description..." 
-                      className="min-h-[120px] resize-none bg-background"
-                    />
-                  </div>
-                </section>
-
-                <section className="space-y-6">
-                  <h3 className="text-lg font-bold border-t pt-8 text-left">Address & Location</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2 text-left">
-                      <Label className="font-semibold text-muted-foreground text-xs">Street Address</Label>
-                      <Input placeholder="e.g. 123 Main Street" className="bg-background" />
-                    </div>
-                    <div className="space-y-2 text-left">
-                      <Label className="font-semibold text-muted-foreground text-xs">City</Label>
-                      <Input placeholder="e.g. San Francisco" className="bg-background" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-left">
-                    <Label className="font-semibold text-muted-foreground text-xs">Google Maps URL</Label>
-                    <div className="relative">
-                      <Input placeholder="https://maps.google.com/..." className="pr-10 bg-background" />
-                      <ExternalLink className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="show-maps" defaultChecked />
-                    <label htmlFor="show-maps" className="text-sm font-medium leading-none cursor-pointer">
-                      Show Google Maps link on menu page
+                  <div className="flex items-center space-x-3 pt-4">
+                    <Checkbox id="show-maps-new" />
+                    <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
+                      Show map on outlet page
                     </label>
                   </div>
                 </section>
+
               </TabsContent>
 
-              <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
+              <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
                   <div className="space-y-1.5 text-left max-w-2xl">
                     <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
@@ -346,7 +418,7 @@ export default function AddNewBranchPage() {
                           "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
                           hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
                         )}>
-                          <div className="w-32 shrink-0 text-left">
+                          <div className="w-32 shrink-0">
                             <span className="font-bold text-base text-foreground">{hour.day}</span>
                           </div>
                           
@@ -417,13 +489,13 @@ export default function AddNewBranchPage() {
                   </div>
 
                   <Card className="border shadow-none overflow-hidden bg-muted/10">
-                    <CardHeader className="bg-white border-b py-4 px-8">
+                    <CardHeader className="bg-white border-b py-4 px-8 text-left">
                       <div className="space-y-0.5">
                         <CardTitle className="text-sm font-bold text-foreground">Specific Dates</CardTitle>
                         <p className="text-xs text-muted-foreground font-medium">Override regular hours for public holidays or events</p>
                       </div>
                     </CardHeader>
-                    <CardContent className="p-0 divide-y bg-white">
+                    <CardContent className="p-0 divide-y bg-white text-left">
                       {specialHours.length > 0 ? specialHours.map((item) => (
                         <div key={item.id} className={cn(
                           "flex flex-col md:flex-row md:items-center gap-8 py-6 px-8 transition-colors",
@@ -501,7 +573,7 @@ export default function AddNewBranchPage() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background">
+              <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background text-left">
                 <section className="space-y-8">
                   <div className="flex items-center justify-between border-b pb-6">
                     <div>
@@ -516,15 +588,15 @@ export default function AddNewBranchPage() {
 
                   <div className={cn(!tipFeeEnabled && "opacity-40 pointer-events-none", "space-y-8")}>
                     <Card>
-                      <CardHeader>
+                      <CardHeader className="text-left">
                         <CardTitle>Core Configuration</CardTitle>
                         <CardDescription>Set the fundamental rules for how tips are calculated.</CardDescription>
                       </CardHeader>
-                      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                        <div className="space-y-2 text-left">
+                      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-left">
+                        <div className="space-y-2">
                           <Label>Currency</Label>
                           <Select value={currency} onValueChange={setCurrency}>
-                            <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="bg-background h-11"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="AED">AED - UAE Dirham (د.إ)</SelectItem>
                               <SelectItem value="USD">USD - US Dollar ($)</SelectItem>
@@ -533,7 +605,7 @@ export default function AddNewBranchPage() {
                           </Select>
                           <p className="text-xs text-muted-foreground pt-1">The currency used for all tip calculations.</p>
                         </div>
-                        <div className="space-y-2 text-left">
+                        <div className="space-y-2">
                           <Label>Tip Calculation Method</Label>
                           <RadioGroup
                             value={feeType}
@@ -575,18 +647,18 @@ export default function AddNewBranchPage() {
                     </Card>
                     
                     <Card>
-                      <CardHeader>
+                      <CardHeader className="text-left">
                         <CardTitle>Customer Tipping Options</CardTitle>
                         <CardDescription>Control the options and limits your customers see during checkout.</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6 pt-2">
+                      <CardContent className="space-y-6 pt-2 text-left">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                              <div className="space-y-2 text-left">
+                              <div className="space-y-2">
                               <Label>Max Tip Amount Allowed ({feeType === 'Percentage' ? '%' : currencySymbols[currency]})</Label>
-                              <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="bg-background"/>
+                              <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="bg-background h-11"/>
                               <p className="text-xs text-muted-foreground pt-1">Set a maximum limit for tips to prevent errors.</p>
                               </div>
-                              <div className="space-y-2 text-left">
+                              <div className="space-y-2">
                               <Label>Allow Custom Tip</Label>
                               <div className="flex items-center justify-between rounded-lg border p-3 h-[60px] bg-background">
                                   <p className="text-sm text-muted-foreground">Let customers enter their own amount.</p>
@@ -630,7 +702,7 @@ export default function AddNewBranchPage() {
                               </TooltipProvider>
                               <Popover>
                                   <PopoverTrigger asChild>
-                                  <Input type="text" placeholder="Select or enter custom rate..." value={quickTagSearch} onChange={(e) => setQuickTagSearch(e.target.value)} onKeyDown={handleAddSuggestedRate} className="bg-background mt-2 placeholder:text-muted-foreground" />
+                                  <Input type="text" placeholder="Select or enter custom rate..." value={quickTagSearch} onChange={(e) => setQuickTagSearch(e.target.value)} onKeyDown={handleAddSuggestedRate} className="bg-background mt-2 placeholder:text-muted-foreground h-11" />
                                   </PopoverTrigger>
                                   <PopoverContent className="w-[--radix-popover-trigger-width] p-1">
                                   <div className="grid grid-cols-4 gap-1">

@@ -305,97 +305,94 @@ export default function EditBranchPage() {
                   </div>
                 </section>
 
-                {/* Branding & Identity Section */}
+                {/* Branding & Identity Section - REDESIGNED */}
                 <section className="space-y-6 pt-8 border-t">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">Branding & Identity</h3>
-                      <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet's digital menu.</p>
-                    </div>
-                    <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-xl border border-dashed shrink-0">
-                      <Label htmlFor="show-logo-edit" className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground cursor-pointer">Display Logo</Label>
-                      <Switch id="show-logo-edit" checked={showLogo} onCheckedChange={setShowLogo} />
-                    </div>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold">Branding & Identity</h3>
+                    <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                    {/* Left: Featured Image */}
                     <div className="md:col-span-7 space-y-4">
-                        <Label className="text-sm font-bold flex items-center gap-2">
-                            Featured Image (Banner)
-                            <TooltipProvider>
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p className="max-w-xs">This image appears as the header background on your mobile menu home page.</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                        </Label>
-                        <div className="relative aspect-[21/9] w-full rounded-2xl bg-muted border-2 border-dashed flex items-center justify-center overflow-hidden group transition-colors hover:border-primary/50">
-                            {featuredImage ? (
-                                <Image src={featuredImage} alt="Featured" fill className="object-cover" />
-                            ) : (
-                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                    <ImageIcon className="h-10 w-10 opacity-30" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-center px-4">Widescreen Header Image</p>
-                                    <p className="text-[10px] opacity-60">Recommended: 1200 x 400px</p>
-                                </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                <Button 
-                                    variant="secondary" 
-                                    size="sm" 
-                                    className="font-bold h-10 px-6 rounded-xl"
-                                    onClick={() => bannerInputRef.current?.click()}
-                                >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {featuredImage ? 'Change Banner' : 'Upload Banner'}
-                                </Button>
-                                {featuredImage && (
-                                    <Button variant="destructive" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setFeaturedImage(null)}>
-                                        <X className="h-5 w-5" />
-                                    </Button>
-                                )}
-                            </div>
-                            <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
+                              <p>This header appears as the header background on your mobile menu home page.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      
+                      <div 
+                        className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
+                        onClick={() => bannerInputRef.current?.click()}
+                      >
+                        {featuredImage ? (
+                          <Image src={featuredImage} alt="Banner" fill className="object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 text-center p-4">
+                            <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">Widescreen Header Image</p>
+                            <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                          </div>
+                        )}
+                        <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                      </div>
                     </div>
 
+                    {/* Right: Color & Logo Toggle */}
                     <div className="md:col-span-5 space-y-6">
-                        <div className="space-y-4">
-                            <Label className="text-sm font-bold flex items-center gap-2">
-                                <Palette className="h-4 w-4 text-primary" /> Primary Brand Color
-                            </Label>
-                            <div className="p-5 rounded-2xl border bg-gray-50/50 space-y-4">
-                                <div className="flex items-center gap-4">
-                                    {/* Large color swatch that triggers the picker */}
-                                    <div className="relative h-16 w-16 shrink-0">
-                                        <Input 
-                                            type="color" 
-                                            value={primaryColor} 
-                                            onChange={(e) => setPrimaryColor(e.target.value)}
-                                            className="absolute inset-0 h-full w-full cursor-pointer rounded-2xl border-4 border-white shadow-md p-0 overflow-hidden"
-                                        />
-                                    </div>
-                                    <div className="flex-1 space-y-1">
-                                        <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Brand Hex Code</Label>
-                                        <div className="relative">
-                                            <Input 
-                                                value={primaryColor} 
-                                                onChange={(e) => setPrimaryColor(e.target.value)}
-                                                className="h-12 bg-white font-mono font-bold uppercase pr-10 rounded-xl text-base"
-                                            />
-                                            <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-[11px] text-muted-foreground leading-relaxed italic px-1">
-                                    This color defines the tone for buttons, links, and highlights on your digital interfaces.
-                                </p>
-                            </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Palette className="h-4 w-4 text-teal-500" />
+                          <Label className="text-sm font-semibold">Primary Brand Color</Label>
                         </div>
+                        
+                        <Card className="shadow-none border-gray-100 bg-white">
+                          <CardContent className="p-5 space-y-4">
+                            <div className="flex items-center gap-4">
+                              <div className="relative h-14 w-14 shrink-0">
+                                <Input 
+                                  type="color" 
+                                  value={primaryColor} 
+                                  onChange={(e) => setPrimaryColor(e.target.value)}
+                                  className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
+                                />
+                              </div>
+                              <div className="flex-1 space-y-1.5">
+                                <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Brand Hex Code</Label>
+                                <div className="relative">
+                                  <Input 
+                                    value={primaryColor} 
+                                    onChange={(e) => setPrimaryColor(e.target.value)}
+                                    className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
+                                  />
+                                  <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                                </div>
+                              </div>
+                            </div>
+                            <p className="text-[11px] text-gray-400 leading-relaxed italic">
+                              This color defines the tone for buttons, links, and highlights on your digital interfaces.
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
+                        <CardContent className="p-5 flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <p className="text-sm font-bold text-gray-900">Logo</p>
+                            <p className="text-xs text-gray-500 font-medium">Enable or disable logo on your mobile menu home page.</p>
+                          </div>
+                          <Switch checked={showLogo} onCheckedChange={setShowLogo} />
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
                 </section>

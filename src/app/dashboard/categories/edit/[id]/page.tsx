@@ -388,7 +388,7 @@ export default function EditBranchPage() {
                         <CardContent className="p-5 flex items-center justify-between">
                           <div className="space-y-0.5">
                             <p className="text-sm font-bold text-gray-900">Display Logo</p>
-                            <p className="text-xs text-gray-500 font-medium">Show your restaurant logo at the top of the mobile menu.</p>
+                            <p className="text-xs text-gray-500 font-medium">Show your restaurant logo on the home screen.</p>
                           </div>
                           <Switch checked={showLogo} onCheckedChange={setShowLogo} />
                         </CardContent>

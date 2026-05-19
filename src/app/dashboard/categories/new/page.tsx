@@ -344,7 +344,7 @@ export default function AddNewBranchPage() {
                           <CardContent className="p-5 space-y-4">
                             <div className="flex items-center gap-4">
                               <div className="relative h-14 w-14 shrink-0">
-                                <Input 
+                                <input 
                                   type="color" 
                                   value={primaryColor} 
                                   onChange={(e) => setPrimaryColor(e.target.value)}
@@ -373,8 +373,8 @@ export default function AddNewBranchPage() {
                       <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
                         <CardContent className="p-5 flex items-center justify-between">
                           <div className="space-y-0.5">
-                            <p className="text-sm font-bold text-gray-900">Logo</p>
-                            <p className="text-xs text-gray-500 font-medium">Enable or disable logo on your mobile menu home page.</p>
+                            <p className="text-sm font-bold text-gray-900">Display Logo</p>
+                            <p className="text-xs text-gray-500 font-medium">Show your restaurant logo at the top of the mobile menu.</p>
                           </div>
                           <Switch checked={showLogo} onCheckedChange={setShowLogo} />
                         </CardContent>

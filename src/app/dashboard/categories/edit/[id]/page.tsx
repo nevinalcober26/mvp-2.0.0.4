@@ -43,6 +43,7 @@ import {
   MapPin,
   ExternalLink,
   MoreHorizontal,
+  Palette,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -82,6 +83,10 @@ export default function EditBranchPage() {
   const [activeTab, setActiveTab] = useState('basic');
 
   const branch = useMemo(() => mockBranchData[branchId] || { name: 'Unknown Branch' }, [branchId]);
+
+  // States for new branding fields
+  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
+  const [primaryColor, setPrimaryColor] = useState('#18B4A6');
 
   // State for Opening Hours
   const [regularHours, setRegularHours] = useState(
@@ -283,6 +288,32 @@ export default function EditBranchPage() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Featured Image</Label>
+                      <div className="relative aspect-[21/9] w-full rounded-2xl bg-muted border-2 border-dashed flex items-center justify-center overflow-hidden group">
+                          {featuredImage ? (
+                              <Image src={featuredImage} alt="Featured" fill className="object-cover" />
+                          ) : (
+                              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                  <ImageIcon className="h-10 w-10 opacity-30" />
+                                  <p className="text-xs font-bold uppercase tracking-widest">Widescreen Header Image</p>
+                                  <p className="text-[10px] opacity-60">Recommended: 1200 x 400px</p>
+                              </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                              <Button variant="secondary" size="sm" className="font-bold h-10 px-6 rounded-xl">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Banner
+                              </Button>
+                              {featuredImage && (
+                                  <Button variant="destructive" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setFeaturedImage(null)}>
+                                      <X className="h-5 w-5" />
+                                  </Button>
+                              )}
+                          </div>
+                      </div>
+                  </div>
                 </section>
 
                 {/* Address & Location Section */}
@@ -334,6 +365,7 @@ export default function EditBranchPage() {
                 {/* Additional Settings Section */}
                 <section className="space-y-6 pt-8 border-t">
                   <h3 className="text-lg font-bold">Additional Settings</h3>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Cuisine type</Label>
@@ -346,6 +378,35 @@ export default function EditBranchPage() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-sm font-semibold flex items-center gap-2">
+                            <Palette className="h-4 w-4 text-primary" /> Primary Brand Color
+                        </Label>
+                        <div className="flex items-center gap-3">
+                            <div 
+                                className="w-11 h-11 rounded-xl border-2 shadow-sm shrink-0" 
+                                style={{ backgroundColor: primaryColor }}
+                            />
+                            <div className="flex-1 relative">
+                                <Input 
+                                    type="color" 
+                                    value={primaryColor} 
+                                    onChange={(e) => setPrimaryColor(e.target.value)}
+                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                                />
+                                <Input 
+                                    value={primaryColor} 
+                                    onChange={(e) => setPrimaryColor(e.target.value)}
+                                    className="h-11 bg-background font-mono font-bold uppercase pr-10"
+                                />
+                                <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
                       <Select defaultValue="United Arab Emirates">

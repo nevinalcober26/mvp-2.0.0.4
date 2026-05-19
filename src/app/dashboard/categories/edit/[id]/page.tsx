@@ -44,6 +44,7 @@ import {
   ExternalLink,
   MoreHorizontal,
   Palette,
+  Edit,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -608,7 +609,7 @@ export default function EditBranchPage() {
                                     </SelectContent>
                                   </Select>
                                 </div>
-                                <span className="text-xs font-medium text-muted-foreground mt-6">to</span>
+                                <span className="text-xs font-medium text-muted-foreground mt-6">until</span>
                                 <div className="space-y-1.5 text-left">
                                   <Label className="text-xs font-semibold text-muted-foreground ml-1">Until</Label>
                                   <Select value={item.to} onValueChange={(val) => handleUpdateSpecialHour(item.id, 'to', val)}>

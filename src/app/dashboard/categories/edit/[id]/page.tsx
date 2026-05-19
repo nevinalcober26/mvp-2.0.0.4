@@ -54,9 +54,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui/tooltip';
 import Image from 'next/image';
 
@@ -89,6 +89,7 @@ export default function EditBranchPage() {
   // States for branding
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#18B4A6');
+  const [showLogo, setShowLogo] = useState(true);
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -306,9 +307,15 @@ export default function EditBranchPage() {
 
                 {/* Branding & Identity Section */}
                 <section className="space-y-6 pt-8 border-t">
-                  <div>
-                    <h3 className="text-lg font-bold">Branding & Identity</h3>
-                    <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet's digital menu.</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold">Branding & Identity</h3>
+                      <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet's digital menu.</p>
+                    </div>
+                    <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-xl border border-dashed shrink-0">
+                      <Label htmlFor="show-logo-edit" className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground cursor-pointer">Display Logo</Label>
+                      <Switch id="show-logo-edit" checked={showLogo} onCheckedChange={setShowLogo} />
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-10">

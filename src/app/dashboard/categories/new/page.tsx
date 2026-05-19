@@ -53,9 +53,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui/tooltip';
 import Image from 'next/image';
 
@@ -79,6 +79,7 @@ export default function AddNewBranchPage() {
   // States for branding
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState('#18B4A6');
+  const [showLogo, setShowLogo] = useState(true);
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -292,9 +293,15 @@ export default function AddNewBranchPage() {
 
                 {/* Branding & Identity Section */}
                 <section className="space-y-6 pt-8 border-t">
-                  <div>
-                    <h3 className="text-lg font-bold">Branding & Identity</h3>
-                    <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet's digital menu.</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold">Branding & Identity</h3>
+                      <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet's digital menu.</p>
+                    </div>
+                    <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-xl border border-dashed shrink-0">
+                      <Label htmlFor="show-logo-new" className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground cursor-pointer">Display Logo</Label>
+                      <Switch id="show-logo-new" checked={showLogo} onCheckedChange={setShowLogo} />
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
@@ -535,7 +542,7 @@ export default function AddNewBranchPage() {
                             <span className="font-bold text-base text-foreground">{hour.day}</span>
                           </div>
                           
-                          <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
+                          <div className="flex-1 flex wrap items-center gap-4 text-left">
                             <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                               <div className="space-y-1.5 text-left">
                                 <Label className="text-xs font-semibold text-muted-foreground ml-1">Open At</Label>
@@ -548,9 +555,9 @@ export default function AddNewBranchPage() {
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <span className="text-xs font-medium text-muted-foreground mt-6">until</span>
+                              <span className="text-xs font-medium text-muted-foreground mt-6">to</span>
                               <div className="space-y-1.5 text-left">
-                                <Label className="text-xs font-semibold text-muted-foreground ml-1">Close At</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground ml-1">Until</Label>
                                 <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
                                   <SelectTrigger className="w-36 h-10 bg-background font-medium">
                                     <SelectValue />

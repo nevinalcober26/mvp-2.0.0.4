@@ -86,7 +86,7 @@ export default function ChoosePlanPage() {
           <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#e6f7f6] blur-[120px] opacity-60" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#fffcf0] blur-[120px] opacity-60" />
         </div>
-        <div className="relative z-10 flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-500">
+        <div className="relative z-10 flex flex-col items-center space-y-6 animate-in fade-in zoom-in duration-500 text-center">
           <div className="h-20 w-20 rounded-3xl bg-white shadow-xl flex items-center justify-center">
             <RefreshCw className="h-10 w-10 text-[#18B4A6] animate-spin" />
           </div>
@@ -350,11 +350,11 @@ export default function ChoosePlanPage() {
                 </TableHeader>
                 <TableBody>
                   {features.map((feature, i) => (
-                    <TableRow key={feature.name} className="border-gray-100 h-14 group">
-                      <TableCell className="px-8 text-[13px] font-bold text-gray-900">{feature.name}</TableCell>
-                      <TableCell className="text-center"><RenderCheck value={feature.free} /></TableCell>
-                      <TableCell className="text-center bg-[#18B4A6]/[0.02]"><RenderCheck value={feature.pro} /></TableCell>
-                      <TableCell className="text-center"><RenderCheck value={feature.enterprise} /></TableCell>
+                    <TableRow key={feature.name} className="border-gray-100 h-14 group text-center">
+                      <TableCell className="px-8 text-[13px] font-bold text-gray-900 text-left">{feature.name}</TableCell>
+                      <TableCell><RenderCheck value={feature.free} /></TableCell>
+                      <TableCell className="bg-[#18B4A6]/[0.02]"><RenderCheck value={feature.pro} /></TableCell>
+                      <TableCell><RenderCheck value={feature.enterprise} /></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

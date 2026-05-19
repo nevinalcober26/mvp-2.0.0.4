@@ -69,7 +69,7 @@ export default function PaymentGatewayPage() {
           </div>
           <div className="space-y-3">
             <h2 className="text-3xl font-bold text-[#142424]">Securing Transaction</h2>
-            <p className="text-[15px] font-medium text-gray-400 max-w-[340px] leading-relaxed">
+            <p className="text-[15px] font-medium text-gray-400 max-w-[340px] leading-relaxed text-center">
               We are verifying your payment details with <span className="font-bold text-[#142424]">Network International</span> secure servers...
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function PaymentGatewayPage() {
         </div>
       </header>
 
-      <main className="relative flex-1 flex flex-col items-center p-4 pt-12 overflow-auto">
+      <main className="relative flex-1 flex flex-col items-center p-4 pt-12 overflow-auto pb-24">
         <div className="absolute inset-0 z-0 pointer-events-none fixed">
           <div className="absolute top-[-5%] left-[-5%] w-[50%] h-[50%] rounded-full bg-[#f0f7ff] blur-[100px] opacity-70" />
           <div className="absolute bottom-[-5%] right-[-5%] w-[50%] h-[50%] rounded-full bg-[#f0f7ff] blur-[100px] opacity-70" />
@@ -122,7 +122,7 @@ export default function PaymentGatewayPage() {
             </div>
 
             <Card className="border-0 shadow-2xl shadow-blue-900/5 rounded-[32px] overflow-hidden bg-white/95 backdrop-blur-xl">
-              <CardContent className="p-8 sm:p-10 space-y-8">
+              <CardContent className="p-8 sm:p-10 space-y-8 text-left">
                 
                 <div className="p-5 rounded-[20px] bg-blue-50/50 border border-blue-100 flex items-start gap-4">
                   <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
@@ -217,7 +217,7 @@ export default function PaymentGatewayPage() {
           </div>
 
           <div className="lg:col-span-5 space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
-            <h3 className="text-[18px] font-bold text-[#142424] pt-4 px-2 text-left">Order Summary</h3>
+            <h3 className="text-[18px] font-bold text-[#142424] pt-4 px-2 text-left uppercase tracking-wider">Order Summary</h3>
             <Card className="border-0 shadow-lg rounded-[32px] bg-white text-[#142424] overflow-hidden">
               <CardContent className="p-8 space-y-8">
                 <div className="flex items-center justify-between border-b border-gray-50 pb-8">

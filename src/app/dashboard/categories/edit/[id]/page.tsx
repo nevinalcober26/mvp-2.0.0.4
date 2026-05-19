@@ -42,6 +42,7 @@ import {
   Image as ImageIcon,
   MapPin,
   ExternalLink,
+  MoreHorizontal,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';

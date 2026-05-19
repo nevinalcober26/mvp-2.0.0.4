@@ -41,6 +41,7 @@ import {
   HandCoins,
   X,
   Star,
+  MoreHorizontal,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';

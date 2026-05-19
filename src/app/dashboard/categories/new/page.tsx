@@ -21,7 +21,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Info,
@@ -349,34 +349,30 @@ export default function AddNewBranchPage() {
                             </Label>
                             <div className="p-5 rounded-2xl border bg-gray-50/50 space-y-4">
                                 <div className="flex items-center gap-4">
-                                    <div 
-                                        className="w-16 h-16 rounded-2xl border-4 border-white shadow-md shrink-0 transition-transform hover:scale-110" 
-                                        style={{ backgroundColor: primaryColor }}
-                                    />
+                                    {/* Large color swatch that triggers the picker */}
+                                    <div className="relative h-16 w-16 shrink-0">
+                                        <Input 
+                                            type="color" 
+                                            value={primaryColor} 
+                                            onChange={(e) => setPrimaryColor(e.target.value)}
+                                            className="absolute inset-0 h-full w-full cursor-pointer rounded-2xl border-4 border-white shadow-md p-0 overflow-hidden"
+                                        />
+                                    </div>
                                     <div className="flex-1 space-y-1">
-                                        <p className="text-xs font-bold text-gray-900 uppercase">Selected Hex</p>
+                                        <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Brand Hex Code</Label>
                                         <div className="relative">
                                             <Input 
                                                 value={primaryColor} 
                                                 onChange={(e) => setPrimaryColor(e.target.value)}
-                                                className="h-10 bg-white font-mono font-bold uppercase pr-10 rounded-lg text-sm"
+                                                className="h-12 bg-white font-mono font-bold uppercase pr-10 rounded-xl text-base"
                                             />
-                                            <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground opacity-50" />
+                                            <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
                                         </div>
                                     </div>
                                 </div>
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Quick Picker</Label>
-                                    <Input 
-                                        type="color" 
-                                        value={primaryColor} 
-                                        onChange={(e) => setPrimaryColor(e.target.value)}
-                                        className="h-10 w-full cursor-pointer bg-white rounded-lg p-1 border-gray-200"
-                                    />
-                                    <p className="text-[10px] text-muted-foreground leading-relaxed italic">
-                                        Note: This color defines the tone for buttons, links, and highlights on your digital interfaces.
-                                    </p>
-                                </div>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed italic px-1">
+                                    This color defines the tone for buttons, links, and highlights on your digital interfaces.
+                                </p>
                             </div>
                         </div>
                     </div>

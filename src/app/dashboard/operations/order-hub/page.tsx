@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import gsap from 'gsap';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -79,7 +80,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   },
   accepted: {
     label: 'ACCEPTED',
-    subLabel: 'Confirmed & in kitchen queue',
+    subLabel: 'Confirmed in kitchen queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
@@ -88,7 +89,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   },
   in_progress: {
     label: 'PREPARING',
-    subLabel: 'Kitchen is cooking now',
+    subLabel: 'Food is being cooked now',
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
@@ -132,94 +133,121 @@ const generateMockOrders = (count: number): HubOrder[] => {
 };
 
 const OrderCard = ({ order }: { order: HubOrder }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const isExiting = order.status === 'exiting';
   const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
   const Icon = isExiting ? exitConfig[order.exitType!].icon : (config as any).icon;
   const isDelayed = order.timeOpenMinutes > 15 && order.status === 'pending';
 
+  useEffect(() => {
+    if (isExiting && cardRef.current) {
+      // Trigger smooth exit animation
+      const tl = gsap.timeline();
+      tl.to(cardRef.current, {
+        delay: 2.2, // Let the blink run for a bit
+        duration: 0.5,
+        opacity: 0,
+        scale: 0.95,
+        ease: 'power2.inOut'
+      })
+      .to(cardRef.current, {
+        duration: 0.3,
+        height: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        overflow: 'hidden',
+        ease: 'power2.inOut'
+      });
+    }
+  }, [isExiting]);
+
   return (
-    <Card 
-      className={cn(
-        "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
-        isExiting ? cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent") : "bg-white hover:shadow-md",
-        isDelayed && !isExiting && "border-rose-200 bg-rose-50/30"
-      )}
-    >
-      <CardContent className="p-0 flex flex-col h-full relative z-10 text-left">
-        {!isExiting && (
-          <div className={cn("absolute left-0 top-0 bottom-0 w-1", (config as any).accent)} />
+    <div ref={cardRef} className="w-full">
+      <Card 
+        className={cn(
+          "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
+          isExiting ? cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent") : "bg-white hover:shadow-md",
+          isDelayed && !isExiting && "border-rose-200 bg-rose-50/30"
         )}
+      >
+        <CardContent className="p-0 flex flex-col h-full relative z-10 text-left">
+          {!isExiting && (
+            <div className={cn("absolute left-0 top-0 bottom-0 w-1", (config as any).accent)} />
+          )}
 
-        <div className={cn(
-          "px-4 py-3 flex items-center justify-between",
-          isExiting ? "bg-black/10" : "border-b bg-slate-50/50"
-        )}>
-          <div className="flex flex-col">
-            <span className={cn(
-              "text-[10px] font-bold uppercase tracking-tight", 
-              isExiting ? "text-white/60" : "text-slate-400"
-            )}>
-                {isExiting ? 'Final Status' : 'Order ID'}
-            </span>
-            <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
-              {order.orderNumber}
-            </h3>
-          </div>
-          
           <div className={cn(
-            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm",
-            isExiting ? "bg-white text-slate-900" : cn((config as any).accent, "text-white")
+            "px-4 py-3 flex items-center justify-between",
+            isExiting ? "bg-black/10" : "border-b bg-slate-50/50"
           )}>
-            <Icon className="h-3 w-3" />
-            {(isExiting && order.exitType ? exitConfig[order.exitType].text : (config as any).label).toUpperCase()}
-          </div>
-        </div>
-
-        <div className="p-4 space-y-3">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
-                <MapPin className="h-3.5 w-3.5 opacity-70" />
-                <span className="font-medium text-xs">
-                  <span className="font-bold text-slate-900">{order.tableNumber}</span> • {order.floor}
-                </span>
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className={cn(
-                      "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
-                      isExiting ? "bg-white/10" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
-                    )}>
-                      <Timer className="h-3 w-3" />
-                      {order.timeOpenMinutes}m
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-xs font-semibold">Time since order was received</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+            <div className="flex flex-col">
+              <span className={cn(
+                "text-[10px] font-bold uppercase tracking-tight", 
+                isExiting ? "text-white/60" : "text-slate-400"
+              )}>
+                  {isExiting ? 'Final Status' : 'Order ID'}
+              </span>
+              <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
+                {order.orderNumber}
+              </h3>
             </div>
             
-            <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
-              <User className="h-3.5 w-3.5 opacity-70" />
-              <span className="font-medium text-xs">Waiter: {order.server}</span>
+            <div className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm",
+              isExiting ? "bg-white text-slate-900" : cn((config as any).accent, "text-white")
+            )}>
+              <Icon className="h-3 w-3" />
+              {(isExiting && order.exitType ? exitConfig[order.exitType].text : (config as any).label).toUpperCase()}
             </div>
           </div>
 
-          <div className={cn(
-            "flex items-center justify-center gap-2 py-2 rounded-lg border",
-            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-100"
-          )}>
-             <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-primary/70")} />
-             <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>
-               {order.itemsCount} Items
-             </span>
+          <div className="p-4 space-y-3">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
+                  <MapPin className="h-3.5 w-3.5 opacity-70" />
+                  <span className="font-medium text-xs">
+                    <span className="font-bold text-slate-900">{order.tableNumber}</span> • {order.floor}
+                  </span>
+                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={cn(
+                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
+                        isExiting ? "bg-white/10" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
+                      )}>
+                        <Timer className="h-3 w-3" />
+                        {order.timeOpenMinutes}m
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p className="text-xs font-semibold">Time since order was received</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
+                <User className="h-3.5 w-3.5 opacity-70" />
+                <span className="font-medium text-xs">Waiter: {order.server}</span>
+              </div>
+            </div>
+
+            <div className={cn(
+              "flex items-center justify-center gap-2 py-2 rounded-lg border",
+              isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-100"
+            )}>
+               <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-primary/70")} />
+               <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>
+                 {order.itemsCount} Items
+               </span>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -290,8 +318,8 @@ export default function OrderHubPage() {
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (
@@ -376,12 +404,12 @@ export default function OrderHubPage() {
             <CardHeader className="bg-slate-900 text-white p-6 shrink-0 text-left">
               <div className="flex items-center justify-between mb-1">
                 <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-teal-400" /> Recent Pulse
+                  <Activity className="h-4 w-4 text-teal-400" /> Activity Log
                 </CardTitle>
                 <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
               </div>
               <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
-                Audit trail for finalized tickets.
+                History of finalized tickets.
               </CardDescription>
             </CardHeader>
             
@@ -420,9 +448,9 @@ export default function OrderHubPage() {
              <div className="flex items-start gap-3">
                 <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                   <p className="text-xs font-bold text-slate-900">Pro-Tip for Admins</p>
+                   <p className="text-xs font-bold text-slate-900">Operational Logic</p>
                    <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                     Tickets will <span className="text-primary font-bold">blink</span> for 3s when they are finished or cancelled to confirm status before being logged to the Recent Pulse.
+                     Tickets will <span className="text-primary font-bold">blink and scale</span> when finalized, then smoothly collapse so new orders can move up the queue.
                    </p>
                 </div>
              </div>

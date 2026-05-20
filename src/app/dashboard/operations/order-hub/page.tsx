@@ -9,20 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Clock,
   CheckCircle2,
   XCircle,
   AlertCircle,
   Play,
   Package,
-  MapPin,
   Search,
   Activity,
   Timer,
@@ -83,7 +75,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   },
   accepted: {
     label: 'ACCEPTED',
-    subLabel: 'Confirmed & in kitchen queue',
+    subLabel: 'Confirmed in kitchen queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
@@ -211,10 +203,8 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
-                  <MapPin className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs text-left">
-                    <span className={cn("font-bold", isExiting ? "text-white" : "text-slate-900")}>Table {order.tableNumber}</span> • {order.floor}
-                  </span>
+                  <User className="h-3.5 w-3.5 opacity-70" />
+                  <span className="font-medium text-xs">Waiter: {order.server}</span>
                 </div>
                 
                 <TooltipProvider>
@@ -234,11 +224,6 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              </div>
-              
-              <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
-                <User className="h-3.5 w-3.5 opacity-70" />
-                <span className="font-medium text-xs">Waiter: {order.server}</span>
               </div>
             </div>
 
@@ -262,7 +247,6 @@ export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
-  const [floorFilter, setFloorFilter] = useState('all');
 
   useEffect(() => {
     setOrders(generateMockOrders(48));
@@ -321,14 +305,13 @@ export default function OrderHubPage() {
 
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
                            o.server.toLowerCase().includes(search.toLowerCase());
-      const matchesFloor = floorFilter === 'all' || o.floor === floorFilter;
-      return matchesSearch && matchesFloor;
+      return matchesSearch;
     }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
   };
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
     { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
@@ -359,16 +342,6 @@ export default function OrderHubPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
              </div>
-             <Select value={floorFilter} onValueChange={setFloorFilter}>
-                <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200 rounded-lg text-xs font-bold shadow-none">
-                  <MapPin className="h-3.5 w-3.5 mr-2 text-slate-400" />
-                  <SelectValue placeholder="All Areas" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  <SelectItem value="all">All Areas</SelectItem>
-                  {floors.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                </SelectContent>
-             </Select>
           </div>
         </div>
       </div>

@@ -133,7 +133,7 @@ const generateMockOrders = (count: number): HubOrder[] => {
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
       server: servers[Math.floor(Math.random() * servers.length)],
-      timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
+      timeOpenMinutes: Math.floor((Date.now() - timestamp) / 60000),
       timestamp: timestamp,
     };
   });
@@ -144,7 +144,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
   const isExiting = order.status === 'exiting';
   const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
   const Icon = isExiting ? exitConfig[order.exitType!].icon : (config as any).icon;
-  const isDelayed = order.timeOpenMinutes > 15 && order.status === 'pending';
+  const isDelayed = order.timeOpenMinutes > 15 && (order.status === 'pending' || order.status === 'accepted');
 
   useEffect(() => {
     if (isExiting && cardRef.current) {
@@ -219,7 +219,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs text-inherit">Waiter: {order.server}</span>
+                  <span className="font-medium text-xs text-inherit">By {order.server}</span>
                 </div>
                 
                 <TooltipProvider>
@@ -227,7 +227,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                     <TooltipTrigger asChild>
                       <div className={cn(
                         "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
-                        isExiting ? "bg-white/10" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
+                        isExiting ? "bg-white/10 text-white" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
                       )}>
                         <Timer className="h-3 w-3" />
                         {order.timeOpenMinutes}m
@@ -271,9 +271,18 @@ export default function OrderHubPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
+        // 1. Increment time for all active orders
+        const timedOrders = prev.map(o => {
+            if (o.status !== 'exiting') {
+                const mins = Math.floor((Date.now() - o.timestamp) / 60000);
+                return { ...o, timeOpenMinutes: mins };
+            }
+            return o;
+        });
+
         const rand = Math.random();
 
-        // 1. Chance to add a new PENDING order
+        // 2. Chance to add a new PENDING order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -284,35 +293,35 @@ export default function OrderHubPage() {
             timeOpenMinutes: 0,
             timestamp: Date.now(),
           };
-          return [newOrder, ...prev];
+          return [newOrder, ...timedOrders];
         }
 
-        // 2. Chance to progress an order from PENDING -> ACCEPTED
+        // 3. Chance to progress an order from PENDING -> ACCEPTED
         if (rand > 0.15 && rand < 0.35) {
-          const pendingIdx = prev.findIndex(o => o.status === 'pending');
+          const pendingIdx = timedOrders.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
-            return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' } : o);
+            return timedOrders.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' } : o);
           }
         }
 
-        // 3. Chance to progress an order from ACCEPTED -> PREPARING
+        // 4. Chance to progress an order from ACCEPTED -> PREPARING
         if (rand > 0.35 && rand < 0.55) {
-          const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
+          const acceptedIdx = timedOrders.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
-            return prev.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' } : o);
+            return timedOrders.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' } : o);
           }
         }
 
-        // 4. Chance to FINALIZE an order (Exit Simulation)
+        // 5. Chance to FINALIZE an order (Exit Simulation)
         if (rand > 0.55 && rand < 0.75) {
-          const candidates = prev.filter(o => o.status === 'in_progress');
-          if (candidates.length === 0) return prev;
+          const candidates = timedOrders.filter(o => o.status === 'in_progress');
+          if (candidates.length === 0) return timedOrders;
 
           const target = candidates[Math.floor(Math.random() * candidates.length)];
           const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
           const randomExit = Math.random() > 0.7 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
 
-          const updated = prev.map(o => {
+          const updated = timedOrders.map(o => {
             if (o.id === target.id) {
               return { 
                 ...o, 
@@ -344,7 +353,7 @@ export default function OrderHubPage() {
           return updated;
         }
 
-        return prev;
+        return timedOrders;
       });
     }, 4000);
 
@@ -517,7 +526,7 @@ export default function OrderHubPage() {
                 <div className="space-y-1">
                    <p className="text-xs font-bold text-slate-900">Simulation Active</p>
                    <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                     The system is simulating live orders. New cards will <span className="text-primary font-bold">fade and zoom in</span> as they progress through the kitchen columns.
+                     Tickets are dynamically aging. All timers reflect the <span className="text-primary font-bold">total wait time</span> since the guest placed the order.
                    </p>
                 </div>
              </div>

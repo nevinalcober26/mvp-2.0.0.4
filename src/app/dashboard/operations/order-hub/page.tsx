@@ -347,14 +347,28 @@ export default function OrderHubPage() {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
 
-        // Prioritize finalization for those in preparing phase
-        const preparing = candidates.filter(o => o.status === 'in_progress');
-        const target = preparing.length > 0 
-          ? preparing[Math.floor(Math.random() * preparing.length)]
-          : candidates[Math.floor(Math.random() * candidates.length)];
+        // Determine exit type: COMPLETED (80%) vs Others (20%)
+        const randomExit = Math.random() > 0.8 
+          ? (['CANCELLED', 'REJECTED', 'FAILED'][Math.floor(Math.random() * 3)] as ExitType)
+          : 'COMPLETED';
 
-        const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-        const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
+        let target: HubOrder | undefined;
+        
+        if (randomExit === 'COMPLETED') {
+          // STRICT RULE: COMPLETED only applies to "Preparing" column
+          const preparingCandidates = candidates.filter(o => o.status === 'in_progress');
+          if (preparingCandidates.length > 0) {
+            target = preparingCandidates[Math.floor(Math.random() * preparingCandidates.length)];
+          } else {
+            // No preparing items to complete? Skip this cycle or could pick another type
+            return prev;
+          }
+        } else {
+          // CANCELLED/REJECTED/FAILED can happen anywhere
+          target = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+
+        if (!target) return prev;
 
         const newLog: EventLog = {
           id: Math.random().toString(),
@@ -382,7 +396,7 @@ export default function OrderHubPage() {
 
         // Cleanup card after blink animation
         setTimeout(() => {
-          setOrders(current => current.filter(o => o.id !== target.id));
+          setOrders(current => current.filter(o => o.id !== target!.id));
         }, 3200);
 
         return updated;
@@ -500,7 +514,7 @@ export default function OrderHubPage() {
 
           <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit text-left">
             <div className="space-y-6">
-              <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[550px]">
+              <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[500px]">
                 <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
                   <div className="flex items-center justify-between mb-1">
                     <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">

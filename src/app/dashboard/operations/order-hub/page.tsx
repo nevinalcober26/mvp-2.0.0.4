@@ -30,6 +30,7 @@ import {
   Filter,
   Activity,
   Timer,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';

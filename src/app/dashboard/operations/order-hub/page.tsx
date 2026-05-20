@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
-import { formatDistanceToNow, subDays, subHours } from 'date-fns';
+import { formatDistanceToNow, subHours } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -123,7 +123,7 @@ const statuses: HubStatus[] = ['pending', 'accepted', 'in_progress'];
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    const hoursAgo = Math.floor(Math.random() * 48); 
+    const hoursAgo = Math.floor(Math.random() * 4); 
     const timestamp = subHours(new Date(), hoursAgo).getTime();
     
     return {
@@ -220,7 +220,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
+                  <span className="font-bold text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
                     By Staff {order.server}
                   </span>
                 </div>
@@ -284,7 +284,7 @@ export default function OrderHubPage() {
 
         const rand = Math.random();
 
-        // Simulate Entrance
+        // Simulate Entrance (15% chance)
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -298,7 +298,7 @@ export default function OrderHubPage() {
           return [newOrder, ...timedOrders];
         }
 
-        // Progress PENDING -> ACCEPTED
+        // Progress PENDING -> ACCEPTED (20% chance)
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = timedOrders.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
@@ -306,7 +306,7 @@ export default function OrderHubPage() {
           }
         }
 
-        // Progress ACCEPTED -> PREPARING
+        // Progress ACCEPTED -> PREPARING (20% chance)
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = timedOrders.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -314,15 +314,28 @@ export default function OrderHubPage() {
           }
         }
 
-        // Exit Simulation
+        // SYNCED EXIT Simulation (20% chance)
         if (rand > 0.55 && rand < 0.75) {
           const candidates = timedOrders.filter(o => o.status === 'in_progress');
           if (candidates.length === 0) return timedOrders;
 
           const target = candidates[Math.floor(Math.random() * candidates.length)];
           const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-          const randomExit = Math.random() > 0.7 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
+          const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
 
+          // 1. Create the Log Entry immediately (Syncing start of animation)
+          const newLog: EventLog = {
+            id: Math.random().toString(),
+            orderNumber: target.orderNumber,
+            type: randomExit as ExitType,
+            timestamp: new Date(),
+            server: target.server,
+            isNew: true
+          };
+
+          setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
+
+          // 2. Set the order to exiting status (Synchronized visual feedback)
           const updated = timedOrders.map(o => {
             if (o.id === target.id) {
               return { 
@@ -335,17 +348,7 @@ export default function OrderHubPage() {
             return o;
           });
 
-          const newLog: EventLog = {
-            id: Math.random().toString(),
-            orderNumber: target.orderNumber,
-            type: randomExit as ExitType,
-            timestamp: new Date(),
-            server: target.server,
-            isNew: true
-          };
-
-          setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
-
+          // 3. Clean up the order from memory after animation finishes
           setTimeout(() => {
             setOrders(current => current.filter(o => o.id !== target.id));
           }, 3200);
@@ -355,7 +358,7 @@ export default function OrderHubPage() {
 
         return timedOrders;
       });
-    }, 4000);
+    }, 4500);
 
     return () => clearInterval(interval);
   }, []);
@@ -429,8 +432,9 @@ export default function OrderHubPage() {
         </div>
       </div>
 
-      <main className="flex-1 p-6">
-        <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <main className="flex-1 p-6 relative">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* Main Kanban Section */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
@@ -466,9 +470,10 @@ export default function OrderHubPage() {
             })}
           </div>
 
+          {/* Sticky Activity Sidebar */}
           <aside className="xl:col-span-1">
             <div className="sticky top-[88px] space-y-6">
-              <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[500px]">
+              <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[550px]">
                 <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
                   <div className="flex items-center justify-between mb-1">
                     <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
@@ -481,7 +486,7 @@ export default function OrderHubPage() {
                   </CardDescription>
                 </CardHeader>
                 
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 bg-white">
                   <div className="p-6 space-y-6">
                     {recentExits.length > 0 ? recentExits.map((event) => {
                       const config = exitConfig[event.type];
@@ -489,21 +494,21 @@ export default function OrderHubPage() {
                         <div 
                           key={event.id} 
                           className={cn(
-                            "relative pl-6 pb-6 border-l last:border-0 last:pb-0 transition-all duration-1000",
-                            event.isNew ? cn("animate-status-blink rounded-r-lg py-2 -ml-2 pl-8", config.pulseColor) : ""
+                            "relative pl-6 pb-6 border-l last:border-0 last:pb-0 transition-all",
+                            event.isNew && cn("animate-status-blink rounded-r-lg py-3 -ml-4 pl-10 ring-1 ring-inset ring-slate-100", config.pulseColor)
                           )}
                         >
                           <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
                           <div className="space-y-1">
                             <div className="flex items-center justify-between">
                                <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
-                               <span className="text-[9px] font-bold text-slate-400">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
+                               <span className="text-[9px] font-bold text-slate-400 uppercase">just now</span>
                             </div>
                             <div className="flex items-center gap-2">
                                <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
                                   {event.type}
                                </Badge>
-                               <span className="text-[10px] font-medium text-slate-500 italic">By Staff {event.server}</span>
+                               <span className="text-[10px] font-bold text-slate-500 italic">By Staff {event.server}</span>
                             </div>
                           </div>
                         </div>

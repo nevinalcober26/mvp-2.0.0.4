@@ -78,7 +78,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-blue-500',
     bg: 'bg-blue-50/50',
     accent: 'bg-blue-500',
-    tooltip: 'Waiting for staff review',
+    tooltip: 'NEW ORDER: This order was just placed by a customer. Staff must manually review and "Accept" the ticket before it is sent to the kitchen for preparation.',
   },
   accepted: {
     label: 'ACCEPTED',
@@ -88,7 +88,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-indigo-500',
     bg: 'bg-indigo-50/50',
     accent: 'bg-indigo-500',
-    tooltip: 'Confirmed & in kitchen queue',
+    tooltip: 'CONFIRMED: Staff has acknowledged the order. It is now officially in the kitchen queue and waiting for a chef to begin cooking.',
   },
   in_progress: {
     label: 'PREPARING',
@@ -98,7 +98,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-teal-500',
     bg: 'bg-teal-50/50',
     accent: 'bg-teal-500',
-    tooltip: 'Currently being prepared',
+    tooltip: 'IN PROGRESS: The kitchen is actively cooking this order. Staff should expect the food to be ready for service shortly.',
   },
   exiting: {
     label: 'UPDATING',
@@ -108,7 +108,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-white',
     bg: 'bg-slate-900',
     accent: 'bg-white',
-    tooltip: 'Finalizing status',
+    tooltip: 'Finalizing status...',
   }
 };
 
@@ -216,7 +216,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                   </span>
                 </div>
                 <TooltipProvider>
-                  <Tooltip>
+                  <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
                       <div className={cn(
                         "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
@@ -226,8 +226,9 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                         {order.timeOpenMinutes}m
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p className="text-xs font-semibold">{(config as any).tooltip}</p>
+                    <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800">
+                      <p className="font-semibold mb-1">Status Intelligence</p>
+                      <p className="opacity-80">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

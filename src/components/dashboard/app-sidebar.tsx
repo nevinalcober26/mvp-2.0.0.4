@@ -1,3 +1,4 @@
+
 'use client';
 import {
   PieChart,
@@ -18,6 +19,7 @@ import {
   TrendingUp,
   Palette,
   Users,
+  Activity,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -125,7 +127,10 @@ const MANAGEMENT: SidebarItem[] = [
     label: 'Operations',
     id: 'operations',
     icon: Briefcase,
-    items: [{ label: 'QR Code', path: '/dashboard/operations/qr-code' }],
+    items: [
+      { label: 'Live Order Hub', path: '/dashboard/operations/order-hub' },
+      { label: 'QR Code', path: '/dashboard/operations/qr-code' },
+    ],
   },
   {
     label: 'Orders',

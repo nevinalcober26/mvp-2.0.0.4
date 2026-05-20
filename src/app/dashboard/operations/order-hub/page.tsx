@@ -69,7 +69,7 @@ interface EventLog {
   isNew?: boolean;
 }
 
-const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string }> = {
+const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string; tooltip: string }> = {
   pending: {
     label: 'PENDING',
     subLabel: 'Waiting for staff review',
@@ -78,6 +78,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-blue-500',
     bg: 'bg-blue-50/50',
     accent: 'bg-blue-500',
+    tooltip: 'Waiting for staff review',
   },
   accepted: {
     label: 'ACCEPTED',
@@ -87,6 +88,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-indigo-500',
     bg: 'bg-indigo-50/50',
     accent: 'bg-indigo-500',
+    tooltip: 'Confirmed & in kitchen queue',
   },
   in_progress: {
     label: 'PREPARING',
@@ -96,6 +98,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-teal-500',
     bg: 'bg-teal-50/50',
     accent: 'bg-teal-500',
+    tooltip: 'Currently being prepared',
   },
   exiting: {
     label: 'UPDATING',
@@ -105,6 +108,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-white',
     bg: 'bg-slate-900',
     accent: 'bg-white',
+    tooltip: 'Finalizing status',
   }
 };
 
@@ -142,10 +146,9 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
 
   useEffect(() => {
     if (isExiting && cardRef.current) {
-      // Trigger smooth exit animation
       const tl = gsap.timeline();
       tl.to(cardRef.current, {
-        delay: 2.2, // Let the blink run for a bit
+        delay: 2.2,
         duration: 0.5,
         opacity: 0,
         scale: 0.95,
@@ -208,7 +211,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <MapPin className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs">
+                  <span className="font-medium text-xs text-left">
                     <span className={cn("font-bold", isExiting ? "text-white" : "text-slate-900")}>Table {order.tableNumber}</span> • {order.floor}
                   </span>
                 </div>
@@ -224,7 +227,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top">
-                      <p className="text-xs font-semibold">Time since order was received</p>
+                      <p className="text-xs font-semibold">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -286,7 +289,6 @@ export default function OrderHubPage() {
           return o;
         });
 
-        // Add to log with "isNew" flag
         const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
@@ -323,8 +325,8 @@ export default function OrderHubPage() {
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is being cooked now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (
@@ -334,7 +336,7 @@ export default function OrderHubPage() {
       <div className="bg-white border-b px-6 py-6 shrink-0">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Monitor</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
             <div className="flex items-center gap-2">
                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-2 py-0.5 font-bold text-[10px]">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />

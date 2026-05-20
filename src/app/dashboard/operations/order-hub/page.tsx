@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -8,6 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Clock,
   CheckCircle2,
@@ -22,10 +28,11 @@ import {
   User,
   RefreshCw,
   ClipboardList,
+  Calendar,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, subDays, subHours } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -48,7 +55,6 @@ interface HubOrder {
   server: string;
   timeOpenMinutes: number;
   floor: string;
-  tableNumber: string;
   timestamp: number;
   originalStatus?: HubStatus;
 }
@@ -117,17 +123,22 @@ const floors = ['Ground Floor', 'First Floor', 'Terrace', 'VIP Lounge'];
 const statuses: HubStatus[] = ['pending', 'accepted', 'in_progress'];
 
 const generateMockOrders = (count: number): HubOrder[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: `${i + 1}`,
-    orderNumber: `#${4420 + i}`,
-    status: statuses[i % 3],
-    itemsCount: Math.floor(Math.random() * 6) + 1,
-    server: servers[Math.floor(Math.random() * servers.length)],
-    timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
-    floor: floors[Math.floor(Math.random() * floors.length)],
-    tableNumber: `T${(i % 24) + 1}`,
-    timestamp: Date.now() - Math.floor(Math.random() * 600000),
-  }));
+  return Array.from({ length: count }, (_, i) => {
+    // Generate some "older" orders to make lookback meaningful
+    const hoursAgo = Math.floor(Math.random() * 48); 
+    const timestamp = subHours(new Date(), hoursAgo).getTime();
+    
+    return {
+      id: `${i + 1}`,
+      orderNumber: `#${4420 + i}`,
+      status: statuses[i % 3],
+      itemsCount: Math.floor(Math.random() * 6) + 1,
+      server: servers[Math.floor(Math.random() * servers.length)],
+      timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
+      floor: floors[Math.floor(Math.random() * floors.length)],
+      timestamp: timestamp,
+    };
+  });
 };
 
 const OrderCard = ({ order }: { order: HubOrder }) => {
@@ -247,6 +258,7 @@ export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
+  const [lookbackHours, setLookbackHours] = useState('24');
 
   useEffect(() => {
     setOrders(generateMockOrders(48));
@@ -299,10 +311,17 @@ export default function OrderHubPage() {
   }, []);
 
   const getFilteredStatusOrders = (status: HubStatus) => {
+    const now = new Date().getTime();
+    const lookbackThreshold = now - (parseInt(lookbackHours) * 60 * 60 * 1000);
+
     return orders.filter(o => {
       const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
       if (activeStatus !== status) return false;
 
+      // Filter by Lookback Period
+      if (o.timestamp < lookbackThreshold) return false;
+
+      // Filter by Search Query
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
                            o.server.toLowerCase().includes(search.toLowerCase());
       return matchesSearch;
@@ -332,15 +351,33 @@ export default function OrderHubPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-             <div className="relative w-64">
+          <div className="flex flex-wrap items-center gap-4">
+             <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Search order or server..." 
-                  className="pl-10 h-10 bg-slate-50 border-slate-200 rounded-lg text-sm font-medium focus:bg-white transition-all shadow-none"
+                  placeholder="Search order or waiter..." 
+                  className="pl-10 h-11 bg-slate-50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all shadow-none"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
+             </div>
+
+             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 h-11">
+               <Calendar className="h-4 w-4 text-slate-400" />
+               <Label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Period:</Label>
+               <Select value={lookbackHours} onValueChange={setLookbackHours}>
+                 <SelectTrigger className="w-[140px] border-0 bg-transparent shadow-none focus:ring-0 font-bold text-slate-900 p-0 h-auto">
+                   <SelectValue placeholder="Lookback" />
+                 </SelectTrigger>
+                 <SelectContent className="rounded-xl shadow-xl">
+                   <SelectItem value="1" className="font-bold">Last Hour</SelectItem>
+                   <SelectItem value="6" className="font-bold">Last 6 Hours</SelectItem>
+                   <SelectItem value="12" className="font-bold">Last 12 Hours</SelectItem>
+                   <SelectItem value="24" className="font-bold">Today</SelectItem>
+                   <SelectItem value="48" className="font-bold">Last 2 Days</SelectItem>
+                   <SelectItem value="168" className="font-bold">Last 7 Days</SelectItem>
+                 </SelectContent>
+               </Select>
              </div>
           </div>
         </div>

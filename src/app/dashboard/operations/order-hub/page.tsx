@@ -69,8 +69,8 @@ interface EventLog {
 
 const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string }> = {
   pending: {
-    label: 'Pending',
-    subLabel: 'New orders',
+    label: 'NEW ORDER',
+    subLabel: 'Awaiting Review',
     icon: Clock,
     color: 'text-blue-600',
     dot: 'bg-blue-500',
@@ -78,8 +78,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-blue-500',
   },
   accepted: {
-    label: 'Accepted',
-    subLabel: 'Confirmed',
+    label: 'CONFIRMED',
+    subLabel: 'In the Queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
@@ -87,8 +87,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-indigo-500',
   },
   in_progress: {
-    label: 'In Progress',
-    subLabel: 'Preparing',
+    label: 'PREPARING',
+    subLabel: 'Cooking Now',
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
@@ -96,7 +96,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-teal-500',
   },
   exiting: {
-    label: 'Updating',
+    label: 'UPDATING',
     subLabel: 'Processing...',
     icon: RefreshCw,
     color: 'text-white',
@@ -181,20 +181,22 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                 <MapPin className="h-3.5 w-3.5 opacity-70" />
                 <span className="font-medium text-xs">{order.floor}</span>
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className={cn(
-                    "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
-                    isExiting ? "bg-white/10" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
-                  )}>
-                    <Timer className="h-3 w-3" />
-                    {order.timeOpenMinutes}m
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p className="text-xs font-semibold">Time since order was received</p>
-                </TooltipContent>
-              </Tooltip>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className={cn(
+                      "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
+                      isExiting ? "bg-white/10" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
+                    )}>
+                      <Timer className="h-3 w-3" />
+                      {order.timeOpenMinutes}m
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-xs font-semibold">Time since order was received</p>
+                  </TooltipContent>
+                </TooltipProvider>
+              </TooltipProvider>
             </div>
             
             <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
@@ -284,148 +286,146 @@ export default function OrderHubPage() {
   };
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
-    { id: 'pending', label: 'Pending', subLabel: 'New arrivals', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'Accepted', subLabel: 'In queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'In Progress', subLabel: 'Preparing', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'pending', label: 'NEW ORDER', subLabel: 'Awaiting staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
+    { id: 'accepted', label: 'CONFIRMED', subLabel: 'In the kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is being cooked', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (
-    <TooltipProvider>
-      <div className={cn("min-h-screen bg-slate-50 flex flex-col", inter.className)}>
-        <DashboardHeader />
-        
-        <div className="bg-white border-b px-6 py-6 shrink-0">
-          <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-1 text-left">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Monitor</h1>
-              <div className="flex items-center gap-2">
-                 <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-2 py-0.5 font-bold text-[10px]">
-                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                   SYSTEM LIVE
-                 </Badge>
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{orders.length} ACTIVE TICKETS</span>
-              </div>
+    <div className={cn("min-h-screen bg-slate-50 flex flex-col", inter.className)}>
+      <DashboardHeader />
+      
+      <div className="bg-white border-b px-6 py-6 shrink-0">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-1 text-left">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Monitor</h1>
+            <div className="flex items-center gap-2">
+               <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-2 py-0.5 font-bold text-[10px]">
+                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                 SYSTEM LIVE
+               </Badge>
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{orders.length} ACTIVE TICKETS</span>
             </div>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-               <div className="relative w-64 text-left">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input 
-                    placeholder="Search order or server..." 
-                    className="pl-10 h-10 bg-slate-50 border-slate-200 rounded-lg text-sm font-medium focus:bg-white transition-all shadow-none"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-               </div>
-               <Select value={floorFilter} onValueChange={setFloorFilter}>
-                  <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200 rounded-lg text-xs font-bold shadow-none">
-                    <MapPin className="h-3.5 w-3.5 mr-2 text-slate-400" />
-                    <SelectValue placeholder="All Areas" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="all">All Areas</SelectItem>
-                    {floors.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                  </SelectContent>
-               </Select>
-            </div>
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="relative w-64 text-left">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Search order or server..." 
+                  className="pl-10 h-10 bg-slate-50 border-slate-200 rounded-lg text-sm font-medium focus:bg-white transition-all shadow-none"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+             </div>
+             <Select value={floorFilter} onValueChange={setFloorFilter}>
+                <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200 rounded-lg text-xs font-bold shadow-none">
+                  <MapPin className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                  <SelectValue placeholder="All Areas" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="all">All Areas</SelectItem>
+                  {floors.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                </SelectContent>
+             </Select>
           </div>
         </div>
-
-        <main className="flex-1 overflow-hidden p-6 flex gap-6">
-          <div className="flex-1 flex gap-6 min-w-0">
-            {columns.map((col) => {
-              const columnOrders = getFilteredStatusOrders(col.id);
-              return (
-                <div key={col.id} className="flex-1 flex flex-col min-w-[280px] h-full">
-                  <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-3 rounded-xl border transition-all", col.bg)}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("h-2 w-2 rounded-full", col.dot)} />
-                        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">{col.label}</h2>
-                      </div>
-                      <Badge className="bg-slate-900 text-white font-bold px-2 py-0 h-5 text-[10px] rounded-md">
-                        {columnOrders.length}
-                      </Badge>
-                    </div>
-                    <p className="text-[10px] font-medium text-slate-400 pl-4">{col.subLabel}</p>
-                  </div>
-                  
-                  <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner">
-                    <div className="flex flex-col gap-4 pb-20">
-                      {columnOrders.length > 0 ? columnOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} />
-                      )) : (
-                        <div className="py-20 text-center opacity-30">
-                          <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Column Clear</p>
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
-              );
-            })}
-          </div>
-
-          <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
-            <Card className="flex-1 border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl">
-              <CardHeader className="bg-slate-900 text-white p-6 shrink-0 text-left">
-                <div className="flex items-center justify-between mb-1">
-                  <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-teal-400" /> Recent Pulse
-                  </CardTitle>
-                  <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
-                </div>
-                <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
-                  Audit trail for finalized tickets.
-                </CardDescription>
-              </CardHeader>
-              
-              <ScrollArea className="flex-1">
-                <div className="p-6 space-y-6">
-                  {recentExits.length > 0 ? recentExits.map((event) => {
-                    const config = exitConfig[event.type];
-                    return (
-                      <div key={event.id} className="relative pl-6 pb-6 border-l last:border-0 last:pb-0 text-left">
-                        <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                             <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
-                             <span className="text-[9px] font-bold text-slate-400">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                             <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
-                                {event.type}
-                             </Badge>
-                             <span className="text-[10px] font-medium text-slate-500 italic">By {event.server}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }) : (
-                    <div className="py-20 text-center opacity-30">
-                      <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monitoring...</p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </Card>
-
-            <Card className="bg-white border p-5 rounded-2xl text-left shadow-sm">
-               <div className="flex items-start gap-3">
-                  <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                     <p className="text-xs font-bold text-slate-900">Pro-Tip for Admins</p>
-                     <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                       Tickets will <span className="text-primary font-bold">blink</span> for 3s when they are finished or cancelled to confirm status before being logged to the Recent Pulse.
-                     </p>
-                  </div>
-               </div>
-            </Card>
-          </aside>
-        </main>
       </div>
-    </TooltipProvider>
+
+      <main className="flex-1 overflow-hidden p-6 flex gap-6">
+        <div className="flex-1 flex gap-6 min-w-0">
+          {columns.map((col) => {
+            const columnOrders = getFilteredStatusOrders(col.id);
+            return (
+              <div key={col.id} className="flex-1 flex flex-col min-w-[280px] h-full">
+                <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-4 rounded-xl border transition-all", col.bg)}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={cn("h-2.5 w-2.5 rounded-full", col.dot)} />
+                      <h2 className="text-sm font-bold text-slate-800 tracking-tight">{col.label}</h2>
+                    </div>
+                    <Badge className="bg-slate-900 text-white font-bold px-2 py-0 h-5 text-[10px] rounded-md">
+                      {columnOrders.length}
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] font-medium text-slate-500 pl-4.5 mt-0.5">{col.subLabel}</p>
+                </div>
+                
+                <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner">
+                  <div className="flex flex-col gap-4 pb-20">
+                    {columnOrders.length > 0 ? columnOrders.map((order) => (
+                      <OrderCard key={order.id} order={order} />
+                    )) : (
+                      <div className="py-20 text-center opacity-30">
+                        <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Column Clear</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            );
+          })}
+        </div>
+
+        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
+          <Card className="flex-1 border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl">
+            <CardHeader className="bg-slate-900 text-white p-6 shrink-0 text-left">
+              <div className="flex items-center justify-between mb-1">
+                <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-teal-400" /> Recent Pulse
+                </CardTitle>
+                <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
+              </div>
+              <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
+                Audit trail for finalized tickets.
+              </CardDescription>
+            </CardHeader>
+            
+            <ScrollArea className="flex-1">
+              <div className="p-6 space-y-6">
+                {recentExits.length > 0 ? recentExits.map((event) => {
+                  const config = exitConfig[event.type];
+                  return (
+                    <div key={event.id} className="relative pl-6 pb-6 border-l last:border-0 last:pb-0 text-left">
+                      <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                           <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
+                           <span className="text-[9px] font-bold text-slate-400">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
+                              {event.type}
+                           </Badge>
+                           <span className="text-[10px] font-medium text-slate-500 italic">By {event.server}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }) : (
+                  <div className="py-20 text-center opacity-30">
+                    <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monitoring...</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </Card>
+
+          <Card className="bg-white border p-5 rounded-2xl text-left shadow-sm">
+             <div className="flex items-start gap-3">
+                <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                   <p className="text-xs font-bold text-slate-900">Pro-Tip for Admins</p>
+                   <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
+                     Tickets will <span className="text-primary font-bold">blink</span> for 3s when they are finished or cancelled to confirm status before being logged to the Recent Pulse.
+                   </p>
+                </div>
+             </div>
+          </Card>
+        </aside>
+      </main>
+    </div>
   );
 }

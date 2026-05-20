@@ -69,8 +69,8 @@ interface EventLog {
 
 const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string }> = {
   pending: {
-    label: 'NEW ORDER',
-    subLabel: 'Awaiting Review',
+    label: 'PENDING',
+    subLabel: 'Waiting for staff review',
     icon: Clock,
     color: 'text-blue-600',
     dot: 'bg-blue-500',
@@ -78,8 +78,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-blue-500',
   },
   accepted: {
-    label: 'CONFIRMED',
-    subLabel: 'In the Queue',
+    label: 'ACCEPTED',
+    subLabel: 'Confirmed & in kitchen queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
@@ -87,8 +87,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-indigo-500',
   },
   in_progress: {
-    label: 'PREPARING',
-    subLabel: 'Cooking Now',
+    label: 'IN PROGRESS',
+    subLabel: 'Kitchen is cooking now',
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
@@ -195,7 +195,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                   <TooltipContent side="top">
                     <p className="text-xs font-semibold">Time since order was received</p>
                   </TooltipContent>
-                </TooltipProvider>
+                </Tooltip>
               </TooltipProvider>
             </div>
             
@@ -286,9 +286,9 @@ export default function OrderHubPage() {
   };
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
-    { id: 'pending', label: 'NEW ORDER', subLabel: 'Awaiting staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'CONFIRMED', subLabel: 'In the kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is being cooked', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'IN PROGRESS', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (

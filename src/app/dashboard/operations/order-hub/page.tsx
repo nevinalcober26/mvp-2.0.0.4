@@ -20,14 +20,14 @@ import {
   AlertCircle,
   Play,
   Package,
-  ArrowRight,
-  Filter,
-  Activity,
   History,
   ClipboardList,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 type HubStatus = 'pending' | 'accepted' | 'in_progress' | 'exiting';
 type ExitType = 'COMPLETED' | 'CANCELLED' | 'REJECTED' | 'FAILED';
@@ -44,42 +44,42 @@ interface HubOrder {
   timestamp: number;
 }
 
-const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; bg: string; border: string }> = {
+const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
   pending: {
     label: 'Pending',
     icon: AlertCircle,
     color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-500',
+    accent: 'bg-blue-500',
+    bg: 'bg-blue-50/50',
   },
   accepted: {
     label: 'Accepted',
     icon: CheckCircle2,
-    color: 'text-yellow-600',
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-500',
+    color: 'text-amber-600',
+    accent: 'bg-amber-500',
+    bg: 'bg-amber-50/50',
   },
   in_progress: {
     label: 'In Progress',
     icon: Play,
     color: 'text-teal-600',
-    bg: 'bg-teal-50',
-    border: 'border-teal-500',
+    accent: 'bg-teal-500',
+    bg: 'bg-teal-50/50',
   },
   exiting: {
     label: 'Exiting...',
-    icon: Activity,
+    icon: Clock,
     color: 'text-gray-400',
+    accent: 'bg-gray-400',
     bg: 'bg-gray-100',
-    border: 'border-gray-200',
   }
 };
 
-const exitConfig: Record<ExitType, { color: string; bg: string; border: string; text: string }> = {
-  COMPLETED: { color: 'text-white', bg: 'bg-green-500', border: 'border-green-600', text: 'SUCCESS' },
-  CANCELLED: { color: 'text-white', bg: 'bg-red-500', border: 'border-red-600', text: 'CANCELLED' },
-  REJECTED: { color: 'text-white', bg: 'bg-red-500', border: 'border-red-600', text: 'REJECTED' },
-  FAILED: { color: 'text-white', bg: 'bg-red-600', border: 'border-red-700', text: 'FAILED' },
+const exitConfig: Record<ExitType, { color: string; bg: string; text: string }> = {
+  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'SUCCESS' },
+  CANCELLED: { color: 'text-white', bg: 'bg-red-600', text: 'CANCELLED' },
+  REJECTED: { color: 'text-white', bg: 'bg-red-600', text: 'REJECTED' },
+  FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED' },
 };
 
 const initialOrders: HubOrder[] = [
@@ -92,16 +92,13 @@ const initialOrders: HubOrder[] = [
 ];
 
 export default function OrderHubPage() {
-  const { toast } = useToast();
   const [orders, setOrders] = useState<HubOrder[]>(initialOrders);
   const [lookbackDays, setLookbackDays] = useState('1');
   const [activeFilter, setActiveFilter] = useState<'all' | HubStatus>('all');
 
-  // Simulator for exiting orders
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
-        // Find a random non-exiting order to "complete"
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
 
@@ -109,7 +106,6 @@ export default function OrderHubPage() {
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitTypes[Math.floor(Math.random() * exitTypes.length)];
 
-        // Update the order to exiting state
         const updated = prev.map(o => {
           if (o.id === target.id) {
             return { ...o, status: 'exiting' as HubStatus, exitType: randomExit };
@@ -117,14 +113,13 @@ export default function OrderHubPage() {
           return o;
         });
 
-        // Set timeout to remove it after blink
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
         }, 3500);
 
         return updated;
       });
-    }, 12000); // Simulate periodically
+    }, 15000);
 
     return () => clearInterval(interval);
   }, []);
@@ -134,25 +129,25 @@ export default function OrderHubPage() {
   }, [orders, activeFilter]);
 
   return (
-    <>
+    <div className={cn("min-h-screen bg-[#F8FAFC]", inter.className)}>
       <DashboardHeader />
-      <main className="p-4 sm:p-6 lg:p-8 space-y-6 bg-muted/20 min-h-screen">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className="p-4 sm:p-6 lg:p-10 space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8 text-left">
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">Live Order Hub</h1>
-              <p className="text-muted-foreground text-sm font-medium">Real-time order monitoring and dispatch control center.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
+              <p className="text-slate-500 text-sm font-medium">Monitor and manage active floor operations in real-time.</p>
             </div>
           </div>
 
-          <Card className="p-4 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+          <Card className="border-0 shadow-sm overflow-hidden bg-white rounded-xl">
+            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <Select value={lookbackDays} onValueChange={setLookbackDays}>
-                  <SelectTrigger className="w-[200px] bg-background border-border font-semibold">
-                    <History className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Lookback Period" />
+                  <SelectTrigger className="w-[180px] h-10 bg-slate-50 border-slate-200 font-medium text-slate-700">
+                    <History className="h-4 w-4 mr-2 text-slate-400" />
+                    <SelectValue placeholder="Lookback" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1">Last 24 Hours</SelectItem>
@@ -160,17 +155,17 @@ export default function OrderHubPage() {
                     <SelectItem value="30">Last 30 Days</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="h-8 w-px bg-border mx-2" />
-                <span className="text-sm font-bold text-foreground">
-                  {orders.length} Orders Active
+                <div className="h-6 w-px bg-slate-200" />
+                <span className="text-sm font-semibold text-slate-600">
+                  {orders.length} ACTIVE ORDERS
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
+              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-lg border border-slate-200">
                 <Button 
-                  variant={activeFilter === 'all' ? 'default' : 'ghost'} 
+                  variant={activeFilter === 'all' ? 'secondary' : 'ghost'} 
                   size="sm" 
-                  className={cn("shadow-sm font-semibold", activeFilter === 'all' && "bg-white text-foreground hover:bg-white")}
+                  className={cn("h-8 px-4 text-xs font-semibold rounded-md transition-all", activeFilter === 'all' ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700")}
                   onClick={() => setActiveFilter('all')}
                 >
                   All
@@ -178,23 +173,22 @@ export default function OrderHubPage() {
                 {['pending', 'accepted', 'in_progress'].map((status) => (
                   <Button 
                     key={status}
-                    variant={activeFilter === status ? 'default' : 'ghost'} 
+                    variant={activeFilter === status ? 'secondary' : 'ghost'} 
                     size="sm" 
                     className={cn(
-                      "shadow-sm font-semibold gap-2 capitalize", 
-                      activeFilter === status && "bg-white text-foreground hover:bg-white"
+                      "h-8 px-3 text-xs font-semibold rounded-md transition-all capitalize", 
+                      activeFilter === status ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
                     )}
                     onClick={() => setActiveFilter(status as HubStatus)}
                   >
-                    <div className={cn("h-2 w-2 rounded-full", statusConfig[status as HubStatus].bg.replace('bg-', 'bg-').replace('-50', '-500'))} />
                     {status.replace('_', ' ')}
                   </Button>
                 ))}
               </div>
-            </div>
+            </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {filteredOrders.map((order) => {
               const isExiting = order.status === 'exiting';
               const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
@@ -204,56 +198,83 @@ export default function OrderHubPage() {
                 <Card 
                   key={order.id}
                   className={cn(
-                    "group relative transition-all duration-300 border-2 overflow-hidden",
-                    config.border,
-                    isExiting && "animate-status-blink scale-[1.05] z-10",
+                    "group relative transition-all duration-300 border border-slate-200 overflow-hidden bg-white shadow-sm hover:shadow-md",
+                    isExiting && "animate-status-blink scale-[1.02] z-10 border-transparent ring-4 ring-white shadow-2xl",
                     isExiting && config.bg
                   )}
                 >
-                  <CardContent className="p-6 flex flex-col items-center justify-center aspect-square text-center space-y-4">
+                  {/* Status Side Bar */}
+                  {!isExiting && (
+                    <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
+                  )}
+
+                  <CardContent className="p-0 flex flex-col h-full">
+                    {/* Header */}
                     <div className={cn(
-                      "h-12 w-12 rounded-full flex items-center justify-center transition-colors shadow-sm",
-                      isExiting ? "bg-white/20" : config.bg
+                      "p-5 flex items-center justify-between border-b border-slate-100 transition-colors",
+                      isExiting ? "border-transparent" : "bg-white"
                     )}>
-                      <Icon className={cn("h-6 w-6", isExiting ? "text-white" : config.color)} />
+                      <div className="space-y-0.5 text-left">
+                        <span className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Order ID</span>
+                        <h3 className={cn("text-xl font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
+                          {order.orderNumber}
+                        </h3>
+                      </div>
+                      <div className={cn("flex flex-col items-end gap-1 text-right")}>
+                         <div className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors",
+                            isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
+                          )}>
+                            <Icon className="h-3 w-3" />
+                            {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
+                         </div>
+                         <div className={cn("flex items-center gap-1 text-[10px] font-medium transition-colors", isExiting ? "text-white/60" : "text-slate-400")}>
+                            <Clock className="h-3 w-3" />
+                            {order.timeOpen}
+                         </div>
+                      </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <p className={cn("text-3xl font-black tracking-tighter", isExiting ? "text-white" : "text-foreground")}>
-                        {order.orderNumber}
-                      </p>
-                      <p className={cn("text-[10px] font-black uppercase tracking-widest", isExiting ? "text-white/80" : config.color)}>
-                        {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
-                      </p>
-                    </div>
-
-                    <div className={cn(
-                        "w-full grid grid-cols-2 gap-y-2 pt-2 border-t border-dashed",
-                        isExiting ? "border-white/20" : "border-border"
-                    )}>
-                      <div className="text-left space-y-0.5">
-                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Floor</p>
-                        <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.floor}</p>
-                      </div>
-                      <div className="text-right space-y-0.5">
-                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Time</p>
-                        <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.timeOpen}</p>
-                      </div>
-                      <div className="text-left space-y-0.5">
-                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Server</p>
-                        <div className="flex items-center gap-1.5">
-                          <div className={cn("h-4 w-4 rounded-full flex items-center justify-center", isExiting ? "bg-white/20" : "bg-primary/10")}>
-                            <Users className={cn("h-2.5 w-2.5", isExiting ? "text-white" : "text-primary")} />
+                    {/* Body */}
+                    <div className="p-5 space-y-4 text-left">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Location</p>
+                          <div className={cn("flex items-center gap-1.5 font-medium text-sm", isExiting ? "text-white" : "text-slate-700")}>
+                            <MapPin className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
+                            {order.floor} Floor
                           </div>
-                          <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.server}</span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Server</p>
+                          <div className={cn("flex items-center gap-1.5 font-medium text-sm", isExiting ? "text-white" : "text-slate-700")}>
+                            <Users className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
+                            {order.server}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right space-y-0.5">
-                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Items</p>
-                        <div className="flex items-center justify-end gap-1.5">
-                           <Package className={cn("h-3 w-3", isExiting ? "text-white/60" : "text-muted-foreground")} />
-                           <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.itemsCount}</span>
+
+                      <div className={cn(
+                        "flex items-center justify-between p-3 rounded-xl border border-dashed transition-colors",
+                        isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
+                      )}>
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
+                            isExiting ? "bg-white/20" : "bg-slate-200/50"
+                          )}>
+                             <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-500")} />
+                          </div>
+                          <div>
+                            <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>
+                              {order.itemsCount} Items
+                            </p>
+                            <p className={cn("text-[10px] font-medium transition-colors", isExiting ? "text-white/60" : "text-slate-500")}>
+                              In this ticket
+                            </p>
+                          </div>
                         </div>
+                        <ChevronRight className={cn("h-4 w-4 opacity-30", isExiting ? "text-white" : "text-slate-400")} />
                       </div>
                     </div>
                   </CardContent>
@@ -264,16 +285,19 @@ export default function OrderHubPage() {
 
           {filteredOrders.length === 0 && (
             <div className="py-32 text-center space-y-4">
-              <div className="h-20 w-20 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto">
-                <ClipboardList className="h-10 w-10 text-muted-foreground opacity-20" />
+              <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto border border-slate-200">
+                <ClipboardList className="h-10 w-10 text-slate-300" />
               </div>
-              <p className="text-lg font-bold text-muted-foreground">No orders matching your criteria.</p>
-              <Button variant="link" onClick={() => setActiveFilter('all')}>Clear all filters</Button>
+              <div className="space-y-1">
+                <p className="text-xl font-bold text-slate-900">No active orders</p>
+                <p className="text-sm font-medium text-slate-500">Wait for guests to scan and order from their menu.</p>
+              </div>
+              <Button variant="outline" className="font-bold rounded-lg px-6" onClick={() => setActiveFilter('all')}>View All History</Button>
             </div>
           )}
 
         </div>
       </main>
-    </>
+    </div>
   );
 }

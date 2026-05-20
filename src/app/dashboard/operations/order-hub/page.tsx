@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -468,8 +469,8 @@ export default function OrderHubPage() {
           })}
         </div>
 
-        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0 text-left">
-          <Card className="flex-1 border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl">
+        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0 text-left sticky top-6 self-start h-[calc(100vh-12rem)]">
+          <Card className="flex-1 border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[500px]">
             <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
               <div className="flex items-center justify-between mb-1">
                 <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
@@ -519,7 +520,7 @@ export default function OrderHubPage() {
             </ScrollArea>
           </Card>
 
-          <Card className="bg-white border p-5 rounded-2xl shadow-sm">
+          <Card className="bg-white border p-5 rounded-2xl shadow-sm shrink-0">
              <div className="flex items-start gap-3">
                 <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">

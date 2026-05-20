@@ -206,7 +206,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
             "px-4 py-3 flex items-center justify-between",
             isExiting ? "bg-black/10" : "border-b bg-slate-50/50"
           )}>
-            <div className="flex flex-col">
+            <div className="flex flex-col text-left">
               <span className={cn(
                 "text-[10px] font-bold uppercase tracking-tight", 
                 isExiting ? "text-white/60" : "text-slate-400"
@@ -255,8 +255,8 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800 shadow-xl z-[100]">
-                      <p className="font-bold mb-1">Wait Time Tracker</p>
-                      <p className="opacity-90 font-medium">{(config as any).tooltip}</p>
+                      <p className="font-bold mb-1 text-left">Wait Time Tracker</p>
+                      <p className="opacity-90 font-medium text-left">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -340,21 +340,20 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // STRICT 30-Second Finalization Cycle
+  // STRICT 10-Second Finalization Cycle - Fully Synchronized
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
 
-        // Prioritize finalization for those in preparing phase, then anywhere else
+        // Prioritize finalization for those in preparing phase
         const preparing = candidates.filter(o => o.status === 'in_progress');
         const target = preparing.length > 0 
           ? preparing[Math.floor(Math.random() * preparing.length)]
           : candidates[Math.floor(Math.random() * candidates.length)];
 
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-        // 80% chance of success (Completed), 20% chance of an issue
         const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
 
         const newLog: EventLog = {
@@ -366,7 +365,7 @@ export default function OrderHubPage() {
           isNew: true
         };
 
-        // Sync exit entry to Activity Log
+        // Sync exit entry to Activity Log AT THE SAME TIME
         setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
 
         const updated = prev.map(o => {
@@ -381,14 +380,14 @@ export default function OrderHubPage() {
           return o;
         });
 
-        // Remove card after 3.2s (allows time for the 2.2s blink + height collapse)
+        // Cleanup card after blink animation
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
         }, 3200);
 
         return updated;
       });
-    }, 30000); // EXACTLY 30 SECONDS
+    }, 10000); // EXACTLY 10 SECONDS
 
     return () => clearInterval(finalizationInterval);
   }, []);
@@ -419,7 +418,7 @@ export default function OrderHubPage() {
       
       <div className="bg-white border-b px-6 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
             <div className="flex items-center gap-2">
                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-2 py-0.5 font-bold text-[10px]">
@@ -499,7 +498,7 @@ export default function OrderHubPage() {
             })}
           </div>
 
-          <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit">
+          <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit text-left">
             <div className="space-y-6">
               <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[550px]">
                 <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
@@ -509,7 +508,7 @@ export default function OrderHubPage() {
                     </CardTitle>
                     <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
                   </div>
-                  <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
+                  <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider text-left">
                     History of finalized tickets.
                   </CardDescription>
                 </CardHeader>
@@ -529,10 +528,10 @@ export default function OrderHubPage() {
                           <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-left">
-                               <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
+                               <span className={cn("text-sm font-bold", event.isNew ? "text-slate-900" : "text-slate-900")}>Order {event.orderNumber}</span>
                                <span className="text-[9px] font-bold text-slate-400 uppercase">just now</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-left">
                                <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
                                   {event.type}
                                 </Badge>
@@ -554,7 +553,7 @@ export default function OrderHubPage() {
               <Card className="bg-white border p-5 rounded-2xl shadow-sm text-left">
                  <div className="flex items-start gap-3">
                     <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <div className="space-y-1">
+                    <div className="space-y-1 text-left">
                        <p className="text-xs font-bold text-slate-900">Live Order Tracking</p>
                        <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
                          This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.

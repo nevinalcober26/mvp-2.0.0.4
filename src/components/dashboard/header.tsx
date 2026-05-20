@@ -65,16 +65,15 @@ export function DashboardHeader() {
         textToShow = currentText.substring(0, charIndex + 1);
         charIndex++;
       }
-      // Use a functional update to get the latest state of the cursor
       setPlaceholder(textToShow + (showCursor ? '|' : ''));
 
       if (!isDeleting && charIndex === currentText.length) {
         isDeleting = true;
-        typeTimeout = setTimeout(type, 2000); // Pause at end
+        typeTimeout = setTimeout(type, 2000);
       } else if (isDeleting && charIndex === 0) {
         isDeleting = false;
         textIndex = (textIndex + 1) % placeholderTexts.length;
-        typeTimeout = setTimeout(type, 500); // Pause before typing new text
+        typeTimeout = setTimeout(type, 500);
       } else {
         const typingSpeed = isDeleting ? 75 : 120;
         typeTimeout = setTimeout(type, typingSpeed);
@@ -91,7 +90,6 @@ export function DashboardHeader() {
     };
 
     const startTimeout = setTimeout(() => {
-      // Clear initial placeholder before starting animation
       setPlaceholder('');
       type();
       blink();
@@ -191,7 +189,7 @@ export function DashboardHeader() {
             <Button variant="ghost" size="icon" className="rounded-full relative">
               <Bell className="h-5 w-5" />
               <span className="sr-only">Toggle notifications</span>
-              <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500" />
+              <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-50" />
             </Button>
           </DropdownMenuTrigger>
           <NotificationMenu />
@@ -199,14 +197,15 @@ export function DashboardHeader() {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full overflow-hidden h-8 w-8 p-0">
               {userAvatar && (
                 <Image
                   src={userAvatar.imageUrl}
                   width={32}
                   height={32}
                   alt="User avatar"
-                  className="rounded-full"
+                  className="rounded-full object-cover"
+                  style={{ width: '100%', height: 'auto' }}
                   data-ai-hint={userAvatar.imageHint}
                 />
               )}

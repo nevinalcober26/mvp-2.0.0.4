@@ -131,7 +131,6 @@ const formatDuration = (ms: number) => {
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    // Realistic wait times for a live board: 1-15 minutes
     const minutesAgo = Math.floor(Math.random() * 15) + 1; 
     const timestamp = subMinutes(new Date(), minutesAgo).getTime();
     
@@ -156,7 +155,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
   const durationMs = now - order.timestamp;
   const timeOpenMinutes = Math.floor(durationMs / 60000);
   const isDelayed = timeOpenMinutes > 15 && (order.status === 'pending' || order.status === 'accepted');
-  const isNew = durationMs < 5000; // Less than 5 seconds old
+  const isNew = durationMs < 5000;
 
   useEffect(() => {
     if (isExiting && cardRef.current) {
@@ -291,7 +290,6 @@ export default function OrderHubPage() {
     setOrders(generateMockOrders(20));
   }, []);
 
-  // Update clock every second for realistic timers
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
@@ -304,7 +302,6 @@ export default function OrderHubPage() {
       setOrders(prev => {
         const rand = Math.random();
 
-        // Simulate Entrance (15% chance)
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -318,7 +315,6 @@ export default function OrderHubPage() {
           return [newOrder, ...prev];
         }
 
-        // Progress PENDING -> ACCEPTED (20% chance)
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
@@ -326,7 +322,6 @@ export default function OrderHubPage() {
           }
         }
 
-        // Progress ACCEPTED -> PREPARING (20% chance)
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -334,7 +329,6 @@ export default function OrderHubPage() {
           }
         }
 
-        // SYNCED EXIT Simulation (20% chance)
         if (rand > 0.55 && rand < 0.75) {
           const candidates = prev.filter(o => o.status === 'in_progress');
           if (candidates.length === 0) return prev;
@@ -343,7 +337,6 @@ export default function OrderHubPage() {
           const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
           const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
 
-          // 1. Create the Log Entry immediately (Syncing start of animation)
           const newLog: EventLog = {
             id: Math.random().toString(),
             orderNumber: target.orderNumber,
@@ -355,7 +348,6 @@ export default function OrderHubPage() {
 
           setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
 
-          // 2. Set the order to exiting status (Synchronized visual feedback)
           const updated = prev.map(o => {
             if (o.id === target.id) {
               return { 
@@ -368,7 +360,6 @@ export default function OrderHubPage() {
             return o;
           });
 
-          // 3. Clean up the order from memory after animation finishes
           setTimeout(() => {
             setOrders(current => current.filter(o => o.id !== target.id));
           }, 3200);
@@ -454,7 +445,6 @@ export default function OrderHubPage() {
 
       <main className="flex-1 p-6 relative">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-8">
-          {/* Main Kanban Section */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
@@ -490,7 +480,6 @@ export default function OrderHubPage() {
             })}
           </div>
 
-          {/* Sticky Activity Sidebar */}
           <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit">
             <div className="space-y-6">
               <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[550px]">

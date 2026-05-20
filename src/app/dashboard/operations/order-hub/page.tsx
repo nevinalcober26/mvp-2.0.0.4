@@ -85,7 +85,7 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
     bg: 'bg-teal-50/50',
   },
   exiting: {
-    label: 'Exiting...',
+    label: 'Finalizing...',
     icon: Clock,
     color: 'text-white',
     accent: 'bg-gray-400',
@@ -138,7 +138,11 @@ export default function OrderHubPage() {
 
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-        const randomExit = exitTypes[randomExitIndex(exitTypes.length)];
+        
+        // Bias towards COMPLETED
+        const rand = Math.random();
+        const exitTypeIndex = rand > 0.3 ? 0 : Math.floor(Math.random() * (exitTypes.length - 1)) + 1;
+        const randomExit = exitTypes[exitTypeIndex];
 
         const updated = prev.map(o => {
           if (o.id === target.id) {
@@ -163,7 +167,7 @@ export default function OrderHubPage() {
 
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
-        }, 3500);
+        }, 4000); // 4s blink time for high visibility
 
         return updated;
       });
@@ -172,28 +176,25 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  function randomExitIndex(max: number) {
-    // Bias towards COMPLETED
-    const rand = Math.random();
-    if (rand > 0.3) return 0; // 70% Completed
-    return Math.floor(Math.random() * (max - 1)) + 1;
-  }
-
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      const matchesFilter = activeFilter === 'all' || o.status === activeFilter || (o.status === 'exiting' && o.originalStatus === activeFilter);
+      const isExiting = o.status === 'exiting';
+      // Exiting orders should always be visible to grab attention
+      if (isExiting) return true;
+
+      const matchesFilter = activeFilter === 'all' || o.status === activeFilter;
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || o.server.toLowerCase().includes(search.toLowerCase());
       const matchesFloor = floorFilter === 'all' || o.floor === floorFilter;
       return matchesFilter && matchesSearch && matchesFloor;
-    }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes); // Oldest first (bottlenecks)
+    }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
   }, [orders, activeFilter, search, floorFilter]);
 
   const counts = useMemo(() => {
     return {
       all: orders.length,
-      pending: orders.filter(o => o.status === 'pending' || (o.status === 'exiting' && o.originalStatus === 'pending')).length,
-      accepted: orders.filter(o => o.status === 'accepted' || (o.status === 'exiting' && o.originalStatus === 'accepted')).length,
-      in_progress: orders.filter(o => o.status === 'in_progress' || (o.status === 'exiting' && o.originalStatus === 'in_progress')).length,
+      pending: orders.filter(o => o.status === 'pending').length,
+      accepted: orders.filter(o => o.status === 'accepted').length,
+      in_progress: orders.filter(o => o.status === 'in_progress').length,
     };
   }, [orders]);
 
@@ -209,7 +210,7 @@ export default function OrderHubPage() {
             <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
                <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Monitoring</span>
                <span className="h-1 w-1 rounded-full bg-slate-300" />
-               <span>48 Active Channels</span>
+               <span>{orders.length} Active Channels</span>
             </div>
           </div>
 
@@ -304,24 +305,30 @@ export default function OrderHubPage() {
                     <Card 
                       key={order.id}
                       className={cn(
-                        "group relative transition-all duration-300 border-0 overflow-hidden bg-white shadow-sm hover:shadow-md",
-                        isExiting && "animate-status-blink scale-[1.02] z-10",
-                        isExiting && config.bg,
-                        isSlow && "ring-1 ring-red-200"
+                        "group relative transition-all duration-300 border-0 overflow-hidden shadow-sm hover:shadow-md",
+                        isExiting ? cn(config.bg, "scale-105 z-50 shadow-2xl animate-status-blink ring-4 ring-white/50") : "bg-white",
+                        isSlow && !isExiting && "ring-1 ring-red-200"
                       )}
                     >
+                      {/* Background Visual for Attention */}
+                      {isExiting && (
+                        <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+                           <Icon className="h-24 w-24 text-white" />
+                        </div>
+                      )}
+
                       {!isExiting && (
                         <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
                       )}
 
-                      <CardContent className="p-0 flex flex-col h-full text-left">
+                      <CardContent className="p-0 flex flex-col h-full text-left relative z-10">
                         <div className={cn(
                           "p-4 flex items-center justify-between border-b border-slate-50",
-                          isExiting ? "border-transparent bg-transparent" : "bg-white"
+                          isExiting ? "border-white/10 bg-black/5" : "bg-white"
                         )}>
                           <div className="space-y-0.5">
-                            <span className={cn("text-[9px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>
-                                {isSlow ? 'DELAYED TICKET' : 'ID'}
+                            <span className={cn("text-[9px] font-bold uppercase tracking-wider", isExiting ? "text-white/80" : "text-slate-400")}>
+                                {isExiting ? 'FINAL STATUS' : isSlow ? 'DELAYED TICKET' : 'ORDER ID'}
                             </span>
                             <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
                               {order.orderNumber}
@@ -329,29 +336,31 @@ export default function OrderHubPage() {
                           </div>
                           <div className="flex flex-col items-end gap-1">
                              <div className={cn(
-                                "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide",
-                                isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
+                                "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                isExiting ? "bg-white text-slate-900 shadow-lg" : cn(config.bg, config.color)
                               )}>
-                                <Icon className="h-2.5 w-2.5" />
+                                <Icon className="h-3 w-3" />
                                 {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
                              </div>
-                             <div className={cn("flex items-center gap-1 text-[10px] font-medium", isExiting ? "text-white/60" : "text-slate-400")}>
-                                {isSlow && <Timer className="h-3 w-3 text-red-500 animate-pulse" />}
-                                {order.timeOpenMinutes}m
-                             </div>
+                             {!isExiting && (
+                                <div className={cn("flex items-center gap-1 text-[10px] font-medium text-slate-400")}>
+                                  {isSlow && <Timer className="h-3 w-3 text-red-500 animate-pulse" />}
+                                  {order.timeOpenMinutes}m
+                                </div>
+                             )}
                           </div>
                         </div>
 
                         <div className="p-4 space-y-4">
                           <div className="grid grid-cols-2 gap-3 text-left">
                             <div className="space-y-0.5">
-                              <p className={cn("text-[9px] font-bold uppercase text-slate-400", isExiting && "text-white/60")}>Area</p>
+                              <p className={cn("text-[9px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Floor</p>
                               <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
                                 {order.floor}
                               </div>
                             </div>
                             <div className="space-y-0.5">
-                              <p className={cn("text-[9px] font-bold uppercase text-slate-400", isExiting && "text-white/60")}>Staff</p>
+                              <p className={cn("text-[9px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Staff</p>
                               <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
                                 {order.server}
                               </div>
@@ -375,12 +384,12 @@ export default function OrderHubPage() {
                 })}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed text-center">
+              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed text-center p-12">
                 <div className="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
                   <ClipboardList className="h-8 w-8" />
                 </div>
-                <p className="text-sm font-semibold text-slate-500">No tickets match these filters.</p>
-                <Button variant="outline" size="sm" onClick={() => { setActiveFilter('all'); setFloorFilter('all'); setSearch(''); }}>Reset View</Button>
+                <p className="text-sm font-semibold text-slate-500">No active tickets matching these filters.</p>
+                <Button variant="outline" size="sm" onClick={() => { setActiveFilter('all'); setFloorFilter('all'); setSearch(''); }}>Reset Hub View</Button>
               </div>
             )}
           </div>
@@ -396,7 +405,7 @@ export default function OrderHubPage() {
                 </CardTitle>
                 <Badge className="bg-teal-500/20 text-teal-400 border-0">{recentExits.length}</Badge>
               </div>
-              <CardDescription className="text-white/40 text-xs mt-1 font-medium">Audit trail for finalized tickets.</CardDescription>
+              <CardDescription className="text-white/40 text-xs mt-1 font-medium">Live audit trail for finalized tickets.</CardDescription>
             </CardHeader>
             <ScrollArea className="flex-1">
               <div className="p-4 space-y-4">
@@ -422,7 +431,7 @@ export default function OrderHubPage() {
                 }) : (
                   <div className="py-20 text-center space-y-3">
                     <Activity className="h-8 w-8 text-slate-200 mx-auto" />
-                    <p className="text-xs font-medium text-slate-400">Waiting for live data...</p>
+                    <p className="text-xs font-medium text-slate-400">Waiting for activity...</p>
                   </div>
                 )}
               </div>
@@ -439,9 +448,9 @@ export default function OrderHubPage() {
              <div className="flex items-start gap-4">
                 <HelpCircle className="h-5 w-5 text-[#18B4A6] shrink-0" />
                 <div className="space-y-1">
-                   <p className="text-xs font-bold text-slate-900">Pro-Tip for Admins</p>
+                   <p className="text-xs font-bold text-slate-900">Operational Tip</p>
                    <p className="text-[10px] leading-relaxed text-slate-600 font-medium">
-                     Orders exceeding <span className="font-bold text-red-500">15 minutes</span> in Pending state are automatically highlighted for intervention.
+                     Tickets blinking <span className="font-bold text-green-600">Green</span> or <span className="font-bold text-red-600">Red</span> have just been processed and will be cleared shortly.
                    </p>
                 </div>
              </div>

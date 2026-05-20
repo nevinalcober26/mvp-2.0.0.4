@@ -168,9 +168,9 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.4' },
         },
-        'flip-in': {
-          '0%': { transform: 'perspective(1000px) rotateY(-90deg)', opacity: '0' },
-          '100%': { transform: 'perspective(1000px) rotateY(0deg)', opacity: '1' },
+        'flip-x-in': {
+          '0%': { transform: 'perspective(1000px) rotateX(-90deg)', opacity: '0' },
+          '100%': { transform: 'perspective(1000px) rotateX(0deg)', opacity: '1' },
         },
       },
       animation: {
@@ -181,7 +181,7 @@ export default {
         'collapsible-down': 'collapsible-down 0.2s ease-out',
         'collapsible-up': 'collapsible-up 0.2s ease-out',
         'status-blink': 'status-blink 0.5s ease-in-out infinite',
-        'flip-in': 'flip-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+        'flip-x-in': 'flip-x-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
       },
     },
   },

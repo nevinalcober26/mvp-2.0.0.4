@@ -173,7 +173,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
       ref={cardRef} 
       className={cn(
         "w-full",
-        order.timeOpenMinutes === 0 ? "animate-flip-in" : "animate-in fade-in slide-in-from-left-4 duration-500"
+        order.timeOpenMinutes === 0 ? "animate-flip-x-in" : "animate-in fade-in slide-in-from-left-4 duration-500"
       )}
     >
       <Card 

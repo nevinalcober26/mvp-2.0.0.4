@@ -131,7 +131,7 @@ const formatDuration = (ms: number) => {
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    const minutesAgo = Math.floor(Math.random() * 15) + 1; 
+    const minutesAgo = Math.floor(Math.random() * 10) + 1; 
     const timestamp = subMinutes(new Date(), minutesAgo).getTime();
     
     return {
@@ -297,11 +297,13 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Interval for Incoming & Movement logic (happens every 5s)
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
 
+        // 15% chance to add a new Pending order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -315,6 +317,7 @@ export default function OrderHubPage() {
           return [newOrder, ...prev];
         }
 
+        // 20% chance to move a Pending order to Accepted
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
@@ -322,6 +325,7 @@ export default function OrderHubPage() {
           }
         }
 
+        // 20% chance to move an Accepted order to Preparing
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -329,49 +333,64 @@ export default function OrderHubPage() {
           }
         }
 
-        if (rand > 0.55 && rand < 0.75) {
-          const candidates = prev.filter(o => o.status === 'in_progress');
-          if (candidates.length === 0) return prev;
-
-          const target = candidates[Math.floor(Math.random() * candidates.length)];
-          const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-          const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
-
-          const newLog: EventLog = {
-            id: Math.random().toString(),
-            orderNumber: target.orderNumber,
-            type: randomExit as ExitType,
-            timestamp: new Date(),
-            server: target.server,
-            isNew: true
-          };
-
-          setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
-
-          const updated = prev.map(o => {
-            if (o.id === target.id) {
-              return { 
-                ...o, 
-                status: 'exiting' as HubStatus, 
-                exitType: randomExit as ExitType,
-                originalStatus: o.status 
-              };
-            }
-            return o;
-          });
-
-          setTimeout(() => {
-            setOrders(current => current.filter(o => o.id !== target.id));
-          }, 3200);
-
-          return updated;
-        }
-
         return prev;
       });
-    }, 4500);
+    }, 5000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // STRICT 30-Second Finalization Cycle
+  useEffect(() => {
+    const finalizationInterval = setInterval(() => {
+      setOrders(prev => {
+        const candidates = prev.filter(o => o.status !== 'exiting');
+        if (candidates.length === 0) return prev;
+
+        // Prioritize finalization for those in preparing phase, then anywhere else
+        const preparing = candidates.filter(o => o.status === 'in_progress');
+        const target = preparing.length > 0 
+          ? preparing[Math.floor(Math.random() * preparing.length)]
+          : candidates[Math.floor(Math.random() * candidates.length)];
+
+        const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
+        // 80% chance of success (Completed), 20% chance of an issue
+        const randomExit = Math.random() > 0.8 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
+
+        const newLog: EventLog = {
+          id: Math.random().toString(),
+          orderNumber: target.orderNumber,
+          type: randomExit as ExitType,
+          timestamp: new Date(),
+          server: target.server,
+          isNew: true
+        };
+
+        // Sync exit entry to Activity Log
+        setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
+
+        const updated = prev.map(o => {
+          if (o.id === target.id) {
+            return { 
+              ...o, 
+              status: 'exiting' as HubStatus, 
+              exitType: randomExit as ExitType,
+              originalStatus: o.status 
+            };
+          }
+          return o;
+        });
+
+        // Remove card after 3.2s (allows time for the 2.2s blink + height collapse)
+        setTimeout(() => {
+          setOrders(current => current.filter(o => o.id !== target.id));
+        }, 3200);
+
+        return updated;
+      });
+    }, 30000); // EXACTLY 30 SECONDS
+
+    return () => clearInterval(finalizationInterval);
   }, []);
 
   const getFilteredStatusOrders = (status: HubStatus) => {

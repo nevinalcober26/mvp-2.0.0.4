@@ -16,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import {
   Clock,
-  Users,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -27,7 +26,6 @@ import {
   MapPin,
   ChevronRight,
   Search,
-  Filter,
   Activity,
   Timer,
   HelpCircle,
@@ -64,7 +62,7 @@ interface EventLog {
 
 const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
   pending: {
-    label: 'Pending',
+    label: 'New Order',
     icon: AlertCircle,
     color: 'text-blue-600',
     accent: 'bg-blue-500',
@@ -78,14 +76,14 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
     bg: 'bg-amber-50/50',
   },
   in_progress: {
-    label: 'In Progress',
+    label: 'Preparing',
     icon: Play,
     color: 'text-teal-600',
     accent: 'bg-teal-500',
     bg: 'bg-teal-50/50',
   },
   exiting: {
-    label: 'Finalizing...',
+    label: 'Processing...',
     icon: Clock,
     color: 'text-white',
     accent: 'bg-gray-400',
@@ -208,9 +206,9 @@ export default function OrderHubPage() {
           <div className="space-y-1 text-left">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Order Hub</h1>
             <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Monitoring</span>
+               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Active Orders</span>
                <span className="h-1 w-1 rounded-full bg-slate-300" />
-               <span>{orders.length} Active Channels</span>
+               <span>{orders.length} Total Tickets</span>
             </div>
           </div>
 
@@ -218,7 +216,7 @@ export default function OrderHubPage() {
              <div className="relative w-64 text-left">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Order ID or Server..." 
+                  placeholder="Order # or Server..." 
                   className="pl-9 h-10 bg-slate-50 border-slate-200"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -238,7 +236,7 @@ export default function OrderHubPage() {
              <Select value={lookbackDays} onValueChange={setLookbackDays}>
                 <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200">
                   <History className="h-3.5 w-3.5 mr-2 text-slate-400" />
-                  <SelectValue placeholder="Lookback" />
+                  <SelectValue placeholder="History View" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1">Last 24 Hours</SelectItem>
@@ -263,7 +261,7 @@ export default function OrderHubPage() {
               )}
               onClick={() => setActiveFilter('all')}
             >
-              Overview ({counts.all})
+              All Orders ({counts.all})
             </Button>
             {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
               const config = statusConfig[status];
@@ -284,7 +282,7 @@ export default function OrderHubPage() {
                   onClick={() => setActiveFilter(status)}
                 >
                   <div className={cn("w-2 h-2 rounded-full", config.accent)} />
-                  {status.replace('_', ' ')}
+                  {config.label}
                   <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-slate-100 text-[10px]">{count}</Badge>
                 </Button>
               );

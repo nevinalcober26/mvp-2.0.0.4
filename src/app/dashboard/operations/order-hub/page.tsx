@@ -30,6 +30,7 @@ import {
   RefreshCw,
   ClipboardList,
   Calendar,
+  Armchair,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -50,6 +51,7 @@ type ExitType = 'COMPLETED' | 'CANCELLED' | 'REJECTED' | 'FAILED';
 interface HubOrder {
   id: string;
   orderNumber: string;
+  table: string;
   status: HubStatus;
   exitType?: ExitType;
   itemsCount: number;
@@ -129,6 +131,7 @@ const generateMockOrders = (count: number): HubOrder[] => {
     return {
       id: `${Math.random().toString(36).substr(2, 9)}`,
       orderNumber: `#${4420 + i}`,
+      table: `T${Math.floor(Math.random() * 20) + 1}`,
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
       server: servers[Math.floor(Math.random() * servers.length)],
@@ -218,18 +221,24 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
           <div className="p-4 space-y-3">
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
-                  <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-bold text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
-                    By Staff {order.server}
-                  </span>
+                <div className={cn("flex flex-col gap-0.5", isExiting ? "text-white/80" : "text-slate-500")}>
+                  <div className="flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 opacity-70" />
+                    <span className="font-bold text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
+                      By Staff {order.server}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <Armchair className="h-3.5 w-3.5 opacity-70" />
+                    <span className="font-bold text-xs text-inherit">Table {order.table}</span>
+                  </div>
                 </div>
                 
                 <TooltipProvider>
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
                       <div className={cn(
-                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors shrink-0",
+                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors shrink-0 self-start",
                         isExiting ? "bg-white/10 text-white" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
                       )}>
                         <Timer className="h-3 w-3" />
@@ -289,6 +298,7 @@ export default function OrderHubPage() {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
             orderNumber: `#${4500 + Math.floor(Math.random() * 1000)}`,
+            table: `T${Math.floor(Math.random() * 20) + 1}`,
             status: 'pending',
             itemsCount: Math.floor(Math.random() * 5) + 1,
             server: servers[Math.floor(Math.random() * servers.length)],
@@ -372,7 +382,8 @@ export default function OrderHubPage() {
       if (activeStatus !== status) return false;
       if (o.timestamp < lookbackThreshold) return false;
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
-                           o.server.toLowerCase().includes(search.toLowerCase());
+                           o.server.toLowerCase().includes(search.toLowerCase()) ||
+                           o.table.toLowerCase().includes(search.toLowerCase());
       return matchesSearch;
     }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
   };
@@ -404,7 +415,7 @@ export default function OrderHubPage() {
              <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Search order or waiter..." 
+                  placeholder="Search order, table, or waiter..." 
                   className="pl-10 h-11 bg-slate-50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all shadow-none"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -500,14 +511,14 @@ export default function OrderHubPage() {
                         >
                           <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
                           <div className="space-y-1">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between text-left">
                                <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
                                <span className="text-[9px] font-bold text-slate-400 uppercase">just now</span>
                             </div>
                             <div className="flex items-center gap-2">
                                <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
                                   {event.type}
-                               </Badge>
+                                </Badge>
                                <span className="text-[10px] font-bold text-slate-500 italic">By Staff {event.server}</span>
                             </div>
                           </div>
@@ -523,13 +534,13 @@ export default function OrderHubPage() {
                 </ScrollArea>
               </Card>
 
-              <Card className="bg-white border p-5 rounded-2xl shadow-sm">
+              <Card className="bg-white border p-5 rounded-2xl shadow-sm text-left">
                  <div className="flex items-start gap-3">
                     <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                       <p className="text-xs font-bold text-slate-900">Simulation Active</p>
+                       <p className="text-xs font-bold text-slate-900">Live Order Tracking</p>
                        <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                         Tickets are dynamically aging. All timers reflect the <span className="text-primary font-bold">total wait time</span> since the guest placed the order.
+                         This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
                        </p>
                     </div>
                  </div>

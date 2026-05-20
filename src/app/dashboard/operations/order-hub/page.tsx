@@ -43,6 +43,7 @@ interface HubOrder {
   timeOpen: string;
   floor: string;
   timestamp: number;
+  originalStatus?: HubStatus; // Track status before exit for filtering
 }
 
 const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
@@ -70,7 +71,7 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
   exiting: {
     label: 'Exiting...',
     icon: Clock,
-    color: 'text-gray-400',
+    color: 'text-white',
     accent: 'bg-gray-400',
     bg: 'bg-gray-100',
   }
@@ -120,7 +121,12 @@ export default function OrderHubPage() {
 
         const updated = prev.map(o => {
           if (o.id === target.id) {
-            return { ...o, status: 'exiting' as HubStatus, exitType: randomExit };
+            return { 
+              ...o, 
+              status: 'exiting' as HubStatus, 
+              exitType: randomExit,
+              originalStatus: o.status 
+            };
           }
           return o;
         });
@@ -131,21 +137,25 @@ export default function OrderHubPage() {
 
         return updated;
       });
-    }, 8000); // Faster interval for testing with many cards
+    }, 5000); // 5s interval for a more active "live" feel
 
     return () => clearInterval(interval);
   }, []);
 
   const filteredOrders = useMemo(() => {
-    return orders.filter(o => activeFilter === 'all' || o.status === activeFilter);
+    return orders.filter(o => {
+      if (activeFilter === 'all') return true;
+      // Show if it matches active filter OR if it is currently exiting and USED TO match active filter
+      return o.status === activeFilter || (o.status === 'exiting' && o.originalStatus === activeFilter);
+    });
   }, [orders, activeFilter]);
 
   const counts = useMemo(() => {
     return {
       all: orders.length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      accepted: orders.filter(o => o.status === 'accepted').length,
-      in_progress: orders.filter(o => o.status === 'in_progress').length,
+      pending: orders.filter(o => o.status === 'pending' || (o.status === 'exiting' && o.originalStatus === 'pending')).length,
+      accepted: orders.filter(o => o.status === 'accepted' || (o.status === 'exiting' && o.originalStatus === 'accepted')).length,
+      in_progress: orders.filter(o => o.status === 'in_progress' || (o.status === 'exiting' && o.originalStatus === 'in_progress')).length,
     };
   }, [orders]);
 
@@ -178,7 +188,7 @@ export default function OrderHubPage() {
                 </Select>
                 <div className="h-6 w-px bg-slate-200" />
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  Total Managed: {orders.length}
+                  Total Active: {orders.length}
                 </span>
               </div>
 
@@ -306,7 +316,7 @@ export default function OrderHubPage() {
                               {order.itemsCount} Items
                             </p>
                             <p className={cn("text-[10px] font-medium transition-colors font-sans", isExiting ? "text-white/60" : "text-slate-500")}>
-                              Pending Prep
+                              {isExiting ? 'Order Processed' : 'Pending Prep'}
                             </p>
                           </div>
                         </div>

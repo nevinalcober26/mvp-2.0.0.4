@@ -150,11 +150,11 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
     if (isExiting && cardRef.current) {
       const tl = gsap.timeline();
       tl.to(cardRef.current, {
-        delay: 2.2,
+        delay: 2.2, // Time to allow the blink/pulse animation to command attention
         duration: 0.5,
         opacity: 0,
-        scale: 0.95,
-        ease: 'power2.inOut'
+        scale: 0.8,
+        ease: 'power2.in'
       })
       .to(cardRef.current, {
         duration: 0.3,
@@ -180,7 +180,9 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
       <Card 
         className={cn(
           "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
-          isExiting ? cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent") : "bg-white hover:shadow-md",
+          isExiting 
+            ? cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent") 
+            : "bg-white hover:shadow-md",
           isDelayed && !isExiting && "border-rose-200 bg-rose-50/30"
         )}
       >
@@ -219,7 +221,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs text-inherit">By {order.server}</span>
+                  <span className="font-medium text-xs text-inherit">By Staff {order.server}</span>
                 </div>
                 
                 <TooltipProvider>
@@ -506,7 +508,7 @@ export default function OrderHubPage() {
                            <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
                               {event.type}
                            </Badge>
-                           <span className="text-[10px] font-medium text-slate-500 italic">By {event.server}</span>
+                           <span className="text-[10px] font-medium text-slate-500 italic">By Staff {event.server}</span>
                         </div>
                       </div>
                     </div>

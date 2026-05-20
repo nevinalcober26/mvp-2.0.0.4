@@ -83,20 +83,31 @@ const exitConfig: Record<ExitType, { color: string; bg: string; text: string }> 
   FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED' },
 };
 
-const initialOrders: HubOrder[] = [
-  { id: '1', orderNumber: '#4421', status: 'pending', itemsCount: 4, server: 'Alex', timeOpen: '2m', floor: 'Ground', timestamp: Date.now() },
-  { id: '2', orderNumber: '#4422', status: 'accepted', itemsCount: 2, server: 'Maria', timeOpen: '5m', floor: 'Ground', timestamp: Date.now() },
-  { id: '3', orderNumber: '#4423', status: 'in_progress', itemsCount: 6, server: 'Sarah', timeOpen: '8m', floor: 'First', timestamp: Date.now() },
-  { id: '4', orderNumber: '#4424', status: 'pending', itemsCount: 1, server: 'John', timeOpen: '1m', floor: 'Ground', timestamp: Date.now() },
-  { id: '5', orderNumber: '#4425', status: 'in_progress', itemsCount: 3, server: 'Emma', timeOpen: '12m', floor: 'Ground', timestamp: Date.now() },
-  { id: '6', orderNumber: '#4426', status: 'accepted', itemsCount: 5, server: 'Lisa', timeOpen: '4m', floor: 'First', timestamp: Date.now() },
-];
+const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
+const floors = ['Ground', 'First', 'Terrace', 'Lounge'];
+const statuses: HubStatus[] = ['pending', 'accepted', 'in_progress'];
+
+const generateMockOrders = (count: number): HubOrder[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `${i + 1}`,
+    orderNumber: `#${4420 + i}`,
+    status: statuses[i % 3],
+    itemsCount: Math.floor(Math.random() * 8) + 1,
+    server: servers[Math.floor(Math.random() * servers.length)],
+    timeOpen: `${Math.floor(Math.random() * 15) + 1}m`,
+    floor: floors[Math.floor(Math.random() * floors.length)],
+    timestamp: Date.now() - Math.floor(Math.random() * 1000000),
+  }));
+};
+
+const initialOrders: HubOrder[] = generateMockOrders(48);
 
 export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>(initialOrders);
   const [lookbackDays, setLookbackDays] = useState('1');
   const [activeFilter, setActiveFilter] = useState<'all' | HubStatus>('all');
 
+  // Simulator for exit animations
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
@@ -120,7 +131,7 @@ export default function OrderHubPage() {
 
         return updated;
       });
-    }, 15000);
+    }, 8000); // Faster interval for testing with many cards
 
     return () => clearInterval(interval);
   }, []);
@@ -129,16 +140,25 @@ export default function OrderHubPage() {
     return orders.filter(o => activeFilter === 'all' || o.status === activeFilter);
   }, [orders, activeFilter]);
 
+  const counts = useMemo(() => {
+    return {
+      all: orders.length,
+      pending: orders.filter(o => o.status === 'pending').length,
+      accepted: orders.filter(o => o.status === 'accepted').length,
+      in_progress: orders.filter(o => o.status === 'in_progress').length,
+    };
+  }, [orders]);
+
   return (
     <div className={cn("min-h-screen bg-[#F8FAFC]", inter.className)}>
       <DashboardHeader />
       <main className="p-4 sm:p-6 lg:p-10 space-y-8">
-        <div className="max-w-7xl mx-auto space-y-8 text-left">
+        <div className="max-w-[1600px] mx-auto space-y-8 text-left">
           
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
-              <p className="text-slate-500 text-sm font-medium">Monitor and manage active floor operations in real-time.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-sans">Live Order Hub</h1>
+              <p className="text-slate-500 text-sm font-medium font-sans">Monitor and manage active floor operations in real-time.</p>
             </div>
           </div>
 
@@ -157,41 +177,46 @@ export default function OrderHubPage() {
                   </SelectContent>
                 </Select>
                 <div className="h-6 w-px bg-slate-200" />
-                <span className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
-                  {orders.length} ACTIVE ORDERS
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  Total Managed: {orders.length}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-lg border border-slate-200">
+              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200">
                 <Button 
-                  variant={activeFilter === 'all' ? 'secondary' : 'ghost'} 
+                  variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-8 px-4 text-xs font-semibold rounded-md transition-all", 
-                    activeFilter === 'all' ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
+                    "h-9 px-4 text-xs font-bold rounded-lg transition-all", 
+                    activeFilter === 'all' ? "bg-white shadow-sm text-slate-900 border border-slate-200" : "text-slate-500 hover:text-slate-700"
                   )}
                   onClick={() => setActiveFilter('all')}
                 >
-                  All
+                  All ({counts.all})
                 </Button>
                 {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
                   const config = statusConfig[status];
                   const isActive = activeFilter === status;
+                  const count = counts[status as keyof typeof counts];
+                  
                   return (
                     <Button 
                       key={status}
                       variant="ghost" 
                       size="sm" 
                       className={cn(
-                        "h-8 px-3 text-xs font-semibold rounded-md transition-all capitalize flex items-center", 
+                        "h-9 px-4 text-xs font-bold rounded-lg transition-all capitalize flex items-center gap-2", 
                         isActive 
                           ? cn("bg-white shadow-sm border border-slate-200", config.color) 
                           : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       )}
                       onClick={() => setActiveFilter(status)}
                     >
-                      <div className={cn("w-1.5 h-1.5 rounded-full mr-2", config.accent)} />
+                      <div className={cn("w-1.5 h-1.5 rounded-full", config.accent)} />
                       {status.replace('_', ' ')}
+                      <span className={cn("text-[10px] opacity-60", isActive ? config.color : "text-slate-400")}>
+                        {count}
+                      </span>
                     </Button>
                   );
                 })}
@@ -226,20 +251,20 @@ export default function OrderHubPage() {
                       isExiting ? "border-transparent" : "bg-white"
                     )}>
                       <div className="space-y-0.5 text-left">
-                        <span className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Order ID</span>
-                        <h3 className={cn("text-xl font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
+                        <span className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Order ID</span>
+                        <h3 className={cn("text-lg font-bold tracking-tight font-sans", isExiting ? "text-white" : "text-slate-900")}>
                           {order.orderNumber}
                         </h3>
                       </div>
                       <div className={cn("flex flex-col items-end gap-1 text-right")}>
                          <div className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors",
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors font-sans",
                             isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
                           )}>
                             <Icon className="h-3 w-3" />
                             {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
                          </div>
-                         <div className={cn("flex items-center gap-1 text-[10px] font-medium transition-colors", isExiting ? "text-white/60" : "text-slate-400")}>
+                         <div className={cn("flex items-center gap-1 text-[10px] font-medium transition-colors font-sans", isExiting ? "text-white/60" : "text-slate-400")}>
                             <Clock className="h-3 w-3" />
                             {order.timeOpen}
                          </div>
@@ -250,15 +275,15 @@ export default function OrderHubPage() {
                     <div className="p-5 space-y-4 text-left">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Location</p>
-                          <div className={cn("flex items-center gap-1.5 font-medium text-sm", isExiting ? "text-white" : "text-slate-700")}>
+                          <p className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Location</p>
+                          <div className={cn("flex items-center gap-1.5 font-medium text-xs font-sans", isExiting ? "text-white" : "text-slate-700")}>
                             <MapPin className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
-                            {order.floor} Floor
+                            {order.floor}
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>Server</p>
-                          <div className={cn("flex items-center gap-1.5 font-medium text-sm", isExiting ? "text-white" : "text-slate-700")}>
+                          <p className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Server</p>
+                          <div className={cn("flex items-center gap-1.5 font-medium text-xs font-sans", isExiting ? "text-white" : "text-slate-700")}>
                             <Users className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
                             {order.server}
                           </div>
@@ -277,11 +302,11 @@ export default function OrderHubPage() {
                              <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-500")} />
                           </div>
                           <div>
-                            <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>
+                            <p className={cn("text-xs font-bold font-sans", isExiting ? "text-white" : "text-slate-700")}>
                               {order.itemsCount} Items
                             </p>
-                            <p className={cn("text-[10px] font-medium transition-colors", isExiting ? "text-white/60" : "text-slate-500")}>
-                              In this ticket
+                            <p className={cn("text-[10px] font-medium transition-colors font-sans", isExiting ? "text-white/60" : "text-slate-500")}>
+                              Pending Prep
                             </p>
                           </div>
                         </div>
@@ -300,10 +325,10 @@ export default function OrderHubPage() {
                 <ClipboardList className="h-10 w-10 text-slate-300" />
               </div>
               <div className="space-y-1">
-                <p className="text-xl font-bold text-slate-900">No active orders</p>
-                <p className="text-sm font-medium text-slate-500">Wait for guests to scan and order from their menu.</p>
+                <p className="text-xl font-bold text-slate-900 font-sans">No active orders found</p>
+                <p className="text-sm font-medium text-slate-500 font-sans">The kitchen appears to be clear for this status.</p>
               </div>
-              <Button variant="outline" className="font-bold rounded-lg px-6" onClick={() => setActiveFilter('all')}>View All History</Button>
+              <Button variant="outline" className="font-bold rounded-lg px-6 font-sans" onClick={() => setActiveFilter('all')}>View All History</Button>
             </div>
           )}
 

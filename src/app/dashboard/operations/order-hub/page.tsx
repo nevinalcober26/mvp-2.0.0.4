@@ -77,7 +77,7 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
 };
 
 const exitConfig: Record<ExitType, { color: string; bg: string; text: string }> = {
-  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'SUCCESS' },
+  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'COMPLETED' },
   CANCELLED: { color: 'text-white', bg: 'bg-red-600', text: 'CANCELLED' },
   REJECTED: { color: 'text-white', bg: 'bg-red-600', text: 'REJECTED' },
   FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED' },
@@ -157,7 +157,7 @@ export default function OrderHubPage() {
                   </SelectContent>
                 </Select>
                 <div className="h-6 w-px bg-slate-200" />
-                <span className="text-sm font-semibold text-slate-600">
+                <span className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
                   {orders.length} ACTIVE ORDERS
                 </span>
               </div>

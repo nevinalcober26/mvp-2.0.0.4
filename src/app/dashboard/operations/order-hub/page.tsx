@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
+import { formatDistanceToNow } from 'date-fns';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -201,7 +203,7 @@ export default function OrderHubPage() {
       {/* Dynamic Sub-Header */}
       <div className="bg-white border-b px-4 sm:px-6 lg:px-10 py-4 shrink-0">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Order Hub</h1>
             <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
                <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Monitoring</span>
@@ -211,7 +213,7 @@ export default function OrderHubPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-             <div className="relative w-64">
+             <div className="relative w-64 text-left">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
                   placeholder="Order ID or Server..." 
@@ -311,7 +313,7 @@ export default function OrderHubPage() {
                         <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
                       )}
 
-                      <CardContent className="p-0 flex flex-col h-full">
+                      <CardContent className="p-0 flex flex-col h-full text-left">
                         <div className={cn(
                           "p-4 flex items-center justify-between border-b border-slate-50",
                           isExiting ? "border-transparent bg-transparent" : "bg-white"
@@ -340,7 +342,7 @@ export default function OrderHubPage() {
                         </div>
 
                         <div className="p-4 space-y-4">
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-2 gap-3 text-left">
                             <div className="space-y-0.5">
                               <p className={cn("text-[9px] font-bold uppercase text-slate-400", isExiting && "text-white/60")}>Area</p>
                               <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
@@ -372,7 +374,7 @@ export default function OrderHubPage() {
                 })}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed">
+              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed text-center">
                 <div className="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
                   <ClipboardList className="h-8 w-8" />
                 </div>
@@ -386,7 +388,7 @@ export default function OrderHubPage() {
         {/* Live Pulse Sidebar */}
         <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
           <Card className="flex-1 border-0 shadow-sm bg-white overflow-hidden flex flex-col rounded-3xl">
-            <CardHeader className="bg-[#142424] text-white p-6 shrink-0">
+            <CardHeader className="bg-[#142424] text-white p-6 shrink-0 text-left">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
                   <History className="h-4 w-4 text-[#18B4A6]" /> Recent Events
@@ -400,7 +402,7 @@ export default function OrderHubPage() {
                 {recentExits.length > 0 ? recentExits.map((event) => {
                   const config = exitConfig[event.type];
                   return (
-                    <div key={event.id} className="relative pl-6 pb-4 border-l border-slate-100 last:border-0 last:pb-0">
+                    <div key={event.id} className="relative pl-6 pb-4 border-l border-slate-100 last:border-0 last:pb-0 text-left">
                       <div className={cn("absolute -left-1.5 top-0 h-3 w-3 rounded-full border-2 border-white", config.bg)} />
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
@@ -432,7 +434,7 @@ export default function OrderHubPage() {
           </Card>
 
           {/* Quick Help Card */}
-          <Card className="bg-[#18B4A6]/10 border-0 p-5 rounded-3xl">
+          <Card className="bg-[#18B4A6]/10 border-0 p-5 rounded-3xl text-left">
              <div className="flex items-start gap-4">
                 <HelpCircle className="h-5 w-5 text-[#18B4A6] shrink-0" />
                 <div className="space-y-1">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -150,7 +149,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
     if (isExiting && cardRef.current) {
       const tl = gsap.timeline();
       tl.to(cardRef.current, {
-        delay: 2.2, // Time to allow the blink/pulse animation to command attention
+        delay: 2.2, // Visual emphasis time
         duration: 0.5,
         opacity: 0,
         scale: 0.8,
@@ -221,14 +220,16 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs text-inherit">By Staff {order.server}</span>
+                  <span className="font-medium text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
+                    By Staff {order.server}
+                  </span>
                 </div>
                 
                 <TooltipProvider>
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
                       <div className={cn(
-                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors",
+                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors shrink-0",
                         isExiting ? "bg-white/10 text-white" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
                       )}>
                         <Timer className="h-3 w-3" />
@@ -273,7 +274,7 @@ export default function OrderHubPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
-        // 1. Increment time for all active orders
+        // 1. Update aging timers
         const timedOrders = prev.map(o => {
             if (o.status !== 'exiting') {
                 const mins = Math.floor((Date.now() - o.timestamp) / 60000);
@@ -284,7 +285,7 @@ export default function OrderHubPage() {
 
         const rand = Math.random();
 
-        // 2. Chance to add a new PENDING order (entrance)
+        // 2. Simulate Entrance (New Ticket)
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -298,7 +299,7 @@ export default function OrderHubPage() {
           return [newOrder, ...timedOrders];
         }
 
-        // 3. Chance to progress an order from PENDING -> ACCEPTED
+        // 3. Progress PENDING -> ACCEPTED
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = timedOrders.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
@@ -306,7 +307,7 @@ export default function OrderHubPage() {
           }
         }
 
-        // 4. Chance to progress an order from ACCEPTED -> PREPARING
+        // 4. Progress ACCEPTED -> PREPARING
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = timedOrders.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -314,7 +315,7 @@ export default function OrderHubPage() {
           }
         }
 
-        // 5. Chance to FINALIZE an order (Exit Simulation)
+        // 5. Exit Simulation (Finalize & Log)
         if (rand > 0.55 && rand < 0.75) {
           const candidates = timedOrders.filter(o => o.status === 'in_progress');
           if (candidates.length === 0) return timedOrders;
@@ -335,7 +336,7 @@ export default function OrderHubPage() {
             return o;
           });
 
-          // Log the event
+          // SYNC TO ACTIVITY LOG
           const newLog: EventLog = {
             id: Math.random().toString(),
             orderNumber: target.orderNumber,
@@ -347,10 +348,10 @@ export default function OrderHubPage() {
 
           setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
 
-          // Physical removal after animation completion
+          // Physical removal after blinking phase (2.2s + overhead)
           setTimeout(() => {
             setOrders(current => current.filter(o => o.id !== target.id));
-          }, 3000);
+          }, 3200);
 
           return updated;
         }
@@ -390,6 +391,7 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col", inter.className)}>
       <DashboardHeader />
       
+      {/* HUB SUB-HEADER */}
       <div className="bg-white border-b px-6 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
@@ -435,7 +437,8 @@ export default function OrderHubPage() {
         </div>
       </div>
 
-      <main className="flex-1 p-6 flex gap-6">
+      {/* MAIN KANBAN BOARD */}
+      <main className="flex-1 p-6 flex gap-6 relative">
         <div className="flex-1 flex gap-6 min-w-0 pr-80">
           {columns.map((col) => {
             const columnOrders = getFilteredStatusOrders(col.id);
@@ -539,3 +542,4 @@ export default function OrderHubPage() {
     </div>
   );
 }
+

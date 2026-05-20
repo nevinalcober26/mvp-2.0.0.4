@@ -155,7 +155,7 @@ export default function PropertiesPage() {
                                                 <TableCell>
                                                     <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center border overflow-hidden">
                                                         {prop.imageUrl ? (
-                                                            <Image src={prop.imageUrl} alt={prop.name} width={48} height={48} className="object-contain" />
+                                                            <Image src={prop.imageUrl} alt={prop.name} width={48} height={48} className="object-contain" style={{ width: 'auto', height: 'auto' }} />
                                                         ) : (
                                                             <ImageIcon className="h-6 w-6 text-muted-foreground" />
                                                         )}
@@ -202,7 +202,7 @@ export default function PropertiesPage() {
                                         <CardContent className="flex flex-col items-center justify-center p-6 gap-4 aspect-square">
                                             <div className="w-[100px] h-[100px] rounded-lg bg-muted flex items-center justify-center border overflow-hidden transition-transform group-hover:scale-105">
                                                 {prop.imageUrl ? (
-                                                    <Image src={prop.imageUrl} alt={prop.name} width={100} height={100} className="object-contain" />
+                                                    <Image src={prop.imageUrl} alt={prop.name} width={100} height={100} className="object-contain" style={{ width: 'auto', height: 'auto' }} />
                                                 ) : (
                                                     <ImageIcon className="h-10 w-10 text-muted-foreground" />
                                                 )}

@@ -143,7 +143,7 @@ export function PropertySheet({ open, onOpenChange, property, onSave }: Property
                       <div className="space-y-2">
                           <label className="cursor-pointer block w-full aspect-square max-w-[160px] rounded-lg border-2 border-dashed flex items-center justify-center bg-muted overflow-hidden hover:bg-muted/80 hover:border-primary transition-colors">
                               {imagePreview ? (
-                                  <Image src={imagePreview} alt="Property icon preview" width={160} height={160} className="object-contain" />
+                                  <Image src={imagePreview} alt="Property icon preview" width={160} height={160} className="object-contain" style={{ width: 'auto', height: 'auto' }} />
                               ) : (
                                   <div className="text-center text-muted-foreground p-4">
                                       <Upload className="h-8 w-8 mx-auto mb-2" />

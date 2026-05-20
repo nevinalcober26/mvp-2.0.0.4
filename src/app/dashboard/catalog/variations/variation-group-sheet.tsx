@@ -166,7 +166,7 @@ const SortableOptionItem = ({
                     <div className="flex flex-col items-center gap-2">
                     <label className="cursor-pointer block w-full aspect-square rounded-lg border-2 border-dashed flex items-center justify-center bg-muted overflow-hidden hover:bg-muted/80 hover:border-primary transition-colors">
                         {form.watch(`options.${index}.photoUrl`) ? (
-                            <Image src={form.watch(`options.${index}.photoUrl`)!} alt="Option photo" width={120} height={120} className="object-cover"/>
+                            <Image src={form.watch(`options.${index}.photoUrl`)!} alt="Option photo" width={120} height={120} className="object-cover" style={{ width: 'auto', height: 'auto' }}/>
                         ) : (
                             <div className="text-center text-muted-foreground p-2">
                                 <Upload className="h-6 w-6 mx-auto mb-1" />
@@ -389,15 +389,15 @@ export function VariationGroupSheet({ open, onOpenChange, group, onSave }: Varia
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-2xl w-full">
-        <SheetHeader>
-          <SheetTitle>{group ? 'Edit' : 'Add'} Variation Group</SheetTitle>
-          <SheetDescription>
-            Manage variation options that can be applied to products.
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent className="sm:max-w-2xl w-full p-0">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-[calc(100%-4rem)]">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
+            <SheetHeader className="p-6 border-b">
+              <SheetTitle>{group ? 'Edit' : 'Add'} Variation Group</SheetTitle>
+              <SheetDescription>
+                Manage variation options that can be applied to products.
+              </SheetDescription>
+            </SheetHeader>
             <ScrollArea className="flex-grow p-6">
               <div className="space-y-8">
                 <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Group Name</FormLabel><FormControl><Input placeholder="e.g., Size, Toppings, Doneness" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -410,7 +410,7 @@ export function VariationGroupSheet({ open, onOpenChange, group, onSave }: Varia
                       control={form.control}
                       name="maxChoices"
                       render={({ field }) => (
-                        <FormItem className="pl-6 pt-2">
+                        <FormItem className="pl-6 pt-2 text-left">
                           <FormLabel>Max Choices Allowed</FormLabel>
                           <FormControl>
                             <Input type="number" {...field} value={field.value ?? ''} placeholder="Leave blank for unlimited"/>
@@ -425,7 +425,7 @@ export function VariationGroupSheet({ open, onOpenChange, group, onSave }: Varia
                   )}
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                   <FormLabel>Options</FormLabel>
                   <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                     <SortableContext items={fields.map((field) => field.id)} strategy={verticalListSortingStrategy}>

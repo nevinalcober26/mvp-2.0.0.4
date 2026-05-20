@@ -1,4 +1,3 @@
-
 'use client';
 import {
   PieChart,
@@ -406,6 +405,7 @@ export function AppSidebar() {
                                     height={40}
                                     alt="Brand logo"
                                     className="rounded-full object-cover grayscale brightness-110"
+                                    style={{ width: 'auto', height: 'auto' }}
                                   />
                                 )}
                               </div>
@@ -550,6 +550,7 @@ export function AppSidebar() {
                       height={32}
                       alt="Restaurant logo"
                       className="rounded-full object-cover"
+                      style={{ width: 'auto', height: 'auto' }}
                     />
                   </div>
                 </div>

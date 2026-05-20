@@ -9,7 +9,8 @@
     "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "git:fix": "git config pull.rebase false"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

@@ -205,7 +205,7 @@ export function DashboardHeader() {
                   height={32}
                   alt="User avatar"
                   className="rounded-full object-cover"
-                  style={{ width: '100%', height: 'auto' }}
+                  style={{ width: 'auto', height: 'auto' }}
                   data-ai-hint={userAvatar.imageHint}
                 />
               )}

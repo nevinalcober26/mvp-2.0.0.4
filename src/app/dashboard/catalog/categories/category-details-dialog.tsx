@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -163,7 +162,7 @@ export function CategoryDetailsDialog({
                       <div className="space-y-2">
                           <label className="cursor-pointer block w-full aspect-video max-w-[200px] rounded-lg border-2 border-dashed flex items-center justify-center bg-muted overflow-hidden hover:bg-muted/80 hover:border-primary transition-colors">
                               {imagePreview ? (
-                                  <Image src={imagePreview} alt="Category image preview" width={200} height={112} className="object-contain" />
+                                  <Image src={imagePreview} alt="Category image preview" width={200} height={112} className="object-contain" style={{ width: 'auto', height: 'auto' }} />
                               ) : (
                                   <div className="text-center text-muted-foreground p-4">
                                       <Upload className="h-8 w-8 mx-auto mb-2" />

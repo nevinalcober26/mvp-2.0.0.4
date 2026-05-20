@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -78,27 +79,27 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-blue-500',
     bg: 'bg-blue-50/50',
     accent: 'bg-blue-500',
-    tooltip: 'Time since placed. Awaiting review.',
+    tooltip: 'Total time since customer placed the order. Awaiting staff acknowledgement.',
   },
   accepted: {
     label: 'ACCEPTED',
-    subLabel: 'Confirmed in queue',
+    subLabel: 'Confirmed & in kitchen queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
     bg: 'bg-indigo-50/50',
     accent: 'bg-indigo-500',
-    tooltip: 'Time since placed. In kitchen queue.',
+    tooltip: 'Total time since customer placed the order. Staff has confirmed, ticket is in kitchen queue.',
   },
   in_progress: {
     label: 'PREPARING',
-    subLabel: 'Kitchen is cooking',
+    subLabel: 'Kitchen is cooking now',
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
     bg: 'bg-teal-50/50',
     accent: 'bg-teal-500',
-    tooltip: 'Time since placed. Kitchen is cooking.',
+    tooltip: 'Total time since customer placed the order. Kitchen is currently cooking this order.',
   },
   exiting: {
     label: 'UPDATING',
@@ -228,7 +229,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800">
-                      <p className="font-bold mb-1">Status Duration</p>
+                      <p className="font-bold mb-1">Status Timing</p>
                       <p className="opacity-90 font-medium">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>

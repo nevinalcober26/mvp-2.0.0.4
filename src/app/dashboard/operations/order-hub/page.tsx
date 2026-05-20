@@ -170,7 +170,13 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
   }, [isExiting]);
 
   return (
-    <div ref={cardRef} className="w-full animate-in fade-in zoom-in-95 duration-500">
+    <div 
+      ref={cardRef} 
+      className={cn(
+        "w-full animate-in fade-in zoom-in-95 duration-500",
+        order.timeOpenMinutes === 0 ? "slide-in-from-top-4" : "slide-in-from-left-4"
+      )}
+    >
       <Card 
         className={cn(
           "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
@@ -227,7 +233,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                         {order.timeOpenMinutes}m
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800">
+                    <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800 shadow-xl z-[100]">
                       <p className="font-bold mb-1">Status Timing</p>
                       <p className="opacity-90 font-medium">{(config as any).tooltip}</p>
                     </TooltipContent>
@@ -267,7 +273,7 @@ export default function OrderHubPage() {
       setOrders(prev => {
         const rand = Math.random();
 
-        // 1. Chance to add a new PENDING order (Simulation of new customer arrival)
+        // 1. Chance to add a new PENDING order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -330,7 +336,7 @@ export default function OrderHubPage() {
 
           setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
 
-          // Physical removal after animation
+          // Physical removal after animation completion
           setTimeout(() => {
             setOrders(current => current.filter(o => o.id !== target.id));
           }, 3000);

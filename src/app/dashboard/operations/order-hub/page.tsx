@@ -82,7 +82,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   },
   accepted: {
     label: 'ACCEPTED',
-    subLabel: 'Confirmed in kitchen queue',
+    subLabel: 'Confirmed & in queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
@@ -365,7 +365,7 @@ export default function OrderHubPage() {
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
     { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 

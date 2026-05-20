@@ -72,33 +72,33 @@ interface EventLog {
 const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string; tooltip: string }> = {
   pending: {
     label: 'PENDING',
-    subLabel: 'Waiting for staff review',
+    subLabel: 'New orders to review',
     icon: Clock,
     color: 'text-blue-600',
     dot: 'bg-blue-500',
     bg: 'bg-blue-50/50',
     accent: 'bg-blue-500',
-    tooltip: 'NEW ORDER: This order was just placed by a customer. Staff must manually review and "Accept" the ticket before it is sent to the kitchen for preparation.',
+    tooltip: 'Time since placed. Awaiting review.',
   },
   accepted: {
     label: 'ACCEPTED',
-    subLabel: 'Confirmed in kitchen queue',
+    subLabel: 'Confirmed in queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
     dot: 'bg-indigo-500',
     bg: 'bg-indigo-50/50',
     accent: 'bg-indigo-500',
-    tooltip: 'CONFIRMED: Staff has acknowledged the order. It is now officially in the kitchen queue and waiting for a chef to begin cooking.',
+    tooltip: 'Time since placed. In kitchen queue.',
   },
   in_progress: {
     label: 'PREPARING',
-    subLabel: 'Food is being cooked now',
+    subLabel: 'Kitchen is cooking',
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
     bg: 'bg-teal-50/50',
     accent: 'bg-teal-500',
-    tooltip: 'IN PROGRESS: The kitchen is actively cooking this order. Staff should expect the food to be ready for service shortly.',
+    tooltip: 'Time since placed. Kitchen is cooking.',
   },
   exiting: {
     label: 'UPDATING',
@@ -108,7 +108,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-white',
     bg: 'bg-slate-900',
     accent: 'bg-white',
-    tooltip: 'Finalizing status...',
+    tooltip: 'Finalizing ticket status...',
   }
 };
 
@@ -215,6 +215,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                     <span className={cn("font-bold", isExiting ? "text-white" : "text-slate-900")}>Table {order.tableNumber}</span> • {order.floor}
                   </span>
                 </div>
+                
                 <TooltipProvider>
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
@@ -227,8 +228,8 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800">
-                      <p className="font-semibold mb-1">Status Intelligence</p>
-                      <p className="opacity-80">{(config as any).tooltip}</p>
+                      <p className="font-bold mb-1">Status Duration</p>
+                      <p className="opacity-90 font-medium">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -327,7 +328,7 @@ export default function OrderHubPage() {
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
     { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Food is being cooked now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (

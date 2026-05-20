@@ -149,7 +149,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
     if (isExiting && cardRef.current) {
       const tl = gsap.timeline();
       tl.to(cardRef.current, {
-        delay: 2.2, // Visual emphasis time
+        delay: 2.2,
         duration: 0.5,
         opacity: 0,
         scale: 0.8,
@@ -274,7 +274,6 @@ export default function OrderHubPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
-        // 1. Update aging timers
         const timedOrders = prev.map(o => {
             if (o.status !== 'exiting') {
                 const mins = Math.floor((Date.now() - o.timestamp) / 60000);
@@ -285,7 +284,7 @@ export default function OrderHubPage() {
 
         const rand = Math.random();
 
-        // 2. Simulate Entrance (New Ticket)
+        // Simulate Entrance
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -299,7 +298,7 @@ export default function OrderHubPage() {
           return [newOrder, ...timedOrders];
         }
 
-        // 3. Progress PENDING -> ACCEPTED
+        // Progress PENDING -> ACCEPTED
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = timedOrders.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
@@ -307,7 +306,7 @@ export default function OrderHubPage() {
           }
         }
 
-        // 4. Progress ACCEPTED -> PREPARING
+        // Progress ACCEPTED -> PREPARING
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = timedOrders.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -315,7 +314,7 @@ export default function OrderHubPage() {
           }
         }
 
-        // 5. Exit Simulation (Finalize & Log)
+        // Exit Simulation
         if (rand > 0.55 && rand < 0.75) {
           const candidates = timedOrders.filter(o => o.status === 'in_progress');
           if (candidates.length === 0) return timedOrders;
@@ -336,7 +335,6 @@ export default function OrderHubPage() {
             return o;
           });
 
-          // SYNC TO ACTIVITY LOG
           const newLog: EventLog = {
             id: Math.random().toString(),
             orderNumber: target.orderNumber,
@@ -348,7 +346,6 @@ export default function OrderHubPage() {
 
           setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
 
-          // Physical removal after blinking phase (2.2s + overhead)
           setTimeout(() => {
             setOrders(current => current.filter(o => o.id !== target.id));
           }, 3200);
@@ -370,11 +367,7 @@ export default function OrderHubPage() {
     return orders.filter(o => {
       const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
       if (activeStatus !== status) return false;
-
-      // Filter by Lookback Period
       if (o.timestamp < lookbackThreshold) return false;
-
-      // Filter by Search Query
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
                            o.server.toLowerCase().includes(search.toLowerCase());
       return matchesSearch;
@@ -391,7 +384,6 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col", inter.className)}>
       <DashboardHeader />
       
-      {/* HUB SUB-HEADER */}
       <div className="bg-white border-b px-6 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
@@ -437,109 +429,110 @@ export default function OrderHubPage() {
         </div>
       </div>
 
-      {/* MAIN KANBAN BOARD */}
-      <main className="flex-1 p-6 flex gap-6 relative">
-        <div className="flex-1 flex gap-6 min-w-0 pr-80">
-          {columns.map((col) => {
-            const columnOrders = getFilteredStatusOrders(col.id);
-            return (
-              <div key={col.id} className="flex-1 flex flex-col min-w-[280px] h-full text-left">
-                <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-4 rounded-xl border transition-all", col.bg)}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("h-2.5 w-2.5 rounded-full", col.dot)} />
-                      <h2 className="text-sm font-bold text-slate-800 tracking-tight">{col.label}</h2>
+      <main className="flex-1 p-6">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-6">
+          <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0 h-full">
+            {columns.map((col) => {
+              const columnOrders = getFilteredStatusOrders(col.id);
+              return (
+                <div key={col.id} className="flex flex-col min-w-0 h-full text-left">
+                  <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-4 rounded-xl border transition-all", col.bg)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={cn("h-2.5 w-2.5 rounded-full", col.dot)} />
+                        <h2 className="text-sm font-bold text-slate-800 tracking-tight">{col.label}</h2>
+                      </div>
+                      <Badge className="bg-slate-900 text-white font-bold px-2 py-0 h-5 text-[10px] rounded-md">
+                        {columnOrders.length}
+                      </Badge>
                     </div>
-                    <Badge className="bg-slate-900 text-white font-bold px-2 py-0 h-5 text-[10px] rounded-md">
-                      {columnOrders.length}
-                    </Badge>
+                    <p className="text-[11px] font-medium text-slate-500 pl-4.5 mt-0.5">{col.subLabel}</p>
                   </div>
-                  <p className="text-[11px] font-medium text-slate-500 pl-4.5 mt-0.5">{col.subLabel}</p>
+                  
+                  <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner min-h-[500px]">
+                    <div className="flex flex-col gap-4 pb-20">
+                      {columnOrders.length > 0 ? columnOrders.map((order) => (
+                        <OrderCard key={order.id} order={order} />
+                      )) : (
+                        <div className="py-20 text-center opacity-30">
+                          <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Column Clear</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </div>
+              );
+            })}
+          </div>
+
+          <aside className="xl:col-span-1">
+            <div className="sticky top-[88px] space-y-6">
+              <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[500px]">
+                <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-teal-400" /> Activity Log
+                    </CardTitle>
+                    <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
+                  </div>
+                  <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
+                    History of finalized tickets.
+                  </CardDescription>
+                </CardHeader>
                 
-                <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner">
-                  <div className="flex flex-col gap-4 pb-20">
-                    {columnOrders.length > 0 ? columnOrders.map((order) => (
-                      <OrderCard key={order.id} order={order} />
-                    )) : (
+                <ScrollArea className="flex-1">
+                  <div className="p-6 space-y-6">
+                    {recentExits.length > 0 ? recentExits.map((event) => {
+                      const config = exitConfig[event.type];
+                      return (
+                        <div 
+                          key={event.id} 
+                          className={cn(
+                            "relative pl-6 pb-6 border-l last:border-0 last:pb-0 transition-all duration-1000",
+                            event.isNew ? cn("animate-status-blink rounded-r-lg py-2 -ml-2 pl-8", config.pulseColor) : ""
+                          )}
+                        >
+                          <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                               <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
+                               <span className="text-[9px] font-bold text-slate-400">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                               <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
+                                  {event.type}
+                               </Badge>
+                               <span className="text-[10px] font-medium text-slate-500 italic">By Staff {event.server}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }) : (
                       <div className="py-20 text-center opacity-30">
-                        <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Column Clear</p>
+                        <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monitoring...</p>
                       </div>
                     )}
                   </div>
                 </ScrollArea>
-              </div>
-            );
-          })}
-        </div>
+              </Card>
 
-        {/* STICKY MANAGEMENT SIDEBAR */}
-        <aside className="sticky top-6 self-start w-80 hidden xl:flex flex-col gap-6 text-left z-30">
-          <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[500px]">
-            <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
-              <div className="flex items-center justify-between mb-1">
-                <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-teal-400" /> Activity Log
-                </CardTitle>
-                <Badge className="bg-white/10 text-white border-0 text-[10px] font-bold px-2 py-0 rounded-md">{recentExits.length}</Badge>
-              </div>
-              <CardDescription className="text-white/40 text-[10px] font-medium uppercase tracking-wider">
-                History of finalized tickets.
-              </CardDescription>
-            </CardHeader>
-            
-            <ScrollArea className="flex-1">
-              <div className="p-6 space-y-6">
-                {recentExits.length > 0 ? recentExits.map((event) => {
-                  const config = exitConfig[event.type];
-                  return (
-                    <div 
-                      key={event.id} 
-                      className={cn(
-                        "relative pl-6 pb-6 border-l last:border-0 last:pb-0 transition-all duration-1000",
-                        event.isNew ? cn("animate-status-blink rounded-r-lg py-2 -ml-2 pl-8", config.pulseColor) : ""
-                      )}
-                    >
-                      <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                           <span className="text-sm font-bold text-slate-900">Order {event.orderNumber}</span>
-                           <span className="text-[9px] font-bold text-slate-400">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <Badge className={cn("text-[9px] font-bold h-4 px-1.5 border-0 rounded-md", config.bg, "text-white")}>
-                              {event.type}
-                           </Badge>
-                           <span className="text-[10px] font-medium text-slate-500 italic">By Staff {event.server}</span>
-                        </div>
-                      </div>
+              <Card className="bg-white border p-5 rounded-2xl shadow-sm">
+                 <div className="flex items-start gap-3">
+                    <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                       <p className="text-xs font-bold text-slate-900">Simulation Active</p>
+                       <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
+                         Tickets are dynamically aging. All timers reflect the <span className="text-primary font-bold">total wait time</span> since the guest placed the order.
+                       </p>
                     </div>
-                  );
-                }) : (
-                  <div className="py-20 text-center opacity-30">
-                    <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Monitoring...</p>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </Card>
-
-          <Card className="bg-white border p-5 rounded-2xl shadow-sm shrink-0">
-             <div className="flex items-start gap-3">
-                <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                   <p className="text-xs font-bold text-slate-900">Simulation Active</p>
-                   <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                     Tickets are dynamically aging. All timers reflect the <span className="text-primary font-bold">total wait time</span> since the guest placed the order.
-                   </p>
-                </div>
-             </div>
-          </Card>
-        </aside>
+                 </div>
+              </Card>
+            </div>
+          </aside>
+        </div>
       </main>
     </div>
   );
 }
-

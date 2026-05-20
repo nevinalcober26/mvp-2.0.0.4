@@ -23,6 +23,7 @@ import {
   History,
   ClipboardList,
   MapPin,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';

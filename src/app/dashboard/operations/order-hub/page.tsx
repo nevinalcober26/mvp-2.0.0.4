@@ -326,7 +326,7 @@ export default function OrderHubPage() {
   };
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
-    { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
+    { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
     { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
     { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];

@@ -164,6 +164,10 @@ export default {
             height: '0',
           },
         },
+        'status-blink': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
+        },
       },
       animation: {
         'shine-loop': 'shine-loop 3s ease-in-out infinite',
@@ -172,6 +176,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'collapsible-down': 'collapsible-down 0.2s ease-out',
         'collapsible-up': 'collapsible-up 0.2s ease-out',
+        'status-blink': 'status-blink 0.5s ease-in-out infinite',
       },
     },
   },

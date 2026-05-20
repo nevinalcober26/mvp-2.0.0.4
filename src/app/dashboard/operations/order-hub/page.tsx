@@ -75,11 +75,11 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
   }
 };
 
-const exitConfig: Record<ExitType, { color: string; bg: string; border: string }> = {
-  COMPLETED: { color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-500' },
-  CANCELLED: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500' },
-  REJECTED: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500' },
-  FAILED: { color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-500' },
+const exitConfig: Record<ExitType, { color: string; bg: string; border: string; text: string }> = {
+  COMPLETED: { color: 'text-white', bg: 'bg-green-500', border: 'border-green-600', text: 'SUCCESS' },
+  CANCELLED: { color: 'text-white', bg: 'bg-red-500', border: 'border-red-600', text: 'CANCELLED' },
+  REJECTED: { color: 'text-white', bg: 'bg-red-500', border: 'border-red-600', text: 'REJECTED' },
+  FAILED: { color: 'text-white', bg: 'bg-red-600', border: 'border-red-700', text: 'FAILED' },
 };
 
 const initialOrders: HubOrder[] = [
@@ -120,18 +120,14 @@ export default function OrderHubPage() {
         // Set timeout to remove it after blink
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
-          toast({
-            title: `Order ${target.orderNumber} ${randomExit}`,
-            description: `Order has been removed from live hub.`,
-          });
-        }, 3000);
+        }, 3500);
 
         return updated;
       });
-    }, 15000); // Simulate every 15 seconds
+    }, 12000); // Simulate periodically
 
     return () => clearInterval(interval);
-  }, [toast]);
+  }, []);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => activeFilter === 'all' || o.status === activeFilter);
@@ -202,7 +198,7 @@ export default function OrderHubPage() {
             {filteredOrders.map((order) => {
               const isExiting = order.status === 'exiting';
               const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
-              const Icon = isExiting ? History : config.icon;
+              const Icon = isExiting ? (order.exitType === 'COMPLETED' ? CheckCircle2 : XCircle) : config.icon;
 
               return (
                 <Card 
@@ -210,57 +206,57 @@ export default function OrderHubPage() {
                   className={cn(
                     "group relative transition-all duration-300 border-2 overflow-hidden",
                     config.border,
-                    isExiting && "animate-pulse"
+                    isExiting && "animate-status-blink scale-[1.05] z-10",
+                    isExiting && config.bg
                   )}
                 >
                   <CardContent className="p-6 flex flex-col items-center justify-center aspect-square text-center space-y-4">
                     <div className={cn(
                       "h-12 w-12 rounded-full flex items-center justify-center transition-colors shadow-sm",
-                      config.bg
+                      isExiting ? "bg-white/20" : config.bg
                     )}>
-                      <Icon className={cn("h-6 w-6", config.color)} />
+                      <Icon className={cn("h-6 w-6", isExiting ? "text-white" : config.color)} />
                     </div>
 
                     <div className="space-y-1">
-                      <p className="text-3xl font-black tracking-tighter text-foreground">
+                      <p className={cn("text-3xl font-black tracking-tighter", isExiting ? "text-white" : "text-foreground")}>
                         {order.orderNumber}
                       </p>
-                      <p className={cn("text-xs font-black uppercase tracking-widest", config.color)}>
-                        {isExiting ? order.exitType : config.label}
+                      <p className={cn("text-[10px] font-black uppercase tracking-widest", isExiting ? "text-white/80" : config.color)}>
+                        {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
                       </p>
                     </div>
 
-                    <div className="w-full grid grid-cols-2 gap-y-2 pt-2 border-t border-dashed">
+                    <div className={cn(
+                        "w-full grid grid-cols-2 gap-y-2 pt-2 border-t border-dashed",
+                        isExiting ? "border-white/20" : "border-border"
+                    )}>
                       <div className="text-left space-y-0.5">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Floor</p>
-                        <p className="text-xs font-bold text-foreground">{order.floor}</p>
+                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Floor</p>
+                        <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.floor}</p>
                       </div>
                       <div className="text-right space-y-0.5">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Time</p>
-                        <p className="text-xs font-bold text-foreground">{order.timeOpen}</p>
+                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Time</p>
+                        <p className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.timeOpen}</p>
                       </div>
                       <div className="text-left space-y-0.5">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Server</p>
+                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Server</p>
                         <div className="flex items-center gap-1.5">
-                          <div className="h-4 w-4 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Users className="h-2.5 w-2.5 text-primary" />
+                          <div className={cn("h-4 w-4 rounded-full flex items-center justify-center", isExiting ? "bg-white/20" : "bg-primary/10")}>
+                            <Users className={cn("h-2.5 w-2.5", isExiting ? "text-white" : "text-primary")} />
                           </div>
-                          <span className="text-xs font-bold text-foreground">{order.server}</span>
+                          <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.server}</span>
                         </div>
                       </div>
                       <div className="text-right space-y-0.5">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Items</p>
+                        <p className={cn("text-[10px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-muted-foreground")}>Items</p>
                         <div className="flex items-center justify-end gap-1.5">
-                           <Package className="h-3 w-3 text-muted-foreground" />
-                           <span className="text-xs font-bold text-foreground">{order.itemsCount}</span>
+                           <Package className={cn("h-3 w-3", isExiting ? "text-white/60" : "text-muted-foreground")} />
+                           <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-foreground")}>{order.itemsCount}</span>
                         </div>
                       </div>
                     </div>
                   </CardContent>
-
-                  {isExiting && (
-                    <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] pointer-events-none" />
-                  )}
                 </Card>
               );
             })}

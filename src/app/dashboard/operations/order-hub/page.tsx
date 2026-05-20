@@ -21,7 +21,6 @@ import {
   AlertCircle,
   Play,
   Package,
-  History,
   MapPin,
   Search,
   Activity,
@@ -55,6 +54,7 @@ interface HubOrder {
   server: string;
   timeOpenMinutes: number;
   floor: string;
+  tableNumber: string;
   timestamp: number;
   originalStatus?: HubStatus;
 }
@@ -87,7 +87,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     accent: 'bg-indigo-500',
   },
   in_progress: {
-    label: 'IN PROGRESS',
+    label: 'PREPARING',
     subLabel: 'Kitchen is cooking now',
     icon: Play,
     color: 'text-teal-600',
@@ -126,6 +126,7 @@ const generateMockOrders = (count: number): HubOrder[] => {
     server: servers[Math.floor(Math.random() * servers.length)],
     timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
     floor: floors[Math.floor(Math.random() * floors.length)],
+    tableNumber: `T${(i % 24) + 1}`,
     timestamp: Date.now() - Math.floor(Math.random() * 600000),
   }));
 };
@@ -179,7 +180,9 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
             <div className="flex items-center justify-between">
               <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                 <MapPin className="h-3.5 w-3.5 opacity-70" />
-                <span className="font-medium text-xs">{order.floor}</span>
+                <span className="font-medium text-xs">
+                  <span className="font-bold text-slate-900">{order.tableNumber}</span> • {order.floor}
+                </span>
               </div>
               <TooltipProvider>
                 <Tooltip>
@@ -287,8 +290,8 @@ export default function OrderHubPage() {
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'Waiting for staff review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in kitchen queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'IN PROGRESS', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (

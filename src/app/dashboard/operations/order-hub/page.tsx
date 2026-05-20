@@ -115,11 +115,96 @@ const generateMockOrders = (count: number): HubOrder[] => {
   }));
 };
 
+const OrderCard = ({ order }: { order: HubOrder }) => {
+  const isExiting = order.status === 'exiting';
+  const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
+  const Icon = isExiting ? exitConfig[order.exitType!].icon : config.icon;
+  const isSlow = order.timeOpenMinutes > 15 && order.status === 'pending';
+
+  return (
+    <Card 
+      className={cn(
+        "group relative transition-all duration-300 border-0 overflow-hidden shadow-sm hover:shadow-md h-fit",
+        isExiting ? cn(config.bg, "scale-105 z-20 shadow-2xl animate-status-blink ring-4 ring-white/50") : "bg-white",
+        isSlow && !isExiting && "ring-1 ring-red-200"
+      )}
+    >
+      {isExiting && (
+        <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+           <Icon className="h-16 w-16 text-white" />
+        </div>
+      )}
+
+      {!isExiting && (
+        <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
+      )}
+
+      <CardContent className="p-0 flex flex-col h-full text-left relative z-10">
+        <div className={cn(
+          "p-3 flex items-center justify-between border-b border-slate-50",
+          isExiting ? "border-white/10 bg-black/5" : "bg-white"
+        )}>
+          <div className="space-y-0.5">
+            <span className={cn("text-[8px] font-bold uppercase tracking-wider", isExiting ? "text-white/80" : "text-slate-400")}>
+                {isExiting ? 'FINAL STATUS' : isSlow ? 'DELAYED' : 'ORDER ID'}
+            </span>
+            <h3 className={cn("text-sm font-bold", isExiting ? "text-white" : "text-slate-900")}>
+              {order.orderNumber}
+            </h3>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+             <div className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
+                isExiting ? "bg-white text-slate-900 shadow-sm" : cn(config.bg, config.color)
+              )}>
+                <Icon className="h-2.5 w-2.5" />
+                {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
+             </div>
+             {!isExiting && (
+                <div className={cn("flex items-center gap-1 text-[9px] font-medium text-slate-400")}>
+                  {isSlow && <Timer className="h-2.5 w-2.5 text-red-500 animate-pulse" />}
+                  {order.timeOpenMinutes}m
+                </div>
+             )}
+          </div>
+        </div>
+
+        <div className="p-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2 text-left">
+            <div className="space-y-0.5">
+              <p className={cn("text-[8px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Floor</p>
+              <div className={cn("flex items-center gap-1 text-[11px] font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+                {order.floor}
+              </div>
+            </div>
+            <div className="space-y-0.5">
+              <p className={cn("text-[8px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Staff</p>
+              <div className={cn("flex items-center gap-1 text-[11px] font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+                {order.server}
+              </div>
+            </div>
+          </div>
+
+          <div className={cn(
+            "flex items-center justify-between p-2 rounded-lg border border-dashed",
+            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
+          )}>
+            <div className="flex items-center gap-2">
+               <Package className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-400")} />
+               <span className={cn("text-[11px] font-bold", isExiting ? "text-white" : "text-slate-700")}>{order.itemsCount} Items</span>
+            </div>
+            <ChevronRight className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-300")} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [lookbackDays, setLookbackDays] = useState('1');
-  const [activeFilter, setActiveFilter] = useState<'all' | HubStatus>('all');
   const [search, setSearch] = useState('');
   const [floorFilter, setFloorFilter] = useState('all');
 
@@ -136,8 +221,6 @@ export default function OrderHubPage() {
 
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-        
-        // Bias towards COMPLETED
         const rand = Math.random();
         const exitTypeIndex = rand > 0.3 ? 0 : Math.floor(Math.random() * (exitTypes.length - 1)) + 1;
         const randomExit = exitTypes[exitTypeIndex];
@@ -154,7 +237,6 @@ export default function OrderHubPage() {
           return o;
         });
 
-        // Add to history log
         setRecentExits(prevExits => [{
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
@@ -165,7 +247,7 @@ export default function OrderHubPage() {
 
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
-        }, 4000); // 4s blink time for high visibility
+        }, 4000);
 
         return updated;
       });
@@ -174,27 +256,22 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredOrders = useMemo(() => {
+  const getFilteredStatusOrders = (status: HubStatus) => {
     return orders.filter(o => {
-      const isExiting = o.status === 'exiting';
-      // Exiting orders should always be visible to grab attention
-      if (isExiting) return true;
+      const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
+      if (activeStatus !== status) return false;
 
-      const matchesFilter = activeFilter === 'all' || o.status === activeFilter;
       const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || o.server.toLowerCase().includes(search.toLowerCase());
       const matchesFloor = floorFilter === 'all' || o.floor === floorFilter;
-      return matchesFilter && matchesSearch && matchesFloor;
+      return matchesSearch && matchesFloor;
     }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
-  }, [orders, activeFilter, search, floorFilter]);
+  };
 
-  const counts = useMemo(() => {
-    return {
-      all: orders.length,
-      pending: orders.filter(o => o.status === 'pending').length,
-      accepted: orders.filter(o => o.status === 'accepted').length,
-      in_progress: orders.filter(o => o.status === 'in_progress').length,
-    };
-  }, [orders]);
+  const columns: { id: HubStatus; label: string; accent: string }[] = [
+    { id: 'pending', label: 'Pending', accent: 'bg-blue-500' },
+    { id: 'accepted', label: 'Accepted', accent: 'bg-amber-500' },
+    { id: 'in_progress', label: 'In Progress', accent: 'bg-teal-500' },
+  ];
 
   return (
     <div className={cn("min-h-screen bg-[#F1F5F9] flex flex-col", inter.className)}>
@@ -206,9 +283,9 @@ export default function OrderHubPage() {
           <div className="space-y-1 text-left">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Order Hub</h1>
             <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Active Orders</span>
+               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Feed</span>
                <span className="h-1 w-1 rounded-full bg-slate-300" />
-               <span>{orders.length} Total Tickets</span>
+               <span>{orders.length} Active Tickets</span>
             </div>
           </div>
 
@@ -216,7 +293,7 @@ export default function OrderHubPage() {
              <div className="relative w-64 text-left">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Order # or Server..." 
+                  placeholder="Find Order or Server..." 
                   className="pl-9 h-10 bg-slate-50 border-slate-200"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -248,153 +325,40 @@ export default function OrderHubPage() {
       </div>
 
       <main className="flex-1 overflow-hidden p-4 sm:p-6 lg:p-10 flex gap-8">
-        <div className="flex-1 flex flex-col min-w-0 space-y-6">
-          
-          {/* Status Filters */}
-          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm w-fit">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={cn(
-                "h-9 px-4 text-xs font-bold rounded-lg transition-all", 
-                activeFilter === 'all' ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:text-slate-700"
-              )}
-              onClick={() => setActiveFilter('all')}
-            >
-              All Orders ({counts.all})
-            </Button>
-            {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
-              const config = statusConfig[status];
-              const isActive = activeFilter === status;
-              const count = counts[status as keyof typeof counts];
-              
-              return (
-                <Button 
-                  key={status}
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn(
-                    "h-9 px-4 text-xs font-bold rounded-lg transition-all capitalize flex items-center gap-2", 
-                    isActive 
-                      ? "bg-white shadow-sm border border-slate-200" 
-                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-                  )}
-                  onClick={() => setActiveFilter(status)}
-                >
-                  <div className={cn("w-2 h-2 rounded-full", config.accent)} />
-                  {config.label}
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-slate-100 text-[10px]">{count}</Badge>
-                </Button>
-              );
-            })}
-          </div>
-
-          {/* High Density Grid */}
-          <div className="flex-1 overflow-y-auto pr-2">
-            {filteredOrders.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                {filteredOrders.map((order) => {
-                  const isExiting = order.status === 'exiting';
-                  const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
-                  const Icon = isExiting ? exitConfig[order.exitType!].icon : config.icon;
-                  const isSlow = order.timeOpenMinutes > 15 && order.status === 'pending';
-
-                  return (
-                    <Card 
-                      key={order.id}
-                      className={cn(
-                        "group relative transition-all duration-300 border-0 overflow-hidden shadow-sm hover:shadow-md",
-                        isExiting ? cn(config.bg, "scale-105 z-50 shadow-2xl animate-status-blink ring-4 ring-white/50") : "bg-white",
-                        isSlow && !isExiting && "ring-1 ring-red-200"
-                      )}
-                    >
-                      {/* Background Visual for Attention */}
-                      {isExiting && (
-                        <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
-                           <Icon className="h-24 w-24 text-white" />
-                        </div>
-                      )}
-
-                      {!isExiting && (
-                        <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
-                      )}
-
-                      <CardContent className="p-0 flex flex-col h-full text-left relative z-10">
-                        <div className={cn(
-                          "p-4 flex items-center justify-between border-b border-slate-50",
-                          isExiting ? "border-white/10 bg-black/5" : "bg-white"
-                        )}>
-                          <div className="space-y-0.5">
-                            <span className={cn("text-[9px] font-bold uppercase tracking-wider", isExiting ? "text-white/80" : "text-slate-400")}>
-                                {isExiting ? 'FINAL STATUS' : isSlow ? 'DELAYED TICKET' : 'ORDER ID'}
-                            </span>
-                            <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
-                              {order.orderNumber}
-                            </h3>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                             <div className={cn(
-                                "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                isExiting ? "bg-white text-slate-900 shadow-lg" : cn(config.bg, config.color)
-                              )}>
-                                <Icon className="h-3 w-3" />
-                                {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
-                             </div>
-                             {!isExiting && (
-                                <div className={cn("flex items-center gap-1 text-[10px] font-medium text-slate-400")}>
-                                  {isSlow && <Timer className="h-3 w-3 text-red-500 animate-pulse" />}
-                                  {order.timeOpenMinutes}m
-                                </div>
-                             )}
-                          </div>
-                        </div>
-
-                        <div className="p-4 space-y-4">
-                          <div className="grid grid-cols-2 gap-3 text-left">
-                            <div className="space-y-0.5">
-                              <p className={cn("text-[9px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Floor</p>
-                              <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
-                                {order.floor}
-                              </div>
-                            </div>
-                            <div className="space-y-0.5">
-                              <p className={cn("text-[9px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Staff</p>
-                              <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
-                                {order.server}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className={cn(
-                            "flex items-center justify-between p-2.5 rounded-lg border border-dashed",
-                            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
-                          )}>
-                            <div className="flex items-center gap-2">
-                               <Package className={cn("h-3.5 w-3.5", isExiting ? "text-white" : "text-slate-400")} />
-                               <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>{order.itemsCount} Items</span>
-                            </div>
-                            <ChevronRight className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-300")} />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed text-center p-12">
-                <div className="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
-                  <ClipboardList className="h-8 w-8" />
+        <div className="flex-1 flex gap-6 min-w-0">
+          {columns.map((col) => {
+            const columnOrders = getFilteredStatusOrders(col.id);
+            return (
+              <div key={col.id} className="flex-1 flex flex-col min-w-[300px] h-full">
+                <div className="flex items-center justify-between mb-4 px-2">
+                  <div className="flex items-center gap-2">
+                    <div className={cn("h-2 w-2 rounded-full", col.accent)} />
+                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">{col.label}</h2>
+                  </div>
+                  <Badge variant="secondary" className="bg-slate-200 text-slate-600 font-bold px-2 py-0.5 text-[10px]">
+                    {columnOrders.length}
+                  </Badge>
                 </div>
-                <p className="text-sm font-semibold text-slate-500">No active tickets matching these filters.</p>
-                <Button variant="outline" size="sm" onClick={() => { setActiveFilter('all'); setFloorFilter('all'); setSearch(''); }}>Reset Hub View</Button>
+                
+                <ScrollArea className="flex-1 rounded-2xl bg-slate-200/40 border border-slate-200/60 p-3">
+                  <div className="flex flex-col gap-3">
+                    {columnOrders.length > 0 ? columnOrders.map((order) => (
+                      <OrderCard key={order.id} order={order} />
+                    )) : (
+                      <div className="py-20 text-center opacity-40">
+                        <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-400" />
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">No {col.label} tickets</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
               </div>
-            )}
-          </div>
+            );
+          })}
         </div>
 
         {/* Live Pulse Sidebar */}
-        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
+        <aside className="w-80 hidden 2xl:flex flex-col gap-6 shrink-0">
           <Card className="flex-1 border-0 shadow-sm bg-white overflow-hidden flex flex-col rounded-3xl">
             <CardHeader className="bg-[#142424] text-white p-6 shrink-0 text-left">
               <div className="flex items-center justify-between">
@@ -441,7 +405,6 @@ export default function OrderHubPage() {
             </div>
           </Card>
 
-          {/* Quick Help Card */}
           <Card className="bg-[#18B4A6]/10 border-0 p-5 rounded-3xl text-left">
              <div className="flex items-start gap-4">
                 <HelpCircle className="h-5 w-5 text-[#18B4A6] shrink-0" />

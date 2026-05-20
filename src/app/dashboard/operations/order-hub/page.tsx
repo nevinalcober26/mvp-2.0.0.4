@@ -166,25 +166,35 @@ export default function OrderHubPage() {
                 <Button 
                   variant={activeFilter === 'all' ? 'secondary' : 'ghost'} 
                   size="sm" 
-                  className={cn("h-8 px-4 text-xs font-semibold rounded-md transition-all", activeFilter === 'all' ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700")}
+                  className={cn(
+                    "h-8 px-4 text-xs font-semibold rounded-md transition-all", 
+                    activeFilter === 'all' ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
+                  )}
                   onClick={() => setActiveFilter('all')}
                 >
                   All
                 </Button>
-                {['pending', 'accepted', 'in_progress'].map((status) => (
-                  <Button 
-                    key={status}
-                    variant={activeFilter === status ? 'secondary' : 'ghost'} 
-                    size="sm" 
-                    className={cn(
-                      "h-8 px-3 text-xs font-semibold rounded-md transition-all capitalize", 
-                      activeFilter === status ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
-                    )}
-                    onClick={() => setActiveFilter(status as HubStatus)}
-                  >
-                    {status.replace('_', ' ')}
-                  </Button>
-                ))}
+                {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
+                  const config = statusConfig[status];
+                  const isActive = activeFilter === status;
+                  return (
+                    <Button 
+                      key={status}
+                      variant="ghost" 
+                      size="sm" 
+                      className={cn(
+                        "h-8 px-3 text-xs font-semibold rounded-md transition-all capitalize flex items-center", 
+                        isActive 
+                          ? cn("bg-white shadow-sm border border-slate-200", config.color) 
+                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      )}
+                      onClick={() => setActiveFilter(status)}
+                    >
+                      <div className={cn("w-1.5 h-1.5 rounded-full mr-2", config.accent)} />
+                      {status.replace('_', ' ')}
+                    </Button>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
-import { formatDistanceToNow, subHours } from 'date-fns';
+import { subMinutes } from 'date-fns';
 import {
   Tooltip,
   TooltipContent,
@@ -56,7 +56,6 @@ interface HubOrder {
   exitType?: ExitType;
   itemsCount: number;
   server: string;
-  timeOpenMinutes: number;
   timestamp: number;
   originalStatus?: HubStatus;
 }
@@ -123,10 +122,18 @@ const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseC
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
 const statuses: HubStatus[] = ['pending', 'accepted', 'in_progress'];
 
+const formatDuration = (ms: number) => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}m ${seconds}s`;
+};
+
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    const hoursAgo = Math.floor(Math.random() * 4); 
-    const timestamp = subHours(new Date(), hoursAgo).getTime();
+    // Realistic wait times for a live board: 1-15 minutes
+    const minutesAgo = Math.floor(Math.random() * 15) + 1; 
+    const timestamp = subMinutes(new Date(), minutesAgo).getTime();
     
     return {
       id: `${Math.random().toString(36).substr(2, 9)}`,
@@ -135,18 +142,21 @@ const generateMockOrders = (count: number): HubOrder[] => {
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
       server: servers[Math.floor(Math.random() * servers.length)],
-      timeOpenMinutes: Math.floor((Date.now() - timestamp) / 60000),
       timestamp: timestamp,
     };
   });
 };
 
-const OrderCard = ({ order }: { order: HubOrder }) => {
+const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isExiting = order.status === 'exiting';
   const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
   const Icon = isExiting ? exitConfig[order.exitType!].icon : (config as any).icon;
-  const isDelayed = order.timeOpenMinutes > 15 && (order.status === 'pending' || order.status === 'accepted');
+  
+  const durationMs = now - order.timestamp;
+  const timeOpenMinutes = Math.floor(durationMs / 60000);
+  const isDelayed = timeOpenMinutes > 15 && (order.status === 'pending' || order.status === 'accepted');
+  const isNew = durationMs < 5000; // Less than 5 seconds old
 
   useEffect(() => {
     if (isExiting && cardRef.current) {
@@ -176,7 +186,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
       ref={cardRef} 
       className={cn(
         "w-full",
-        order.timeOpenMinutes === 0 ? "animate-flip-x-in" : "animate-in fade-in slide-in-from-left-4 duration-500"
+        isNew ? "animate-flip-x-in" : "animate-in fade-in slide-in-from-left-4 duration-500"
       )}
     >
       <Card 
@@ -238,15 +248,15 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
                       <div className={cn(
-                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-xs cursor-help transition-colors shrink-0 self-start",
+                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] font-mono cursor-help transition-colors shrink-0 self-start",
                         isExiting ? "bg-white/10 text-white" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
                       )}>
                         <Timer className="h-3 w-3" />
-                        {order.timeOpenMinutes}m
+                        {formatDuration(durationMs)}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800 shadow-xl z-[100]">
-                      <p className="font-bold mb-1">Status Timing</p>
+                      <p className="font-bold mb-1">Wait Time Tracker</p>
                       <p className="opacity-90 font-medium">{(config as any).tooltip}</p>
                     </TooltipContent>
                   </Tooltip>
@@ -275,22 +285,23 @@ export default function OrderHubPage() {
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
   const [lookbackHours, setLookbackHours] = useState('24');
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     setOrders(generateMockOrders(20));
   }, []);
 
+  // Update clock every second for realistic timers
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
-        const timedOrders = prev.map(o => {
-            if (o.status !== 'exiting') {
-                const mins = Math.floor((Date.now() - o.timestamp) / 60000);
-                return { ...o, timeOpenMinutes: mins };
-            }
-            return o;
-        });
-
         const rand = Math.random();
 
         // Simulate Entrance (15% chance)
@@ -302,32 +313,31 @@ export default function OrderHubPage() {
             status: 'pending',
             itemsCount: Math.floor(Math.random() * 5) + 1,
             server: servers[Math.floor(Math.random() * servers.length)],
-            timeOpenMinutes: 0,
             timestamp: Date.now(),
           };
-          return [newOrder, ...timedOrders];
+          return [newOrder, ...prev];
         }
 
         // Progress PENDING -> ACCEPTED (20% chance)
         if (rand > 0.15 && rand < 0.35) {
-          const pendingIdx = timedOrders.findIndex(o => o.status === 'pending');
+          const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
-            return timedOrders.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' } : o);
+            return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' as HubStatus } : o);
           }
         }
 
         // Progress ACCEPTED -> PREPARING (20% chance)
         if (rand > 0.35 && rand < 0.55) {
-          const acceptedIdx = timedOrders.findIndex(o => o.status === 'accepted');
+          const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
-            return timedOrders.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' } : o);
+            return prev.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' as HubStatus } : o);
           }
         }
 
         // SYNCED EXIT Simulation (20% chance)
         if (rand > 0.55 && rand < 0.75) {
-          const candidates = timedOrders.filter(o => o.status === 'in_progress');
-          if (candidates.length === 0) return timedOrders;
+          const candidates = prev.filter(o => o.status === 'in_progress');
+          if (candidates.length === 0) return prev;
 
           const target = candidates[Math.floor(Math.random() * candidates.length)];
           const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
@@ -346,7 +356,7 @@ export default function OrderHubPage() {
           setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
 
           // 2. Set the order to exiting status (Synchronized visual feedback)
-          const updated = timedOrders.map(o => {
+          const updated = prev.map(o => {
             if (o.id === target.id) {
               return { 
                 ...o, 
@@ -366,7 +376,7 @@ export default function OrderHubPage() {
           return updated;
         }
 
-        return timedOrders;
+        return prev;
       });
     }, 4500);
 
@@ -374,7 +384,6 @@ export default function OrderHubPage() {
   }, []);
 
   const getFilteredStatusOrders = (status: HubStatus) => {
-    const now = new Date().getTime();
     const lookbackThreshold = now - (parseInt(lookbackHours) * 60 * 60 * 1000);
 
     return orders.filter(o => {
@@ -385,7 +394,7 @@ export default function OrderHubPage() {
                            o.server.toLowerCase().includes(search.toLowerCase()) ||
                            o.table.toLowerCase().includes(search.toLowerCase());
       return matchesSearch;
-    }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
+    }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
@@ -467,7 +476,7 @@ export default function OrderHubPage() {
                   <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner min-h-[500px]">
                     <div className="flex flex-col gap-4 pb-20">
                       {columnOrders.length > 0 ? columnOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} />
+                        <OrderCard key={order.id} order={order} now={now} />
                       )) : (
                         <div className="py-20 text-center opacity-30">
                           <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
@@ -482,8 +491,8 @@ export default function OrderHubPage() {
           </div>
 
           {/* Sticky Activity Sidebar */}
-          <aside className="xl:col-span-1">
-            <div className="sticky top-[88px] space-y-6">
+          <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit">
+            <div className="space-y-6">
               <Card className="border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl h-[550px]">
                 <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
                   <div className="flex items-center justify-between mb-1">

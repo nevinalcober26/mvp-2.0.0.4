@@ -29,6 +29,7 @@ import {
   Activity,
   Timer,
   HelpCircle,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -60,42 +61,62 @@ interface EventLog {
   server: string;
 }
 
-const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
+const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; dot: string; bg: string }> = {
   pending: {
     label: 'Pending',
-    icon: AlertCircle,
+    icon: Clock,
     color: 'text-blue-600',
-    accent: 'bg-blue-500',
-    bg: 'bg-blue-50/50',
+    dot: 'bg-blue-500',
+    bg: 'bg-blue-50/40',
   },
   accepted: {
     label: 'Accepted',
     icon: CheckCircle2,
-    color: 'text-amber-600',
-    accent: 'bg-amber-500',
-    bg: 'bg-amber-50/50',
+    color: 'text-indigo-600',
+    dot: 'bg-indigo-500',
+    bg: 'bg-indigo-50/40',
   },
   in_progress: {
-    label: 'In Progress',
+    label: 'Preparing',
     icon: Play,
     color: 'text-teal-600',
-    accent: 'bg-teal-500',
-    bg: 'bg-teal-50/50',
+    dot: 'bg-teal-500',
+    bg: 'bg-teal-50/40',
   },
   exiting: {
     label: 'Processing...',
-    icon: Clock,
+    icon: RefreshCwIcon,
     color: 'text-white',
-    accent: 'bg-gray-400',
-    bg: 'bg-gray-100',
+    dot: 'bg-white',
+    bg: 'bg-slate-900',
   }
 };
 
-const exitConfig: Record<ExitType, { color: string; bg: string; text: string; icon: any }> = {
-  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'COMPLETED', icon: CheckCircle2 },
-  CANCELLED: { color: 'text-white', bg: 'bg-red-600', text: 'CANCELLED', icon: XCircle },
-  REJECTED: { color: 'text-white', bg: 'bg-red-600', text: 'REJECTED', icon: XCircle },
-  FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED', icon: AlertCircle },
+function RefreshCwIcon({ className }: { className?: string }) {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={cn("animate-spin", className)}
+    >
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  );
+}
+
+const exitConfig: Record<ExitType, { bg: string; text: string; icon: any }> = {
+  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2 },
+  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle },
+  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle },
+  FAILED: { bg: 'bg-rose-900', text: 'FAILED', icon: AlertCircle },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -107,11 +128,11 @@ const generateMockOrders = (count: number): HubOrder[] => {
     id: `${i + 1}`,
     orderNumber: `#${4420 + i}`,
     status: statuses[i % 3],
-    itemsCount: Math.floor(Math.random() * 8) + 1,
+    itemsCount: Math.floor(Math.random() * 6) + 1,
     server: servers[Math.floor(Math.random() * servers.length)],
-    timeOpenMinutes: Math.floor(Math.random() * 25) + 1,
+    timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
     floor: floors[Math.floor(Math.random() * floors.length)],
-    timestamp: Date.now() - Math.floor(Math.random() * 1000000),
+    timestamp: Date.now() - Math.floor(Math.random() * 600000),
   }));
 };
 
@@ -119,81 +140,76 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
   const isExiting = order.status === 'exiting';
   const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
   const Icon = isExiting ? exitConfig[order.exitType!].icon : config.icon;
-  const isSlow = order.timeOpenMinutes > 15 && order.status === 'pending';
+  const isDelayed = order.timeOpenMinutes > 15 && order.status === 'pending';
 
   return (
     <Card 
       className={cn(
-        "group relative transition-all duration-300 border-0 overflow-hidden shadow-sm hover:shadow-md h-fit",
-        isExiting ? cn(config.bg, "scale-105 z-20 shadow-2xl animate-status-blink ring-4 ring-white/50") : "bg-white",
-        isSlow && !isExiting && "ring-1 ring-red-200"
+        "group relative transition-all duration-300 border shadow-sm hover:shadow-md rounded-2xl overflow-hidden h-fit",
+        isExiting ? cn(config.bg, "scale-105 z-20 shadow-2xl animate-status-blink border-transparent") : "bg-white border-slate-100",
+        isDelayed && !isExiting && "border-rose-200 bg-rose-50/30"
       )}
     >
-      {isExiting && (
-        <div className="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
-           <Icon className="h-16 w-16 text-white" />
-        </div>
-      )}
-
-      {!isExiting && (
-        <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
-      )}
-
-      <CardContent className="p-0 flex flex-col h-full text-left relative z-10">
+      <CardContent className="p-0 flex flex-col h-full relative z-10">
+        {/* Header */}
         <div className={cn(
-          "p-3 flex items-center justify-between border-b border-slate-50",
-          isExiting ? "border-white/10 bg-black/5" : "bg-white"
+          "px-4 py-3 flex items-center justify-between border-b",
+          isExiting ? "border-white/10 bg-black/10" : "border-slate-50 bg-white"
         )}>
-          <div className="space-y-0.5">
-            <span className={cn("text-[8px] font-bold uppercase tracking-wider", isExiting ? "text-white/80" : "text-slate-400")}>
-                {isExiting ? 'FINAL STATUS' : isSlow ? 'DELAYED' : 'ORDER ID'}
+          <div className="flex flex-col">
+            <span className={cn(
+              "text-[10px] font-bold tracking-tight mb-0.5", 
+              isExiting ? "text-white/60" : "text-slate-400"
+            )}>
+                {isExiting ? 'FINAL STATUS' : 'ORDER NUMBER'}
             </span>
-            <h3 className={cn("text-sm font-bold", isExiting ? "text-white" : "text-slate-900")}>
+            <h3 className={cn("text-sm font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
               {order.orderNumber}
             </h3>
           </div>
+          
           <div className="flex flex-col items-end gap-1">
              <div className={cn(
-                "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
-                isExiting ? "bg-white text-slate-900 shadow-sm" : cn(config.bg, config.color)
+                "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold",
+                isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
               )}>
-                <Icon className="h-2.5 w-2.5" />
+                <Icon className="h-3 w-3" />
                 {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
              </div>
-             {!isExiting && (
-                <div className={cn("flex items-center gap-1 text-[9px] font-medium text-slate-400")}>
-                  {isSlow && <Timer className="h-2.5 w-2.5 text-red-500 animate-pulse" />}
-                  {order.timeOpenMinutes}m
-                </div>
-             )}
           </div>
         </div>
 
-        <div className="p-3 space-y-3">
-          <div className="grid grid-cols-2 gap-2 text-left">
-            <div className="space-y-0.5">
-              <p className={cn("text-[8px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Floor</p>
-              <div className={cn("flex items-center gap-1 text-[11px] font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+        {/* Body */}
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className={cn("text-[10px] font-semibold tracking-tight", isExiting ? "text-white/50" : "text-slate-400")}>Floor / Location</p>
+              <div className={cn("flex items-center gap-1.5 text-xs font-medium", isExiting ? "text-white" : "text-slate-700")}>
+                <MapPin className="h-3 w-3 opacity-50" />
                 {order.floor}
               </div>
             </div>
-            <div className="space-y-0.5">
-              <p className={cn("text-[8px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>Staff</p>
-              <div className={cn("flex items-center gap-1 text-[11px] font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+            <div className="space-y-1">
+              <p className={cn("text-[10px] font-semibold tracking-tight", isExiting ? "text-white/50" : "text-slate-400")}>Assigned Staff</p>
+              <div className={cn("flex items-center gap-1.5 text-xs font-medium", isExiting ? "text-white" : "text-slate-700")}>
+                <User className="h-3 w-3 opacity-50" />
                 {order.server}
               </div>
             </div>
           </div>
 
           <div className={cn(
-            "flex items-center justify-between p-2 rounded-lg border border-dashed",
-            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
+            "flex items-center justify-between px-3 py-2.5 rounded-xl border",
+            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50/50 border-slate-100"
           )}>
             <div className="flex items-center gap-2">
-               <Package className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-400")} />
-               <span className={cn("text-[11px] font-bold", isExiting ? "text-white" : "text-slate-700")}>{order.itemsCount} Items</span>
+               <Package className={cn("h-3.5 w-3.5", isExiting ? "text-white" : "text-slate-400")} />
+               <span className={cn("text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>{order.itemsCount} Food Items</span>
             </div>
-            <ChevronRight className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-300")} />
+            <div className={cn("flex items-center gap-1 text-[11px] font-bold", isExiting ? "text-white/80" : isDelayed ? "text-rose-600" : "text-slate-400")}>
+               <Timer className="h-3 w-3" />
+               {order.timeOpenMinutes}m
+            </div>
           </div>
         </div>
       </CardContent>
@@ -212,7 +228,6 @@ export default function OrderHubPage() {
     setOrders(generateMockOrders(48));
   }, []);
 
-  // Simulator for live activity
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
@@ -222,7 +237,7 @@ export default function OrderHubPage() {
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const rand = Math.random();
-        const exitTypeIndex = rand > 0.3 ? 0 : Math.floor(Math.random() * (exitTypes.length - 1)) + 1;
+        const exitTypeIndex = rand > 0.4 ? 0 : Math.floor(Math.random() * (exitTypes.length - 1)) + 1;
         const randomExit = exitTypes[exitTypeIndex];
 
         const updated = prev.map(o => {
@@ -247,11 +262,11 @@ export default function OrderHubPage() {
 
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
-        }, 4000);
+        }, 3500);
 
         return updated;
       });
-    }, 6000);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, []);
@@ -261,93 +276,88 @@ export default function OrderHubPage() {
       const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
       if (activeStatus !== status) return false;
 
-      const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || o.server.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
+                           o.server.toLowerCase().includes(search.toLowerCase());
       const matchesFloor = floorFilter === 'all' || o.floor === floorFilter;
       return matchesSearch && matchesFloor;
     }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes);
   };
 
-  const columns: { id: HubStatus; label: string; accent: string }[] = [
-    { id: 'pending', label: 'Pending', accent: 'bg-blue-500' },
-    { id: 'accepted', label: 'Accepted', accent: 'bg-amber-500' },
-    { id: 'in_progress', label: 'In Progress', accent: 'bg-teal-500' },
+  const columns: { id: HubStatus; label: string; dot: string; bg: string }[] = [
+    { id: 'pending', label: 'Pending', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
+    { id: 'accepted', label: 'Accepted', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
+    { id: 'in_progress', label: 'Preparing', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
   ];
 
   return (
-    <div className={cn("min-h-screen bg-[#F1F5F9] flex flex-col", inter.className)}>
+    <div className={cn("min-h-screen bg-[#F8FAFC] flex flex-col", inter.className)}>
       <DashboardHeader />
       
-      {/* Dynamic Sub-Header */}
-      <div className="bg-white border-b px-4 sm:px-6 lg:px-10 py-4 shrink-0">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Sub-Header */}
+      <div className="bg-white border-b px-6 py-5 shrink-0">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1 text-left">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Order Hub</h1>
-            <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Feed</span>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
+            <div className="flex items-center gap-3 text-sm font-medium text-slate-500">
+               <span className="flex items-center gap-2"><Activity className="h-4 w-4 text-emerald-500" /> Live Kitchen Feed</span>
                <span className="h-1 w-1 rounded-full bg-slate-300" />
                <span>{orders.length} Active Tickets</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-             <div className="relative w-64 text-left">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <div className="flex flex-wrap items-center gap-4">
+             <div className="relative w-72 text-left">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Find Order or Server..." 
-                  className="pl-9 h-10 bg-slate-50 border-slate-200"
+                  placeholder="Find Order or Staff..." 
+                  className="pl-10 h-11 bg-slate-50/50 border-slate-200 rounded-xl font-medium focus-visible:ring-primary/20"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
              </div>
              <Select value={floorFilter} onValueChange={setFloorFilter}>
-                <SelectTrigger className="w-[140px] h-10 bg-slate-50 border-slate-200">
-                  <MapPin className="h-3.5 w-3.5 mr-2 text-slate-400" />
-                  <SelectValue placeholder="Floor" />
+                <SelectTrigger className="w-[160px] h-11 bg-slate-50/50 border-slate-200 rounded-xl font-semibold">
+                  <MapPin className="h-4 w-4 mr-2 text-slate-400" />
+                  <SelectValue placeholder="All Floors" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Floors</SelectItem>
-                  {floors.map(f => <SelectItem key={f} value={f}>{f} Floor</SelectItem>)}
+                <SelectContent className="rounded-xl shadow-xl">
+                  <SelectItem value="all" className="font-medium">All Floors</SelectItem>
+                  {floors.map(f => <SelectItem key={f} value={f} className="font-medium">{f} Floor</SelectItem>)}
                 </SelectContent>
              </Select>
-             <div className="h-6 w-px bg-slate-200 mx-1" />
-             <Select value={lookbackDays} onValueChange={setLookbackDays}>
-                <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200">
-                  <History className="h-3.5 w-3.5 mr-2 text-slate-400" />
-                  <SelectValue placeholder="History View" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Last 24 Hours</SelectItem>
-                  <SelectItem value="7">Last 7 Days</SelectItem>
-                </SelectContent>
-             </Select>
+             <div className="h-8 w-px bg-slate-200 mx-1" />
+             <Button variant="outline" className="h-11 rounded-xl font-bold border-slate-200 bg-white shadow-sm hover:bg-slate-50 gap-2">
+                <History className="h-4 w-4" />
+                History
+             </Button>
           </div>
         </div>
       </div>
 
-      <main className="flex-1 overflow-hidden p-4 sm:p-6 lg:p-10 flex gap-8">
-        <div className="flex-1 flex gap-6 min-w-0">
+      <main className="flex-1 overflow-hidden p-6 lg:p-10 flex gap-10">
+        <div className="flex-1 flex gap-8 min-w-0">
           {columns.map((col) => {
             const columnOrders = getFilteredStatusOrders(col.id);
             return (
-              <div key={col.id} className="flex-1 flex flex-col min-w-[300px] h-full">
-                <div className="flex items-center justify-between mb-4 px-2">
-                  <div className="flex items-center gap-2">
-                    <div className={cn("h-2 w-2 rounded-full", col.accent)} />
-                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest">{col.label}</h2>
+              <div key={col.id} className="flex-1 flex flex-col min-w-[320px] h-full">
+                <div className={cn("flex items-center justify-between mb-5 px-4 py-3 rounded-2xl border border-slate-100", col.bg)}>
+                  <div className="flex items-center gap-3">
+                    <div className={cn("h-2.5 w-2.5 rounded-full", col.dot)} />
+                    <h2 className="text-sm font-bold text-slate-800 tracking-tight uppercase">{col.label}</h2>
                   </div>
-                  <Badge variant="secondary" className="bg-slate-200 text-slate-600 font-bold px-2 py-0.5 text-[10px]">
+                  <Badge className="bg-white text-slate-900 border-slate-200 font-bold px-3 py-0.5 rounded-full shadow-sm">
                     {columnOrders.length}
                   </Badge>
                 </div>
                 
-                <ScrollArea className="flex-1 rounded-2xl bg-slate-200/40 border border-slate-200/60 p-3">
-                  <div className="flex flex-col gap-3">
+                <ScrollArea className="flex-1 rounded-3xl bg-slate-100/30 border border-slate-200/40 p-4">
+                  <div className="flex flex-col gap-4 pb-10">
                     {columnOrders.length > 0 ? columnOrders.map((order) => (
                       <OrderCard key={order.id} order={order} />
                     )) : (
-                      <div className="py-20 text-center opacity-40">
-                        <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-400" />
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">No {col.label} tickets</p>
+                      <div className="py-24 text-center opacity-40">
+                        <ClipboardList className="h-12 w-12 mx-auto mb-4 text-slate-300" />
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Empty Section</p>
                       </div>
                     )}
                   </div>
@@ -357,61 +367,65 @@ export default function OrderHubPage() {
           })}
         </div>
 
-        {/* Live Pulse Sidebar */}
-        <aside className="w-80 hidden 2xl:flex flex-col gap-6 shrink-0">
-          <Card className="flex-1 border-0 shadow-sm bg-white overflow-hidden flex flex-col rounded-3xl">
-            <CardHeader className="bg-[#142424] text-white p-6 shrink-0 text-left">
+        {/* Audit Sidebar */}
+        <aside className="w-80 hidden xl:flex flex-col gap-8 shrink-0">
+          <Card className="flex-1 border border-slate-200 shadow-xl bg-white overflow-hidden flex flex-col rounded-[32px]">
+            <CardHeader className="bg-slate-900 text-white p-7 shrink-0 text-left">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
-                  <History className="h-4 w-4 text-[#18B4A6]" /> Recent Events
+                <CardTitle className="text-sm font-bold tracking-tight uppercase flex items-center gap-2.5">
+                  <History className="h-4 w-4 text-emerald-400" /> Recent Events
                 </CardTitle>
-                <Badge className="bg-teal-500/20 text-teal-400 border-0">{recentExits.length}</Badge>
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-0 font-bold">{recentExits.length}</Badge>
               </div>
-              <CardDescription className="text-white/40 text-xs mt-1 font-medium">Live audit trail for finalized tickets.</CardDescription>
+              <CardDescription className="text-white/40 text-xs mt-1.5 font-medium leading-relaxed">
+                Live operational audit trail for finalized food orders.
+              </CardDescription>
             </CardHeader>
             <ScrollArea className="flex-1">
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-6">
                 {recentExits.length > 0 ? recentExits.map((event) => {
                   const config = exitConfig[event.type];
                   return (
-                    <div key={event.id} className="relative pl-6 pb-4 border-l border-slate-100 last:border-0 last:pb-0 text-left">
-                      <div className={cn("absolute -left-1.5 top-0 h-3 w-3 rounded-full border-2 border-white", config.bg)} />
-                      <div className="space-y-1">
+                    <div key={event.id} className="relative pl-7 pb-6 border-l border-slate-100 last:border-0 last:pb-0 text-left">
+                      <div className={cn("absolute -left-1.5 top-0.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
+                      <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                           <span className="text-xs font-bold text-slate-900">Order {event.orderNumber}</span>
-                           <span className="text-[9px] font-medium text-slate-400 uppercase">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
+                           <span className="text-[13px] font-bold text-slate-900 tracking-tight">Order {event.orderNumber}</span>
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                           <Badge className={cn("text-[9px] font-black h-4 px-1.5 border-0", config.bg, config.color)}>
+                           <Badge className={cn("text-[9px] font-black h-4 px-2 border-0 rounded-md", config.bg, "text-white")}>
                               {event.type}
                            </Badge>
-                           <span className="text-[10px] text-slate-500 font-medium">by {event.server}</span>
+                           <span className="text-[11px] text-slate-500 font-medium italic">by {event.server}</span>
                         </div>
                       </div>
                     </div>
                   );
                 }) : (
-                  <div className="py-20 text-center space-y-3">
-                    <Activity className="h-8 w-8 text-slate-200 mx-auto" />
-                    <p className="text-xs font-medium text-slate-400">Waiting for activity...</p>
+                  <div className="py-24 text-center space-y-4">
+                    <Activity className="h-10 w-10 text-slate-100 mx-auto" />
+                    <p className="text-sm font-medium text-slate-400">Awaiting kitchen activity...</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
-            <div className="p-4 border-t bg-slate-50/50">
-              <Button variant="ghost" className="w-full h-10 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900" asChild>
-                <a href="/dashboard/reports/payments">View Full Audit Trail</a>
+            <div className="p-5 border-t bg-slate-50/50">
+              <Button variant="ghost" className="w-full h-11 text-[11px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 rounded-2xl" asChild>
+                <a href="/dashboard/reports/payments">View Full Audit History</a>
               </Button>
             </div>
           </Card>
 
-          <Card className="bg-[#18B4A6]/10 border-0 p-5 rounded-3xl text-left">
+          <Card className="bg-emerald-50 border border-emerald-100/50 p-6 rounded-[28px] text-left shadow-sm">
              <div className="flex items-start gap-4">
-                <HelpCircle className="h-5 w-5 text-[#18B4A6] shrink-0" />
+                <div className="h-10 w-10 rounded-2xl bg-white flex items-center justify-center shadow-sm border border-emerald-100 shrink-0">
+                  <HelpCircle className="h-5 w-5 text-emerald-600" />
+                </div>
                 <div className="space-y-1">
-                   <p className="text-xs font-bold text-slate-900">Operational Tip</p>
-                   <p className="text-[10px] leading-relaxed text-slate-600 font-medium">
-                     Tickets blinking <span className="font-bold text-green-600">Green</span> or <span className="font-bold text-red-600">Red</span> have just been processed and will be cleared shortly.
+                   <p className="text-xs font-bold text-slate-900">Dashboard Focus</p>
+                   <p className="text-[11px] leading-relaxed text-slate-600 font-medium">
+                     Processing tickets will <span className="font-bold text-emerald-700 underline decoration-emerald-200">pulse</span> for 3 seconds before clearing to allow staff verification.
                    </p>
                 </div>
              </div>

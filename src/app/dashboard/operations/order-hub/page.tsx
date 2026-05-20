@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -127,7 +128,7 @@ const generateMockOrders = (count: number): HubOrder[] => {
     const timestamp = subHours(new Date(), hoursAgo).getTime();
     
     return {
-      id: `${i + 1}`,
+      id: `${Math.random().toString(36).substr(2, 9)}`,
       orderNumber: `#${4420 + i}`,
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
@@ -169,7 +170,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
   }, [isExiting]);
 
   return (
-    <div ref={cardRef} className="w-full">
+    <div ref={cardRef} className="w-full animate-in fade-in zoom-in-95 duration-500">
       <Card 
         className={cn(
           "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
@@ -212,7 +213,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
               <div className="flex items-center justify-between">
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <User className="h-3.5 w-3.5 opacity-70" />
-                  <span className="font-medium text-xs">Waiter: {order.server}</span>
+                  <span className="font-medium text-xs text-inherit">Waiter: {order.server}</span>
                 </div>
                 
                 <TooltipProvider>
@@ -258,51 +259,88 @@ export default function OrderHubPage() {
   const [lookbackHours, setLookbackHours] = useState('24');
 
   useEffect(() => {
-    setOrders(generateMockOrders(48));
+    setOrders(generateMockOrders(20));
   }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
-        const candidates = prev.filter(o => o.status !== 'exiting');
-        if (candidates.length === 0) return prev;
-
-        const target = candidates[Math.floor(Math.random() * candidates.length)];
-        const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const rand = Math.random();
-        const exitTypeIndex = rand > 0.6 ? 0 : Math.floor(Math.random() * (exitTypes.length - 1)) + 1;
-        const randomExit = exitTypes[exitTypeIndex];
 
-        const updated = prev.map(o => {
-          if (o.id === target.id) {
-            return { 
-              ...o, 
-              status: 'exiting' as HubStatus, 
-              exitType: randomExit,
-              originalStatus: o.status 
-            };
+        // 1. Chance to add a new PENDING order (Simulation of new customer arrival)
+        if (rand < 0.15) {
+          const newOrder: HubOrder = {
+            id: Math.random().toString(36).substr(2, 9),
+            orderNumber: `#${4500 + Math.floor(Math.random() * 1000)}`,
+            status: 'pending',
+            itemsCount: Math.floor(Math.random() * 5) + 1,
+            server: servers[Math.floor(Math.random() * servers.length)],
+            timeOpenMinutes: 0,
+            timestamp: Date.now(),
+          };
+          return [newOrder, ...prev];
+        }
+
+        // 2. Chance to progress an order from PENDING -> ACCEPTED
+        if (rand > 0.15 && rand < 0.35) {
+          const pendingIdx = prev.findIndex(o => o.status === 'pending');
+          if (pendingIdx !== -1) {
+            return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' } : o);
           }
-          return o;
-        });
+        }
 
-        const newLog: EventLog = {
-          id: Math.random().toString(),
-          orderNumber: target.orderNumber,
-          type: randomExit,
-          timestamp: new Date(),
-          server: target.server,
-          isNew: true
-        };
+        // 3. Chance to progress an order from ACCEPTED -> PREPARING
+        if (rand > 0.35 && rand < 0.55) {
+          const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
+          if (acceptedIdx !== -1) {
+            return prev.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' } : o);
+          }
+        }
 
-        setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
+        // 4. Chance to FINALIZE an order (Exit Simulation)
+        if (rand > 0.55 && rand < 0.75) {
+          const candidates = prev.filter(o => o.status === 'in_progress');
+          if (candidates.length === 0) return prev;
 
-        setTimeout(() => {
-          setOrders(current => current.filter(o => o.id !== target.id));
-        }, 3000);
+          const target = candidates[Math.floor(Math.random() * candidates.length)];
+          const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
+          const randomExit = Math.random() > 0.7 ? exitTypes[Math.floor(Math.random() * exitTypes.length)] : 'COMPLETED';
 
-        return updated;
+          const updated = prev.map(o => {
+            if (o.id === target.id) {
+              return { 
+                ...o, 
+                status: 'exiting' as HubStatus, 
+                exitType: randomExit as ExitType,
+                originalStatus: o.status 
+              };
+            }
+            return o;
+          });
+
+          // Log the event
+          const newLog: EventLog = {
+            id: Math.random().toString(),
+            orderNumber: target.orderNumber,
+            type: randomExit as ExitType,
+            timestamp: new Date(),
+            server: target.server,
+            isNew: true
+          };
+
+          setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
+
+          // Physical removal after animation
+          setTimeout(() => {
+            setOrders(current => current.filter(o => o.id !== target.id));
+          }, 3000);
+
+          return updated;
+        }
+
+        return prev;
       });
-    }, 6000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
@@ -344,7 +382,7 @@ export default function OrderHubPage() {
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                  SYSTEM LIVE
                </Badge>
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{orders.length} ACTIVE TICKETS</span>
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{orders.filter(o => o.status !== 'exiting').length} ACTIVE TICKETS</span>
             </div>
           </div>
 
@@ -471,9 +509,9 @@ export default function OrderHubPage() {
              <div className="flex items-start gap-3">
                 <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                   <p className="text-xs font-bold text-slate-900">Operational Logic</p>
+                   <p className="text-xs font-bold text-slate-900">Simulation Active</p>
                    <p className="text-[10px] leading-relaxed text-slate-500 font-medium">
-                     Tickets will <span className="text-primary font-bold">blink and scale</span> when finalized, then smoothly collapse so new orders can move up the queue.
+                     The system is simulating live orders. New cards will <span className="text-primary font-bold">fade and zoom in</span> as they progress through the kitchen columns.
                    </p>
                 </div>
              </div>

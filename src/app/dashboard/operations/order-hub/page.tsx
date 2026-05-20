@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -54,7 +55,6 @@ interface HubOrder {
   itemsCount: number;
   server: string;
   timeOpenMinutes: number;
-  floor: string;
   timestamp: number;
   originalStatus?: HubStatus;
 }
@@ -119,12 +119,10 @@ const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseC
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
-const floors = ['Ground Floor', 'First Floor', 'Terrace', 'VIP Lounge'];
 const statuses: HubStatus[] = ['pending', 'accepted', 'in_progress'];
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    // Generate some "older" orders to make lookback meaningful
     const hoursAgo = Math.floor(Math.random() * 48); 
     const timestamp = subHours(new Date(), hoursAgo).getTime();
     
@@ -135,7 +133,6 @@ const generateMockOrders = (count: number): HubOrder[] => {
       itemsCount: Math.floor(Math.random() * 6) + 1,
       server: servers[Math.floor(Math.random() * servers.length)],
       timeOpenMinutes: Math.floor(Math.random() * 20) + 1,
-      floor: floors[Math.floor(Math.random() * floors.length)],
       timestamp: timestamp,
     };
   });
@@ -338,8 +335,8 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-slate-50 flex flex-col", inter.className)}>
       <DashboardHeader />
       
-      <div className="bg-white border-b px-6 py-6 shrink-0">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
+      <div className="bg-white border-b px-6 py-6 shrink-0 text-left">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Hub</h1>
             <div className="flex items-center gap-2">

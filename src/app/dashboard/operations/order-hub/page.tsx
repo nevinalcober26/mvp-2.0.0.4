@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -173,8 +172,8 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
     <div 
       ref={cardRef} 
       className={cn(
-        "w-full animate-in fade-in zoom-in-95 duration-500",
-        order.timeOpenMinutes === 0 ? "slide-in-from-top-4" : "slide-in-from-left-4"
+        "w-full",
+        order.timeOpenMinutes === 0 ? "animate-flip-in" : "animate-in fade-in slide-in-from-left-4 duration-500"
       )}
     >
       <Card 
@@ -282,7 +281,7 @@ export default function OrderHubPage() {
 
         const rand = Math.random();
 
-        // 2. Chance to add a new PENDING order
+        // 2. Chance to add a new PENDING order (entrance)
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),

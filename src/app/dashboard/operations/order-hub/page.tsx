@@ -66,6 +66,7 @@ interface EventLog {
   type: ExitType;
   timestamp: Date;
   server: string;
+  isNew?: boolean;
 }
 
 const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string }> = {
@@ -107,11 +108,11 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   }
 };
 
-const exitConfig: Record<ExitType, { bg: string; text: string; icon: any }> = {
-  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2 },
-  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle },
-  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle },
-  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle },
+const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string }> = {
+  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-50' },
+  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-50' },
+  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-100' },
+  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-100' },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -208,7 +209,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <MapPin className="h-3.5 w-3.5 opacity-70" />
                   <span className="font-medium text-xs">
-                    <span className="font-bold text-slate-900">{order.tableNumber}</span> • {order.floor}
+                    <span className="font-bold text-slate-900">Table {order.tableNumber}</span> • {order.floor}
                   </span>
                 </div>
                 <TooltipProvider>
@@ -285,13 +286,17 @@ export default function OrderHubPage() {
           return o;
         });
 
-        setRecentExits(prevExits => [{
+        // Add to log with "isNew" flag
+        const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
           type: randomExit,
           timestamp: new Date(),
-          server: target.server
-        }, ...prevExits].slice(0, 15));
+          server: target.server,
+          isNew: true
+        };
+
+        setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 15));
 
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
@@ -418,7 +423,13 @@ export default function OrderHubPage() {
                 {recentExits.length > 0 ? recentExits.map((event) => {
                   const config = exitConfig[event.type];
                   return (
-                    <div key={event.id} className="relative pl-6 pb-6 border-l last:border-0 last:pb-0 text-left">
+                    <div 
+                      key={event.id} 
+                      className={cn(
+                        "relative pl-6 pb-6 border-l last:border-0 last:pb-0 text-left transition-all duration-1000",
+                        event.isNew ? cn("animate-status-blink rounded-r-lg py-2 -ml-2 pl-8", config.pulseColor) : ""
+                      )}
+                    >
                       <div className={cn("absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white shadow-sm", config.bg)} />
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">

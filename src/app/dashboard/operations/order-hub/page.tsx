@@ -62,7 +62,7 @@ interface EventLog {
 
 const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
   pending: {
-    label: 'New Order',
+    label: 'Pending',
     icon: AlertCircle,
     color: 'text-blue-600',
     accent: 'bg-blue-500',
@@ -76,7 +76,7 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
     bg: 'bg-amber-50/50',
   },
   in_progress: {
-    label: 'Preparing',
+    label: 'In Progress',
     icon: Play,
     color: 'text-teal-600',
     accent: 'bg-teal-500',

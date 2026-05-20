@@ -209,7 +209,7 @@ const OrderCard = ({ order }: { order: HubOrder }) => {
                 <div className={cn("flex items-center gap-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                   <MapPin className="h-3.5 w-3.5 opacity-70" />
                   <span className="font-medium text-xs">
-                    <span className="font-bold text-slate-900">Table {order.tableNumber}</span> • {order.floor}
+                    <span className={cn("font-bold", isExiting ? "text-white" : "text-slate-900")}>Table {order.tableNumber}</span> • {order.floor}
                   </span>
                 </div>
                 <TooltipProvider>
@@ -332,8 +332,8 @@ export default function OrderHubPage() {
       <DashboardHeader />
       
       <div className="bg-white border-b px-6 py-6 shrink-0">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1 text-left">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
+          <div className="space-y-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Order Monitor</h1>
             <div className="flex items-center gap-2">
                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-2 py-0.5 font-bold text-[10px]">
@@ -345,7 +345,7 @@ export default function OrderHubPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-             <div className="relative w-64 text-left">
+             <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
                   placeholder="Search order or server..." 
@@ -373,7 +373,7 @@ export default function OrderHubPage() {
           {columns.map((col) => {
             const columnOrders = getFilteredStatusOrders(col.id);
             return (
-              <div key={col.id} className="flex-1 flex flex-col min-w-[280px] h-full">
+              <div key={col.id} className="flex-1 flex flex-col min-w-[280px] h-full text-left">
                 <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-4 rounded-xl border transition-all", col.bg)}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -404,9 +404,9 @@ export default function OrderHubPage() {
           })}
         </div>
 
-        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
+        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0 text-left">
           <Card className="flex-1 border shadow-sm bg-white overflow-hidden flex flex-col rounded-2xl">
-            <CardHeader className="bg-slate-900 text-white p-6 shrink-0 text-left">
+            <CardHeader className="bg-slate-900 text-white p-6 shrink-0">
               <div className="flex items-center justify-between mb-1">
                 <CardTitle className="text-xs font-bold tracking-widest uppercase flex items-center gap-2">
                   <Activity className="h-4 w-4 text-teal-400" /> Activity Log
@@ -426,7 +426,7 @@ export default function OrderHubPage() {
                     <div 
                       key={event.id} 
                       className={cn(
-                        "relative pl-6 pb-6 border-l last:border-0 last:pb-0 text-left transition-all duration-1000",
+                        "relative pl-6 pb-6 border-l last:border-0 last:pb-0 transition-all duration-1000",
                         event.isNew ? cn("animate-status-blink rounded-r-lg py-2 -ml-2 pl-8", config.pulseColor) : ""
                       )}
                     >
@@ -455,7 +455,7 @@ export default function OrderHubPage() {
             </ScrollArea>
           </Card>
 
-          <Card className="bg-white border p-5 rounded-2xl text-left shadow-sm">
+          <Card className="bg-white border p-5 rounded-2xl shadow-sm">
              <div className="flex items-start gap-3">
                 <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                 <div className="space-y-1">

@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -24,6 +25,10 @@ import {
   ClipboardList,
   MapPin,
   ChevronRight,
+  Search,
+  Filter,
+  Activity,
+  Timer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -40,10 +45,18 @@ interface HubOrder {
   exitType?: ExitType;
   itemsCount: number;
   server: string;
-  timeOpen: string;
+  timeOpenMinutes: number;
   floor: string;
   timestamp: number;
-  originalStatus?: HubStatus; // Track status before exit for filtering
+  originalStatus?: HubStatus;
+}
+
+interface EventLog {
+  id: string;
+  orderNumber: string;
+  type: ExitType;
+  timestamp: Date;
+  server: string;
 }
 
 const statusConfig: Record<HubStatus, { label: string; icon: any; color: string; accent: string; bg: string }> = {
@@ -77,11 +90,11 @@ const statusConfig: Record<HubStatus, { label: string; icon: any; color: string;
   }
 };
 
-const exitConfig: Record<ExitType, { color: string; bg: string; text: string }> = {
-  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'COMPLETED' },
-  CANCELLED: { color: 'text-white', bg: 'bg-red-600', text: 'CANCELLED' },
-  REJECTED: { color: 'text-white', bg: 'bg-red-600', text: 'REJECTED' },
-  FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED' },
+const exitConfig: Record<ExitType, { color: string; bg: string; text: string; icon: any }> = {
+  COMPLETED: { color: 'text-white', bg: 'bg-green-600', text: 'COMPLETED', icon: CheckCircle2 },
+  CANCELLED: { color: 'text-white', bg: 'bg-red-600', text: 'CANCELLED', icon: XCircle },
+  REJECTED: { color: 'text-white', bg: 'bg-red-600', text: 'REJECTED', icon: XCircle },
+  FAILED: { color: 'text-white', bg: 'bg-red-700', text: 'FAILED', icon: AlertCircle },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -95,20 +108,25 @@ const generateMockOrders = (count: number): HubOrder[] => {
     status: statuses[i % 3],
     itemsCount: Math.floor(Math.random() * 8) + 1,
     server: servers[Math.floor(Math.random() * servers.length)],
-    timeOpen: `${Math.floor(Math.random() * 15) + 1}m`,
+    timeOpenMinutes: Math.floor(Math.random() * 25) + 1,
     floor: floors[Math.floor(Math.random() * floors.length)],
     timestamp: Date.now() - Math.floor(Math.random() * 1000000),
   }));
 };
 
-const initialOrders: HubOrder[] = generateMockOrders(48);
-
 export default function OrderHubPage() {
-  const [orders, setOrders] = useState<HubOrder[]>(initialOrders);
+  const [orders, setOrders] = useState<HubOrder[]>([]);
+  const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [lookbackDays, setLookbackDays] = useState('1');
   const [activeFilter, setActiveFilter] = useState<'all' | HubStatus>('all');
+  const [search, setSearch] = useState('');
+  const [floorFilter, setFloorFilter] = useState('all');
 
-  // Simulator for exit animations
+  useEffect(() => {
+    setOrders(generateMockOrders(48));
+  }, []);
+
+  // Simulator for live activity
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
@@ -117,7 +135,7 @@ export default function OrderHubPage() {
 
         const target = candidates[Math.floor(Math.random() * candidates.length)];
         const exitTypes: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
-        const randomExit = exitTypes[Math.floor(Math.random() * exitTypes.length)];
+        const randomExit = exitTypes[randomExitIndex(exitTypes.length)];
 
         const updated = prev.map(o => {
           if (o.id === target.id) {
@@ -131,24 +149,41 @@ export default function OrderHubPage() {
           return o;
         });
 
+        // Add to history log
+        setRecentExits(prevExits => [{
+          id: Math.random().toString(),
+          orderNumber: target.orderNumber,
+          type: randomExit,
+          timestamp: new Date(),
+          server: target.server
+        }, ...prevExits].slice(0, 15));
+
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target.id));
         }, 3500);
 
         return updated;
       });
-    }, 5000); // 5s interval for a more active "live" feel
+    }, 6000);
 
     return () => clearInterval(interval);
   }, []);
 
+  function randomExitIndex(max: number) {
+    // Bias towards COMPLETED
+    const rand = Math.random();
+    if (rand > 0.3) return 0; // 70% Completed
+    return Math.floor(Math.random() * (max - 1)) + 1;
+  }
+
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      if (activeFilter === 'all') return true;
-      // Show if it matches active filter OR if it is currently exiting and USED TO match active filter
-      return o.status === activeFilter || (o.status === 'exiting' && o.originalStatus === activeFilter);
-    });
-  }, [orders, activeFilter]);
+      const matchesFilter = activeFilter === 'all' || o.status === activeFilter || (o.status === 'exiting' && o.originalStatus === activeFilter);
+      const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || o.server.toLowerCase().includes(search.toLowerCase());
+      const matchesFloor = floorFilter === 'all' || o.floor === floorFilter;
+      return matchesFilter && matchesSearch && matchesFloor;
+    }).sort((a, b) => b.timeOpenMinutes - a.timeOpenMinutes); // Oldest first (bottlenecks)
+  }, [orders, activeFilter, search, floorFilter]);
 
   const counts = useMemo(() => {
     return {
@@ -160,189 +195,255 @@ export default function OrderHubPage() {
   }, [orders]);
 
   return (
-    <div className={cn("min-h-screen bg-[#F8FAFC]", inter.className)}>
+    <div className={cn("min-h-screen bg-[#F1F5F9] flex flex-col", inter.className)}>
       <DashboardHeader />
-      <main className="p-4 sm:p-6 lg:p-10 space-y-8">
-        <div className="max-w-[1600px] mx-auto space-y-8 text-left">
-          
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-sans">Live Order Hub</h1>
-              <p className="text-slate-500 text-sm font-medium font-sans">Monitor and manage active floor operations in real-time.</p>
+      
+      {/* Dynamic Sub-Header */}
+      <div className="bg-white border-b px-4 sm:px-6 lg:px-10 py-4 shrink-0">
+        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Order Hub</h1>
+            <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
+               <span className="flex items-center gap-1"><Activity className="h-3 w-3 text-teal-500" /> Live Monitoring</span>
+               <span className="h-1 w-1 rounded-full bg-slate-300" />
+               <span>48 Active Channels</span>
             </div>
           </div>
 
-          <Card className="border-0 shadow-sm overflow-hidden bg-white rounded-xl">
-            <CardContent className="p-4 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <Select value={lookbackDays} onValueChange={setLookbackDays}>
-                  <SelectTrigger className="w-[180px] h-10 bg-slate-50 border-slate-200 font-medium text-slate-700">
-                    <History className="h-4 w-4 mr-2 text-slate-400" />
-                    <SelectValue placeholder="Lookback" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Last 24 Hours</SelectItem>
-                    <SelectItem value="7">Last 7 Days</SelectItem>
-                    <SelectItem value="30">Last 30 Days</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="h-6 w-px bg-slate-200" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                  Total Active: {orders.length}
-                </span>
-              </div>
+          <div className="flex flex-wrap items-center gap-3">
+             <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Order ID or Server..." 
+                  className="pl-9 h-10 bg-slate-50 border-slate-200"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+             </div>
+             <Select value={floorFilter} onValueChange={setFloorFilter}>
+                <SelectTrigger className="w-[140px] h-10 bg-slate-50 border-slate-200">
+                  <MapPin className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                  <SelectValue placeholder="Floor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Floors</SelectItem>
+                  {floors.map(f => <SelectItem key={f} value={f}>{f} Floor</SelectItem>)}
+                </SelectContent>
+             </Select>
+             <div className="h-6 w-px bg-slate-200 mx-1" />
+             <Select value={lookbackDays} onValueChange={setLookbackDays}>
+                <SelectTrigger className="w-[160px] h-10 bg-slate-50 border-slate-200">
+                  <History className="h-3.5 w-3.5 mr-2 text-slate-400" />
+                  <SelectValue placeholder="Lookback" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Last 24 Hours</SelectItem>
+                  <SelectItem value="7">Last 7 Days</SelectItem>
+                </SelectContent>
+             </Select>
+          </div>
+        </div>
+      </div>
 
-              <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200">
+      <main className="flex-1 overflow-hidden p-4 sm:p-6 lg:p-10 flex gap-8">
+        <div className="flex-1 flex flex-col min-w-0 space-y-6">
+          
+          {/* Status Filters */}
+          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm w-fit">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn(
+                "h-9 px-4 text-xs font-bold rounded-lg transition-all", 
+                activeFilter === 'all' ? "bg-slate-900 text-white shadow-md" : "text-slate-500 hover:text-slate-700"
+              )}
+              onClick={() => setActiveFilter('all')}
+            >
+              Overview ({counts.all})
+            </Button>
+            {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
+              const config = statusConfig[status];
+              const isActive = activeFilter === status;
+              const count = counts[status as keyof typeof counts];
+              
+              return (
                 <Button 
+                  key={status}
                   variant="ghost" 
                   size="sm" 
                   className={cn(
-                    "h-9 px-4 text-xs font-bold rounded-lg transition-all", 
-                    activeFilter === 'all' ? "bg-white shadow-sm text-slate-900 border border-slate-200" : "text-slate-500 hover:text-slate-700"
+                    "h-9 px-4 text-xs font-bold rounded-lg transition-all capitalize flex items-center gap-2", 
+                    isActive 
+                      ? "bg-white shadow-sm border border-slate-200" 
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                   )}
-                  onClick={() => setActiveFilter('all')}
+                  onClick={() => setActiveFilter(status)}
                 >
-                  All ({counts.all})
+                  <div className={cn("w-2 h-2 rounded-full", config.accent)} />
+                  {status.replace('_', ' ')}
+                  <Badge variant="secondary" className="ml-1 h-5 px-1.5 bg-slate-100 text-[10px]">{count}</Badge>
                 </Button>
-                {(['pending', 'accepted', 'in_progress'] as HubStatus[]).map((status) => {
-                  const config = statusConfig[status];
-                  const isActive = activeFilter === status;
-                  const count = counts[status as keyof typeof counts];
-                  
-                  return (
-                    <Button 
-                      key={status}
-                      variant="ghost" 
-                      size="sm" 
-                      className={cn(
-                        "h-9 px-4 text-xs font-bold rounded-lg transition-all capitalize flex items-center gap-2", 
-                        isActive 
-                          ? cn("bg-white shadow-sm border border-slate-200", config.color) 
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
-                      )}
-                      onClick={() => setActiveFilter(status)}
-                    >
-                      <div className={cn("w-1.5 h-1.5 rounded-full", config.accent)} />
-                      {status.replace('_', ' ')}
-                      <span className={cn("text-[10px] opacity-60", isActive ? config.color : "text-slate-400")}>
-                        {count}
-                      </span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-            {filteredOrders.map((order) => {
-              const isExiting = order.status === 'exiting';
-              const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
-              const Icon = isExiting ? (order.exitType === 'COMPLETED' ? CheckCircle2 : XCircle) : config.icon;
-
-              return (
-                <Card 
-                  key={order.id}
-                  className={cn(
-                    "group relative transition-all duration-300 border border-slate-200 overflow-hidden bg-white shadow-sm hover:shadow-md",
-                    isExiting && "animate-status-blink scale-[1.02] z-10 border-transparent ring-4 ring-white shadow-2xl",
-                    isExiting && config.bg
-                  )}
-                >
-                  {/* Status Side Bar */}
-                  {!isExiting && (
-                    <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
-                  )}
-
-                  <CardContent className="p-0 flex flex-col h-full">
-                    {/* Header */}
-                    <div className={cn(
-                      "p-5 flex items-center justify-between border-b border-slate-100 transition-colors",
-                      isExiting ? "border-transparent" : "bg-white"
-                    )}>
-                      <div className="space-y-0.5 text-left">
-                        <span className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Order ID</span>
-                        <h3 className={cn("text-lg font-bold tracking-tight font-sans", isExiting ? "text-white" : "text-slate-900")}>
-                          {order.orderNumber}
-                        </h3>
-                      </div>
-                      <div className={cn("flex flex-col items-end gap-1 text-right")}>
-                         <div className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide transition-colors font-sans",
-                            isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
-                          )}>
-                            <Icon className="h-3 w-3" />
-                            {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
-                         </div>
-                         <div className={cn("flex items-center gap-1 text-[10px] font-medium transition-colors font-sans", isExiting ? "text-white/60" : "text-slate-400")}>
-                            <Clock className="h-3 w-3" />
-                            {order.timeOpen}
-                         </div>
-                      </div>
-                    </div>
-
-                    {/* Body */}
-                    <div className="p-5 space-y-4 text-left">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <p className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Location</p>
-                          <div className={cn("flex items-center gap-1.5 font-medium text-xs font-sans", isExiting ? "text-white" : "text-slate-700")}>
-                            <MapPin className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
-                            {order.floor}
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <p className={cn("text-[10px] font-bold uppercase tracking-wider font-sans", isExiting ? "text-white/60" : "text-slate-400")}>Server</p>
-                          <div className={cn("flex items-center gap-1.5 font-medium text-xs font-sans", isExiting ? "text-white" : "text-slate-700")}>
-                            <Users className={cn("h-3.5 w-3.5 opacity-50", isExiting ? "text-white/60" : "text-slate-400")} />
-                            {order.server}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border border-dashed transition-colors",
-                        isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
-                      )}>
-                        <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "h-8 w-8 rounded-lg flex items-center justify-center transition-colors",
-                            isExiting ? "bg-white/20" : "bg-slate-200/50"
-                          )}>
-                             <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-500")} />
-                          </div>
-                          <div>
-                            <p className={cn("text-xs font-bold font-sans", isExiting ? "text-white" : "text-slate-700")}>
-                              {order.itemsCount} Items
-                            </p>
-                            <p className={cn("text-[10px] font-medium transition-colors font-sans", isExiting ? "text-white/60" : "text-slate-500")}>
-                              {isExiting ? 'Order Processed' : 'Pending Prep'}
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight className={cn("h-4 w-4 opacity-30", isExiting ? "text-white" : "text-slate-400")} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               );
             })}
           </div>
 
-          {filteredOrders.length === 0 && (
-            <div className="py-32 text-center space-y-4">
-              <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mx-auto border border-slate-200">
-                <ClipboardList className="h-10 w-10 text-slate-300" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-xl font-bold text-slate-900 font-sans">No active orders found</p>
-                <p className="text-sm font-medium text-slate-500 font-sans">The kitchen appears to be clear for this status.</p>
-              </div>
-              <Button variant="outline" className="font-bold rounded-lg px-6 font-sans" onClick={() => setActiveFilter('all')}>View All History</Button>
-            </div>
-          )}
+          {/* High Density Grid */}
+          <div className="flex-1 overflow-y-auto pr-2">
+            {filteredOrders.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                {filteredOrders.map((order) => {
+                  const isExiting = order.status === 'exiting';
+                  const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
+                  const Icon = isExiting ? exitConfig[order.exitType!].icon : config.icon;
+                  const isSlow = order.timeOpenMinutes > 15 && order.status === 'pending';
 
+                  return (
+                    <Card 
+                      key={order.id}
+                      className={cn(
+                        "group relative transition-all duration-300 border-0 overflow-hidden bg-white shadow-sm hover:shadow-md",
+                        isExiting && "animate-status-blink scale-[1.02] z-10",
+                        isExiting && config.bg,
+                        isSlow && "ring-1 ring-red-200"
+                      )}
+                    >
+                      {!isExiting && (
+                        <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.accent)} />
+                      )}
+
+                      <CardContent className="p-0 flex flex-col h-full">
+                        <div className={cn(
+                          "p-4 flex items-center justify-between border-b border-slate-50",
+                          isExiting ? "border-transparent bg-transparent" : "bg-white"
+                        )}>
+                          <div className="space-y-0.5">
+                            <span className={cn("text-[9px] font-bold uppercase tracking-wider", isExiting ? "text-white/60" : "text-slate-400")}>
+                                {isSlow ? 'DELAYED TICKET' : 'ID'}
+                            </span>
+                            <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
+                              {order.orderNumber}
+                            </h3>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                             <div className={cn(
+                                "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide",
+                                isExiting ? "bg-white/20 text-white" : cn(config.bg, config.color)
+                              )}>
+                                <Icon className="h-2.5 w-2.5" />
+                                {isExiting && order.exitType ? exitConfig[order.exitType].text : config.label}
+                             </div>
+                             <div className={cn("flex items-center gap-1 text-[10px] font-medium", isExiting ? "text-white/60" : "text-slate-400")}>
+                                {isSlow && <Timer className="h-3 w-3 text-red-500 animate-pulse" />}
+                                {order.timeOpenMinutes}m
+                             </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 space-y-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-0.5">
+                              <p className={cn("text-[9px] font-bold uppercase text-slate-400", isExiting && "text-white/60")}>Area</p>
+                              <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+                                {order.floor}
+                              </div>
+                            </div>
+                            <div className="space-y-0.5">
+                              <p className={cn("text-[9px] font-bold uppercase text-slate-400", isExiting && "text-white/60")}>Staff</p>
+                              <div className={cn("flex items-center gap-1 text-xs font-semibold", isExiting ? "text-white" : "text-slate-700")}>
+                                {order.server}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={cn(
+                            "flex items-center justify-between p-2.5 rounded-lg border border-dashed",
+                            isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-200"
+                          )}>
+                            <div className="flex items-center gap-2">
+                               <Package className={cn("h-3.5 w-3.5", isExiting ? "text-white" : "text-slate-400")} />
+                               <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>{order.itemsCount} Items</span>
+                            </div>
+                            <ChevronRight className={cn("h-3 w-3", isExiting ? "text-white" : "text-slate-300")} />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center space-y-4 bg-white rounded-3xl border border-dashed">
+                <div className="h-16 w-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300">
+                  <ClipboardList className="h-8 w-8" />
+                </div>
+                <p className="text-sm font-semibold text-slate-500">No tickets match these filters.</p>
+                <Button variant="outline" size="sm" onClick={() => { setActiveFilter('all'); setFloorFilter('all'); setSearch(''); }}>Reset View</Button>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Live Pulse Sidebar */}
+        <aside className="w-80 hidden xl:flex flex-col gap-6 shrink-0">
+          <Card className="flex-1 border-0 shadow-sm bg-white overflow-hidden flex flex-col rounded-3xl">
+            <CardHeader className="bg-[#142424] text-white p-6 shrink-0">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
+                  <History className="h-4 w-4 text-[#18B4A6]" /> Recent Events
+                </CardTitle>
+                <Badge className="bg-teal-500/20 text-teal-400 border-0">{recentExits.length}</Badge>
+              </div>
+              <CardDescription className="text-white/40 text-xs mt-1 font-medium">Audit trail for finalized tickets.</CardDescription>
+            </CardHeader>
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-4">
+                {recentExits.length > 0 ? recentExits.map((event) => {
+                  const config = exitConfig[event.type];
+                  return (
+                    <div key={event.id} className="relative pl-6 pb-4 border-l border-slate-100 last:border-0 last:pb-0">
+                      <div className={cn("absolute -left-1.5 top-0 h-3 w-3 rounded-full border-2 border-white", config.bg)} />
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                           <span className="text-xs font-bold text-slate-900">Order {event.orderNumber}</span>
+                           <span className="text-[9px] font-medium text-slate-400 uppercase">{formatDistanceToNow(event.timestamp, { addSuffix: true })}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <Badge className={cn("text-[9px] font-black h-4 px-1.5 border-0", config.bg, config.color)}>
+                              {event.type}
+                           </Badge>
+                           <span className="text-[10px] text-slate-500 font-medium">by {event.server}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }) : (
+                  <div className="py-20 text-center space-y-3">
+                    <Activity className="h-8 w-8 text-slate-200 mx-auto" />
+                    <p className="text-xs font-medium text-slate-400">Waiting for live data...</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <div className="p-4 border-t bg-slate-50/50">
+              <Button variant="ghost" className="w-full h-10 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900" asChild>
+                <a href="/dashboard/reports/payments">View Full Audit Trail</a>
+              </Button>
+            </div>
+          </Card>
+
+          {/* Quick Help Card */}
+          <Card className="bg-[#18B4A6]/10 border-0 p-5 rounded-3xl">
+             <div className="flex items-start gap-4">
+                <HelpCircle className="h-5 w-5 text-[#18B4A6] shrink-0" />
+                <div className="space-y-1">
+                   <p className="text-xs font-bold text-slate-900">Pro-Tip for Admins</p>
+                   <p className="text-[10px] leading-relaxed text-slate-600 font-medium">
+                     Orders exceeding <span className="font-bold text-red-500">15 minutes</span> in Pending state are automatically highlighted for intervention.
+                   </p>
+                </div>
+             </div>
+          </Card>
+        </aside>
       </main>
     </div>
   );

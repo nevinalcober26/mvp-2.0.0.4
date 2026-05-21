@@ -200,15 +200,15 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
           <div className="p-4 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-0.5">
-                <span className={cn("text-[10px] font-bold uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>
+                <span className={cn("text-[10px] font-bold uppercase", isExiting ? "text-white/60" : "text-slate-400")}>
                   ORDER ID
                 </span>
-                <h3 className={cn("text-lg font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-lg font-bold", isExiting ? "text-white" : "text-slate-900")}>
                   {order.orderNumber}
                 </h3>
               </div>
               <div className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold",
                 isExiting ? "bg-white text-slate-900" : (config as any).badge
               )}>
                 <Icon className="h-3.5 w-3.5" />
@@ -222,16 +222,16 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               <div className={cn("space-y-1.5", isExiting ? "text-white/80" : "text-slate-600")}>
                 <div className="flex items-center gap-2">
                   <User className="h-3.5 w-3.5 opacity-60" />
-                  <span className="text-[13px] font-bold">By Staff {order.server}</span>
+                  <span className="text-[13px] font-semibold">By Staff {order.server}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Armchair className="h-3.5 w-3.5 opacity-60" />
-                  <span className="text-[13px] font-bold">Table {order.table}</span>
+                  <span className="text-[13px] font-semibold">Table {order.table}</span>
                 </div>
               </div>
 
               <div className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-[11px] font-mono border",
+                "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-medium text-[11px] font-mono border",
                 isExiting ? "bg-white/10 border-white/20 text-white" : isCritical ? "bg-white border-rose-200 text-rose-600" : "bg-slate-50 border-slate-100 text-slate-500"
               )}>
                 <Clock className={cn("h-3.5 w-3.5", isCritical && !isExiting && "text-rose-500")} />
@@ -244,7 +244,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               isExiting ? "bg-white/10 border-white/20 text-white" : isCritical ? "bg-white/50 border-rose-200/50" : "bg-slate-50/50 border-slate-100"
             )}>
                <Box className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-400")} />
-               <span className={cn("text-[11px] font-bold uppercase tracking-wider", isExiting ? "text-white" : "text-slate-500")}>
+               <span className={cn("text-[11px] font-bold uppercase", isExiting ? "text-white" : "text-slate-500")}>
                  {order.itemsCount} Items
                </span>
             </div>
@@ -401,13 +401,13 @@ export default function OrderHubPage() {
       <div className="bg-white border-b px-8 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1 text-left">
-            <h1 className="text-[24px] font-black tracking-tight text-slate-900 uppercase">Live Operations</h1>
+            <h1 className="text-[24px] font-bold tracking-tight text-slate-900 uppercase">Live Operations</h1>
             <div className="flex items-center gap-3">
                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-3 py-1 font-bold text-[10px]">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                  REAL-TIME SYNC
                </Badge>
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{orders.filter(o => o.status !== 'exiting').length} ACTIVE TICKETS</span>
+               <span className="text-[10px] font-bold text-slate-400 uppercase">{orders.filter(o => o.status !== 'exiting').length} ACTIVE TICKETS</span>
             </div>
           </div>
 
@@ -423,7 +423,7 @@ export default function OrderHubPage() {
              </div>
              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 h-11">
                <Calendar className="h-4 w-4 text-slate-400" />
-               <Label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Period:</Label>
+               <Label className="text-[11px] font-bold text-slate-500 uppercase">Period:</Label>
                <Select value={lookbackHours} onValueChange={setLookbackHours}>
                  <SelectTrigger className="w-[140px] border-0 bg-transparent shadow-none focus:ring-0 font-bold text-slate-900 p-0 h-auto">
                    <SelectValue placeholder="Lookback" />
@@ -452,13 +452,13 @@ export default function OrderHubPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={cn("h-2 w-2 rounded-full", config.dot)} />
-                        <h2 className="text-sm font-black text-slate-900 tracking-[0.15em]">{config.label}</h2>
+                        <h2 className="text-sm font-bold text-slate-900 uppercase">{config.label}</h2>
                       </div>
-                      <div className="bg-slate-900 text-white font-black px-2 py-0.5 text-[10px] rounded shadow-sm">
+                      <div className="bg-slate-900 text-white font-bold px-2 py-0.5 text-[10px] rounded shadow-sm">
                         {columnOrders.length}
                       </div>
                     </div>
-                    <p className="text-[11px] font-bold text-slate-400 mt-1 pl-[20px]">{config.subLabel}</p>
+                    <p className="text-[11px] font-semibold text-slate-400 mt-1 pl-[20px]">{config.subLabel}</p>
                   </div>
                   
                   <div className="flex-1 space-y-5 pb-20">
@@ -467,7 +467,7 @@ export default function OrderHubPage() {
                     )) : (
                       <div className="py-24 text-center opacity-25 flex flex-col items-center">
                         <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Queue Clear</p>
+                        <p className="text-[10px] font-bold uppercase text-slate-400">Queue Clear</p>
                       </div>
                     )}
                   </div>
@@ -486,8 +486,8 @@ export default function OrderHubPage() {
                       <AlertCircle className="h-5 w-5 text-rose-600" />
                     </div>
                     <div className="space-y-1.5 text-left">
-                       <p className="text-sm font-black text-rose-900 leading-none">Critical Delay Warning</p>
-                       <p className="text-[11px] leading-relaxed text-rose-700 font-bold">
+                       <p className="text-sm font-bold text-rose-900 leading-none">Critical Delay Warning</p>
+                       <p className="text-[11px] leading-relaxed text-rose-700 font-semibold">
                          One or more orders have exceeded the 10-minute threshold. Priority attention required.
                        </p>
                     </div>
@@ -505,21 +505,21 @@ export default function OrderHubPage() {
                       <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
                         <Activity className="h-5 w-5 text-white" />
                       </div>
-                      <CardTitle className="text-lg font-black tracking-widest uppercase">
+                      <CardTitle className="text-lg font-bold uppercase">
                         Activity Log
                       </CardTitle>
                     </div>
-                    <Badge className="bg-white/20 text-white border-0 font-black px-3 py-1 rounded-full text-[10px]">
+                    <Badge className="bg-white/20 text-white border-0 font-bold px-3 py-1 rounded-full text-[10px]">
                       {recentExits.length} ENTRIES
                     </Badge>
                   </div>
-                  <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase tracking-[0.2em] pl-1">
+                  <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase pl-1">
                     System Feed Tracker
                   </p>
                 </CardHeader>
                 
                 <div className="flex-1 bg-white relative overflow-hidden flex flex-col">
-                  <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-dashed border-slate-100 z-0" />
+                  <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-slate-100 z-0" />
 
                   <ScrollArea className="flex-1">
                     <div className="p-6 pt-6 space-y-8 relative z-10">
@@ -540,21 +540,21 @@ export default function OrderHubPage() {
                               )} />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-1">
-                                   <span className={cn("text-[15px] font-black tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
+                                   <span className={cn("text-[15px] font-bold tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
                                      Order {event.orderNumber}
                                    </span>
-                                   <span className={cn("text-[9px] font-black uppercase tracking-[0.15em]", event.isNew ? "text-white/60" : "text-slate-400")}>
+                                   <span className={cn("text-[9px] font-bold uppercase", event.isNew ? "text-white/60" : "text-slate-400")}>
                                      JUST NOW
                                    </span>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3 mt-1">
                                    <div className={cn(
-                                     "px-3 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase border border-transparent shadow-sm",
+                                     "px-3 py-0.5 rounded-full text-[9px] font-bold uppercase border border-transparent shadow-sm",
                                      event.isNew ? "bg-white text-slate-900" : cn(config.bg, "text-white")
                                    )}>
                                       {event.type}
                                     </div>
-                                   <span className={cn("text-[11px] font-bold", event.isNew ? "text-white/80" : "text-slate-500")}>
+                                   <span className={cn("text-[11px] font-semibold", event.isNew ? "text-white/80" : "text-slate-500")}>
                                      By Staff {event.server}
                                    </span>
                                 </div>
@@ -565,14 +565,14 @@ export default function OrderHubPage() {
                       }) : (
                         <div className="py-40 text-center opacity-30 flex flex-col items-center gap-4 px-10">
                           <Activity className="h-10 w-10 text-slate-200" />
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Monitoring Feeds</p>
+                          <p className="text-[10px] font-bold uppercase text-slate-400">Monitoring Feeds</p>
                         </div>
                       )}
                     </div>
                   </ScrollArea>
                   
                   <div className="p-5 bg-slate-50/50 border-t flex items-center justify-center shrink-0">
-                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">End of Log</p>
+                     <p className="text-[10px] font-bold text-slate-300 uppercase">End of Log</p>
                   </div>
                 </div>
               </Card>
@@ -583,8 +583,8 @@ export default function OrderHubPage() {
                       <HelpCircle className="h-5 w-5 text-teal-600" />
                     </div>
                     <div className="space-y-1.5 text-left">
-                       <p className="text-[13px] font-black text-slate-900 leading-none">Operational Help</p>
-                       <p className="text-[11px] leading-relaxed text-slate-500 font-bold">
+                       <p className="text-[13px] font-bold text-slate-900 leading-none">Operational Help</p>
+                       <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
                          Timers indicate the total time elapsed since order submission. Items in the Preparing column are prioritized for finalization.
                        </p>
                     </div>

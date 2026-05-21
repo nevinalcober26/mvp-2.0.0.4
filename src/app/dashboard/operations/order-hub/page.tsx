@@ -29,6 +29,7 @@ import {
   Armchair,
   Box,
   HelpCircle,
+  Ban,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -109,10 +110,10 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
 };
 
 const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; dot: string }> = {
-  COMPLETED: { bg: 'bg-emerald-500', text: 'COMPLETED', icon: CheckCircle2, dot: 'bg-emerald-500' },
-  CANCELLED: { bg: 'bg-orange-500', text: 'CANCELLED', icon: XCircle, dot: 'bg-orange-500' },
-  REJECTED: { bg: 'bg-rose-600', text: 'REJECTED', icon: XCircle, dot: 'bg-rose-600' },
-  FAILED: { bg: 'bg-purple-600', text: 'FAILED', icon: AlertCircle, dot: 'bg-purple-600' },
+  COMPLETED: { bg: 'bg-[#10b981]', text: 'COMPLETED', icon: CheckCircle2, dot: 'bg-[#10b981]' },
+  CANCELLED: { bg: 'bg-[#f43f5e]', text: 'CANCELLED', icon: XCircle, dot: 'bg-[#f43f5e]' },
+  REJECTED: { bg: 'bg-[#f97316]', text: 'REJECTED', icon: Ban, dot: 'bg-[#f97316]' },
+  FAILED: { bg: 'bg-[#1e293b]', text: 'FAILED', icon: AlertCircle, dot: 'bg-[#1e293b]' },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -127,8 +128,7 @@ const formatDuration = (ms: number) => {
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    // Generate realistic kitchen wait times between 1 and 21 minutes
-    const minutesAgo = Math.floor(Math.random() * 21) + 1; 
+    const minutesAgo = Math.floor(Math.random() * 25) + 1; 
     const secondsAgo = Math.floor(Math.random() * 60);
     const timestamp = subMinutes(new Date(), minutesAgo).getTime() - (secondsAgo * 1000);
     
@@ -188,7 +188,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
       <Card 
         className={cn(
           "group relative transition-all duration-300 border shadow-sm rounded-[24px] overflow-hidden bg-white hover:shadow-lg",
-          isCritical && "bg-[#fff1f1] border-red-500 ring-1 ring-red-500/20",
+          isCritical && !isExiting && "bg-[#fff1f1] border-red-500 ring-1 ring-red-500/20",
           isExiting && cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent")
         )}
       >
@@ -241,7 +241,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
 
             <div className={cn(
               "flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed transition-colors",
-              isExiting ? "bg-white/10 border-white/20" : isCritical ? "bg-white/50 border-red-200/50" : "bg-slate-50/50 border-slate-100"
+              isExiting ? "bg-white/10 border-white/20 text-white" : isCritical ? "bg-white/50 border-red-200/50" : "bg-slate-50/50 border-slate-100"
             )}>
                <Box className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-400")} />
                <span className={cn("text-xs font-black uppercase tracking-widest", isExiting ? "text-white" : "text-slate-500")}>
@@ -273,12 +273,10 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Simulate new orders and status movements
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
-        // 15% chance for a new order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -291,14 +289,12 @@ export default function OrderHubPage() {
           };
           return [newOrder, ...prev];
         }
-        // Move Pending to Accepted
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
             return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' as HubStatus } : o);
           }
         }
-        // Move Accepted to Preparing
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -311,7 +307,6 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Strict 10-second synchronized finalization cycle
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
@@ -319,29 +314,23 @@ export default function OrderHubPage() {
         if (candidates.length === 0) return prev;
         
         const inPreparing = candidates.filter(o => o.status === 'in_progress');
-        
         const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
         
         let target: HubOrder | undefined;
         
-        // "COMPLETED" only applies to "Preparing" column
         if (randomExit === 'COMPLETED') {
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {
-              // If no preparing items, we could either skip or force another status
-              // For consistency, let's just skip this 10s tick for COMPLETED if nothing is cooking
               return prev; 
             }
         } else {
-            // Cancel/Reject/Fail can happen at any stage
             target = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
         if (!target) return prev;
         
-        // Log the exit event to synchronize with Activity Log
         const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
@@ -355,14 +344,13 @@ export default function OrderHubPage() {
 
         const updated = prev.map(o => o.id === target!.id ? { ...o, status: 'exiting' as HubStatus, exitType: randomExit, originalStatus: o.status } : o);
         
-        // Cleanup after blinking (matching GSAP timeline)
         setTimeout(() => {
           setOrders(current => current.filter(o => o.id !== target!.id));
         }, 3200);
 
         return updated;
       });
-    }, 10000); // 10s cycle
+    }, 10000);
     return () => clearInterval(finalizationInterval);
   }, []);
 
@@ -437,7 +425,6 @@ export default function OrderHubPage() {
       <main className="flex-1 p-6 relative overflow-visible">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-10">
           
-          {/* Kanban Area - Spanning 75% width */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
@@ -472,11 +459,10 @@ export default function OrderHubPage() {
             })}
           </div>
 
-          {/* Activity & Stats Sidebar - Fixed 25% width */}
           <aside className="xl:col-span-1 sticky top-[88px] self-start text-left h-fit">
             <div className="space-y-6">
               
-              {longestWait > 600000 && ( // 10 minutes wait alert
+              {longestWait > 600000 && ( 
                 <div className="rounded-[32px] bg-rose-50 p-6 shadow-sm border border-rose-100 text-left animate-pulse">
                   <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200/50">
@@ -492,7 +478,6 @@ export default function OrderHubPage() {
                 </div>
               )}
 
-              {/* Activity Log - Command Center UI */}
               <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[600px]">
                 <CardHeader className="bg-[#18B4A6] text-white p-6 pb-8 shrink-0 relative overflow-hidden">
                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
@@ -517,7 +502,6 @@ export default function OrderHubPage() {
                 </CardHeader>
                 
                 <div className="flex-1 bg-white relative overflow-hidden flex flex-col">
-                  {/* Vertical Axis Line */}
                   <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-dashed border-slate-100 z-0" />
 
                   <ScrollArea className="flex-1">
@@ -570,14 +554,12 @@ export default function OrderHubPage() {
                     </div>
                   </ScrollArea>
                   
-                  {/* End Footer of Scroll */}
                   <div className="p-5 bg-slate-50/50 border-t flex items-center justify-center shrink-0">
                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">End of Feed</p>
                   </div>
                 </div>
               </Card>
 
-              {/* Operational Notice */}
               <div className="rounded-[32px] bg-gradient-to-br from-yellow-50 via-white to-purple-50 p-6 shadow-sm border border-white/80 text-left">
                  <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">

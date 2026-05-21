@@ -31,15 +31,18 @@ import {
   ClipboardList,
   Calendar,
   Armchair,
+  Box,
+  Circle,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
 import { subMinutes } from 'date-fns';
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipContent,
 } from '@/components/ui/tooltip';
 import gsap from 'gsap';
 
@@ -69,7 +72,7 @@ interface EventLog {
   isNew?: boolean;
 }
 
-const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string; tooltip: string }> = {
+const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: any; color: string; dot: string; bg: string; accent: string; badge: string; text: string }> = {
   pending: {
     label: 'PENDING',
     subLabel: 'New orders to review',
@@ -78,7 +81,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-blue-500',
     bg: 'bg-blue-50/50',
     accent: 'bg-blue-500',
-    tooltip: 'Total time since customer placed the order. Awaiting staff acknowledgement.',
+    badge: 'bg-blue-500 text-white',
+    text: 'PENDING'
   },
   accepted: {
     label: 'ACCEPTED',
@@ -88,7 +92,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-indigo-500',
     bg: 'bg-indigo-50/50',
     accent: 'bg-indigo-500',
-    tooltip: 'Total time since customer placed the order. Staff has confirmed, ticket is in kitchen queue.',
+    badge: 'bg-indigo-500 text-white',
+    text: 'ACCEPTED'
   },
   in_progress: {
     label: 'PREPARING',
@@ -98,7 +103,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-teal-500',
     bg: 'bg-teal-50/50',
     accent: 'bg-teal-500',
-    tooltip: 'Total time since customer placed the order. Kitchen is currently cooking this order.',
+    badge: 'bg-teal-500 text-white',
+    text: 'PREPARING'
   },
   exiting: {
     label: 'UPDATING',
@@ -108,15 +114,16 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-white',
     bg: 'bg-slate-900',
     accent: 'bg-white',
-    tooltip: 'Finalizing ticket status...',
+    badge: 'bg-slate-900 text-white',
+    text: 'UPDATING'
   }
 };
 
-const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string; textColor: string }> = {
-  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-500', textColor: 'text-emerald-500' },
-  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-500', textColor: 'text-rose-500' },
-  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-700', textColor: 'text-rose-700' },
-  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-900', textColor: 'text-slate-900' },
+const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string; textColor: string; dot: string }> = {
+  COMPLETED: { bg: 'bg-emerald-500', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-500', textColor: 'text-emerald-500', dot: 'bg-emerald-500' },
+  CANCELLED: { bg: 'bg-rose-500', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-500', textColor: 'text-rose-500', dot: 'bg-rose-500' },
+  REJECTED: { bg: 'bg-rose-600', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-600', textColor: 'text-rose-600', dot: 'bg-rose-600' },
+  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-900', textColor: 'text-slate-900', dot: 'bg-slate-900' },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -136,7 +143,7 @@ const generateMockOrders = (count: number): HubOrder[] => {
     
     return {
       id: `${Math.random().toString(36).substr(2, 9)}`,
-      orderNumber: `#${4420 + i}`,
+      orderNumber: `#${4820 + i}`,
       table: `T${Math.floor(Math.random() * 20) + 1}`,
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
@@ -153,8 +160,6 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
   const Icon = isExiting ? exitConfig[order.exitType!].icon : (config as any).icon;
   
   const durationMs = now - order.timestamp;
-  const timeOpenMinutes = Math.floor(durationMs / 60000);
-  const isDelayed = timeOpenMinutes > 15 && (order.status === 'pending' || order.status === 'accepted');
   const isNew = durationMs < 5000;
 
   useEffect(() => {
@@ -190,85 +195,65 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
     >
       <Card 
         className={cn(
-          "group relative transition-all duration-300 border shadow-sm rounded-xl overflow-hidden",
-          isExiting 
-            ? cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent") 
-            : "bg-white hover:shadow-md",
-          isDelayed && !isExiting && "border-rose-200 bg-rose-50/30"
+          "group relative transition-all duration-300 border-0 shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-lg",
+          isExiting && cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent")
         )}
       >
         <CardContent className="p-0 flex flex-col h-full relative z-10 text-left">
+          {/* Status Left Accent Bar */}
           {!isExiting && (
             <div className={cn("absolute left-0 top-0 bottom-0 w-1", (config as any).accent)} />
           )}
 
-          <div className={cn(
-            "px-4 py-3 flex items-center justify-between",
-            isExiting ? "bg-black/10" : "border-b bg-slate-50/50"
-          )}>
-            <div className="flex flex-col text-left">
-              <span className={cn(
-                "text-[10px] font-bold uppercase tracking-tight", 
-                isExiting ? "text-white/60" : "text-slate-400"
+          <div className="p-5 space-y-4">
+            {/* Top Row: ID & Status Badge */}
+            <div className="flex justify-between items-start">
+              <div className="space-y-0.5">
+                <span className={cn("text-[9px] font-black uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>
+                  ORDER ID
+                </span>
+                <h3 className={cn("text-xl font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
+                  {order.orderNumber}
+                </h3>
+              </div>
+              <div className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black shadow-sm",
+                isExiting ? "bg-white text-slate-900" : (config as any).badge
               )}>
-                  {isExiting ? 'Final Status' : 'Order ID'}
-              </span>
-              <h3 className={cn("text-base font-bold", isExiting ? "text-white" : "text-slate-900")}>
-                {order.orderNumber}
-              </h3>
-            </div>
-            
-            <div className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-sm",
-              isExiting ? "bg-white text-slate-900" : cn((config as any).accent, "text-white")
-            )}>
-              <Icon className="h-3 w-3" />
-              {(isExiting && order.exitType ? exitConfig[order.exitType].text : (config as any).label).toUpperCase()}
-            </div>
-          </div>
-
-          <div className="p-4 space-y-3">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div className={cn("flex flex-col gap-0.5", isExiting ? "text-white/80" : "text-slate-500")}>
-                  <div className="flex items-center gap-1.5">
-                    <User className="h-3.5 w-3.5 opacity-70" />
-                    <span className="font-bold text-xs text-inherit whitespace-nowrap truncate max-w-[150px]">
-                      By Staff {order.server}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Armchair className="h-3.5 w-3.5 opacity-70" />
-                    <span className="font-bold text-xs text-inherit">Table {order.table}</span>
-                  </div>
-                </div>
-                
-                <TooltipProvider>
-                  <Tooltip delayDuration={200}>
-                    <TooltipTrigger asChild>
-                      <div className={cn(
-                        "flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[10px] font-mono cursor-help transition-colors shrink-0 self-start",
-                        isExiting ? "bg-white/10 text-white" : isDelayed ? "bg-rose-100 text-rose-600" : "bg-slate-100 text-slate-500"
-                      )}>
-                        <Timer className="h-3 w-3" />
-                        {formatDuration(durationMs)}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-[280px] p-3 text-xs leading-relaxed bg-slate-900 text-white border-slate-800 shadow-xl z-[100]">
-                      <p className="font-bold mb-1 text-left">Wait Time Tracker</p>
-                      <p className="opacity-90 font-medium text-left">{(config as any).tooltip}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Icon className="h-3 w-3" />
+                {(isExiting && order.exitType ? exitConfig[order.exitType].text : (config as any).text).toUpperCase()}
               </div>
             </div>
 
+            {/* Middle Row: Server, Table & Timer */}
+            <div className="flex items-end justify-between">
+              <div className={cn("space-y-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
+                <div className="flex items-center gap-2">
+                  <User className="h-3.5 w-3.5 opacity-60" />
+                  <span className="text-xs font-bold whitespace-nowrap">By Staff {order.server}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Armchair className="h-3.5 w-3.5 opacity-60" />
+                  <span className="text-xs font-bold whitespace-nowrap">Table {order.table}</span>
+                </div>
+              </div>
+
+              <div className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded-lg font-black text-[10px] font-mono shadow-inner border",
+                isExiting ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-100 text-slate-400"
+              )}>
+                <Clock className="h-3 w-3" />
+                {formatDuration(durationMs)}
+              </div>
+            </div>
+
+            {/* Bottom Row: Item Summary Box */}
             <div className={cn(
-              "flex items-center justify-center gap-2 py-2 rounded-lg border",
-              isExiting ? "bg-white/10 border-white/20" : "bg-slate-50 border-slate-100"
+              "flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed",
+              isExiting ? "bg-white/10 border-white/20" : "bg-slate-50/50 border-slate-100"
             )}>
-               <Package className={cn("h-4 w-4", isExiting ? "text-white" : "text-primary/70")} />
-               <span className={cn("text-xs font-bold", isExiting ? "text-white" : "text-slate-700")}>
+               <Box className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-400")} />
+               <span className={cn("text-xs font-black uppercase tracking-widest", isExiting ? "text-white" : "text-slate-500")}>
                  {order.itemsCount} Items
                </span>
             </div>
@@ -297,17 +282,14 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Interval for Incoming & Movement logic (happens every 5s)
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
-
-        // 15% chance to add a new Pending order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
-            orderNumber: `#${4500 + Math.floor(Math.random() * 1000)}`,
+            orderNumber: `#${4800 + Math.floor(Math.random() * 1000)}`,
             table: `T${Math.floor(Math.random() * 20) + 1}`,
             status: 'pending',
             itemsCount: Math.floor(Math.random() * 5) + 1,
@@ -316,114 +298,72 @@ export default function OrderHubPage() {
           };
           return [newOrder, ...prev];
         }
-
-        // 20% chance to move a Pending order to Accepted
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
             return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' as HubStatus } : o);
           }
         }
-
-        // 20% chance to move an Accepted order to Preparing
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
             return prev.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' as HubStatus } : o);
           }
         }
-
         return prev;
       });
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // STRICT 10-Second Finalization Cycle - Fully Synchronized
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
-
-        // Determine exit type: COMPLETED (80%) vs Others (20%)
-        const randomExit = Math.random() > 0.8 
-          ? (['CANCELLED', 'REJECTED', 'FAILED'][Math.floor(Math.random() * 3)] as ExitType)
-          : 'COMPLETED';
-
+        const randomExit = Math.random() > 0.8 ? (['CANCELLED', 'REJECTED', 'FAILED'][Math.floor(Math.random() * 3)] as ExitType) : 'COMPLETED';
         let target: HubOrder | undefined;
-        
         if (randomExit === 'COMPLETED') {
-          // STRICT RULE: COMPLETED only applies to "Preparing" column
           const preparingCandidates = candidates.filter(o => o.status === 'in_progress');
-          if (preparingCandidates.length > 0) {
-            target = preparingCandidates[Math.floor(Math.random() * preparingCandidates.length)];
-          } else {
-            // No preparing items to complete? Skip this cycle or could pick another type
-            return prev;
-          }
+          if (preparingCandidates.length > 0) target = preparingCandidates[Math.floor(Math.random() * preparingCandidates.length)];
+          else return prev;
         } else {
-          // CANCELLED/REJECTED/FAILED can happen anywhere
           target = candidates[Math.floor(Math.random() * candidates.length)];
         }
-
         if (!target) return prev;
-
         const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
-          type: randomExit as ExitType,
+          type: randomExit,
           timestamp: new Date(),
           server: target.server,
           isNew: true
         };
-
-        // Sync exit entry to Activity Log AT THE SAME TIME
         setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
-
-        const updated = prev.map(o => {
-          if (o.id === target.id) {
-            return { 
-              ...o, 
-              status: 'exiting' as HubStatus, 
-              exitType: randomExit as ExitType,
-              originalStatus: o.status 
-            };
-          }
-          return o;
-        });
-
-        // Cleanup card after blink animation
-        setTimeout(() => {
-          setOrders(current => current.filter(o => o.id !== target!.id));
-        }, 3200);
-
+        const updated = prev.map(o => o.id === target!.id ? { ...o, status: 'exiting' as HubStatus, exitType: randomExit, originalStatus: o.status } : o);
+        setTimeout(() => setOrders(current => current.filter(o => o.id !== target!.id)), 3200);
         return updated;
       });
-    }, 10000); // EXACTLY 10 SECONDS
-
+    }, 10000);
     return () => clearInterval(finalizationInterval);
   }, []);
 
   const getFilteredStatusOrders = (status: HubStatus) => {
     const lookbackThreshold = now - (parseInt(lookbackHours) * 60 * 60 * 1000);
-
     return orders.filter(o => {
       const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
       if (activeStatus !== status) return false;
       if (o.timestamp < lookbackThreshold) return false;
-      const matchesSearch = o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
-                           o.server.toLowerCase().includes(search.toLowerCase()) ||
-                           o.table.toLowerCase().includes(search.toLowerCase());
-      return matchesSearch;
+      return o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
+             o.server.toLowerCase().includes(search.toLowerCase()) ||
+             o.table.toLowerCase().includes(search.toLowerCase());
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
-  const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
-    { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-blue-50/50' },
-    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-indigo-50/50' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-teal-50/50' },
+  const columns: { id: HubStatus; label: string; subLabel: string; dot: string }[] = [
+    { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500' },
+    { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500' },
   ];
 
   return (
@@ -453,7 +393,6 @@ export default function OrderHubPage() {
                   onChange={(e) => setSearch(e.target.value)}
                 />
              </div>
-
              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 h-11">
                <Calendar className="h-4 w-4 text-slate-400" />
                <Label className="text-xs font-bold text-slate-500 uppercase tracking-tight">Period:</Label>
@@ -464,10 +403,7 @@ export default function OrderHubPage() {
                  <SelectContent className="rounded-xl shadow-xl">
                    <SelectItem value="1" className="font-bold">Last Hour</SelectItem>
                    <SelectItem value="6" className="font-bold">Last 6 Hours</SelectItem>
-                   <SelectItem value="12" className="font-bold">Last 12 Hours</SelectItem>
                    <SelectItem value="24" className="font-bold">Today</SelectItem>
-                   <SelectItem value="48" className="font-bold">Last 2 Days</SelectItem>
-                   <SelectItem value="168" className="font-bold">Last 7 Days</SelectItem>
                  </SelectContent>
                </Select>
              </div>
@@ -475,142 +411,139 @@ export default function OrderHubPage() {
         </div>
       </div>
 
-      <main className="flex-1 p-6 relative">
-        <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-8">
-          {/* Kanban Columns (75% width) */}
-          <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0 h-full">
+      <main className="flex-1 p-6 relative overflow-visible">
+        <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-10">
+          {/* Kanban Columns */}
+          <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
               return (
                 <div key={col.id} className="flex flex-col min-w-0 h-full text-left">
-                  <div className={cn("flex flex-col gap-0.5 mb-4 px-4 py-4 rounded-xl border transition-all", col.bg)}>
-                    <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-5 px-1">
+                    <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <div className={cn("h-2.5 w-2.5 rounded-full", col.dot)} />
-                        <h2 className="text-sm font-bold text-slate-800 tracking-tight">{col.label}</h2>
+                        <div className={cn("h-2 w-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.1)]", col.dot)} />
+                        <h2 className="text-sm font-black text-slate-900 tracking-wider">{col.label}</h2>
                       </div>
-                      <Badge className="bg-slate-900 text-white font-bold px-2 py-0 h-5 text-[10px] rounded-md">
-                        {columnOrders.length}
-                      </Badge>
+                      <p className="text-[11px] font-bold text-slate-400 pl-4">{col.subLabel}</p>
                     </div>
-                    <p className="text-[11px] font-medium text-slate-500 pl-4.5 mt-0.5">{col.subLabel}</p>
+                    <Badge className="bg-slate-900 text-white font-black px-2.5 py-1 text-[11px] rounded-lg shadow-sm">
+                      {columnOrders.length}
+                    </Badge>
                   </div>
                   
-                  <ScrollArea className="flex-1 rounded-2xl bg-slate-200/20 border border-white/50 p-4 shadow-inner min-h-[500px]">
-                    <div className="flex flex-col gap-4 pb-20">
-                      {columnOrders.length > 0 ? columnOrders.map((order) => (
-                        <OrderCard key={order.id} order={order} now={now} />
-                      )) : (
-                        <div className="py-20 text-center opacity-30">
-                          <ClipboardList className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Column Clear</p>
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
+                  <div className="flex-1 space-y-4 pb-20">
+                    {columnOrders.length > 0 ? columnOrders.map((order) => (
+                      <OrderCard key={order.id} order={order} now={now} />
+                    )) : (
+                      <div className="py-20 text-center opacity-20 flex flex-col items-center">
+                        <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Queue Clear</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Sticky Sidebar (25% width) */}
-          <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit text-left">
+          {/* Activity Log Sidebar */}
+          <aside className="xl:col-span-1 sticky top-[88px] self-start text-left h-fit">
             <div className="space-y-6">
-              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[24px] h-[620px]">
-                <CardHeader className="bg-slate-900 text-white p-6 shrink-0 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
-                    <Activity className="h-32 w-32" />
-                  </div>
-                  <div className="relative z-10 flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-                        <Activity className="h-4 w-4 text-teal-400" />
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
+                <CardHeader className="bg-[#18B4A6] text-white p-6 pb-8 shrink-0 relative overflow-hidden">
+                  <div className="relative z-10 flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
+                        <Activity className="h-5 w-5 text-white" />
                       </div>
-                      <CardTitle className="text-sm font-black tracking-[0.15em] uppercase">
+                      <CardTitle className="text-lg font-black tracking-tight uppercase">
                         Activity Log
                       </CardTitle>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
-                      <span className="text-[10px] font-black text-teal-400 tracking-widest uppercase">Live Feed</span>
-                    </div>
+                    <Badge className="bg-white/20 text-white border-0 font-black px-3 py-1 rounded-full text-xs">
+                      20
+                    </Badge>
                   </div>
-                  <CardDescription className="text-white/40 text-[10px] font-bold uppercase tracking-[0.1em] text-left">
-                    Real-time operational audit trail.
-                  </CardDescription>
+                  <p className="relative z-10 text-white/80 text-[11px] font-bold uppercase tracking-wider pl-1">
+                    Track your finalized orders
+                  </p>
                 </CardHeader>
                 
-                <ScrollArea className="flex-1 bg-white">
-                  <div className="p-0">
-                    {recentExits.length > 0 ? recentExits.map((event) => {
-                      const config = exitConfig[event.type];
-                      return (
-                        <div 
-                          key={event.id} 
-                          className={cn(
-                            "relative border-b last:border-0 transition-all duration-500",
-                            event.isNew ? cn("animate-status-blink z-10 scale-[1.02] shadow-lg text-white", config.bg) : "hover:bg-slate-50"
-                          )}
-                        >
-                           {/* Status Accent Line */}
-                           {!event.isNew && (
-                             <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.pulseColor)} />
-                           )}
+                <div className="flex-1 bg-white relative overflow-hidden flex flex-col">
+                  {/* Timeline Background Line */}
+                  <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-dashed border-slate-100 z-0" />
 
-                          <div className="p-4 flex items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                 <span className={cn("text-sm font-black tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
-                                   Order {event.orderNumber}
-                                 </span>
-                                 <span className={cn("text-[9px] font-bold uppercase tracking-widest", event.isNew ? "text-white/60" : "text-slate-400")}>
-                                   just now
-                                 </span>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                 <span className={cn("text-[10px] font-black uppercase tracking-widest", event.isNew ? "text-white" : config.textColor)}>
-                                    {event.type}
-                                  </span>
-                                 <span className={cn("text-[11px] font-bold italic", event.isNew ? "text-white/80" : "text-slate-400")}>
-                                   By Staff {event.server}
-                                 </span>
+                  <ScrollArea className="flex-1">
+                    <div className="p-6 pt-2 space-y-8 relative z-10">
+                      {recentExits.length > 0 ? recentExits.map((event) => {
+                        const config = exitConfig[event.type];
+                        return (
+                          <div 
+                            key={event.id} 
+                            className={cn(
+                              "relative transition-all duration-500 rounded-2xl",
+                              event.isNew && cn("animate-status-blink z-20 shadow-xl text-white py-4 px-6 scale-[1.02]", config.bg)
+                            )}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className={cn(
+                                "h-2 w-2 rounded-full mt-2.5 shrink-0 shadow-sm relative z-10", 
+                                event.isNew ? "bg-white ring-4 ring-white/30" : config.dot
+                              )} />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between mb-1.5">
+                                   <span className={cn("text-base font-black tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
+                                     Order {event.orderNumber}
+                                   </span>
+                                   <span className={cn("text-[9px] font-black uppercase tracking-widest", event.isNew ? "text-white/60" : "text-slate-400")}>
+                                     JUST NOW
+                                   </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                   <div className={cn(
+                                     "px-3 py-1 rounded-full text-[9px] font-black tracking-wider uppercase",
+                                     event.isNew ? "bg-white text-slate-900" : cn(config.bg, "text-white")
+                                   )}>
+                                      {event.type}
+                                    </div>
+                                   <span className={cn("text-xs font-bold", event.isNew ? "text-white/80" : "text-slate-500")}>
+                                     Staff {event.server}
+                                   </span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                        );
+                      }) : (
+                        <div className="py-32 text-center opacity-30 flex flex-col items-center gap-4 px-10">
+                          <Activity className="h-10 w-10 text-slate-200" />
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Monitoring Feeds</p>
                         </div>
-                      );
-                    }) : (
-                      <div className="py-32 text-center opacity-30 flex flex-col items-center gap-4 px-10">
-                        <div className="h-16 w-16 rounded-[20px] bg-slate-100 flex items-center justify-center">
-                          <Activity className="h-8 w-8 text-slate-300" />
-                        </div>
-                        <div className="space-y-1 text-center">
-                          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Monitoring Network</p>
-                          <p className="text-[10px] text-slate-400 font-medium">Waiting for orders to complete...</p>
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  </ScrollArea>
+                  
+                  <div className="p-5 bg-slate-50/50 border-t flex items-center justify-center shrink-0">
+                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">End of Feed</p>
                   </div>
-                </ScrollArea>
-                <div className="p-4 bg-slate-50 border-t flex items-center justify-center">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">End of feed</p>
                 </div>
               </Card>
 
-              {/* Informational Notice */}
-              <Card className="bg-teal-50/50 border-teal-100 p-5 rounded-[24px] shadow-sm text-left border-2 border-dashed">
-                 <div className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-xl bg-teal-500/10 flex items-center justify-center shrink-0 border border-teal-500/20">
-                      <HelpCircle className="h-4 w-4 text-teal-600" />
+              {/* Informational Gradient Box */}
+              <div className="rounded-[32px] bg-gradient-to-br from-yellow-50 via-white to-purple-50 p-6 shadow-sm border border-white/80 text-left">
+                 <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
+                      <HelpCircle className="h-6 w-6 text-green-600" />
                     </div>
-                    <div className="space-y-1 text-left">
-                       <p className="text-xs font-black uppercase tracking-widest text-teal-900">Live Order Tracking</p>
-                       <p className="text-[11px] leading-relaxed text-teal-800/70 font-bold">
+                    <div className="space-y-1.5 text-left">
+                       <p className="text-sm font-black text-slate-900 leading-none">Live Order Tracking</p>
+                       <p className="text-[11px] leading-relaxed text-slate-500 font-bold">
                          This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
                        </p>
                     </div>
                  </div>
-              </Card>
+              </div>
             </div>
           </aside>
         </div>

@@ -70,7 +70,7 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     dot: 'bg-[#4379ee]',
     bg: 'bg-[#f4f7ff]',
     accent: 'bg-blue-500',
-    badge: 'bg-blue-500 text-white',
+    badge: 'bg-blue-600 text-white',
     text: 'PENDING'
   },
   accepted: {
@@ -127,13 +127,15 @@ const formatDuration = (ms: number) => {
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    const minutesAgo = Math.floor(Math.random() * 8) + 1; 
-    const timestamp = subMinutes(new Date(), minutesAgo).getTime();
+    // Generate realistic kitchen wait times between 1 and 21 minutes
+    const minutesAgo = Math.floor(Math.random() * 21) + 1; 
+    const secondsAgo = Math.floor(Math.random() * 60);
+    const timestamp = subMinutes(new Date(), minutesAgo).getTime() - (secondsAgo * 1000);
     
     return {
       id: `${Math.random().toString(36).substr(2, 9)}`,
       orderNumber: `#${4820 + i}`,
-      table: `T${Math.floor(Math.random() * 20) + 1}`,
+      table: `T${Math.floor(Math.random() * 24) + 1}`,
       status: statuses[i % 3],
       itemsCount: Math.floor(Math.random() * 6) + 1,
       server: servers[Math.floor(Math.random() * servers.length)],
@@ -145,11 +147,12 @@ const generateMockOrders = (count: number): HubOrder[] => {
 const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const isExiting = order.status === 'exiting';
+  const durationMs = now - order.timestamp;
+  const isCritical = durationMs >= 1200000; // 20 minutes in ms
+  const isNew = durationMs < 5000;
+
   const config = isExiting && order.exitType ? exitConfig[order.exitType] : statusConfig[order.status];
   const Icon = isExiting ? exitConfig[order.exitType!].icon : (config as any).icon;
-  
-  const durationMs = now - order.timestamp;
-  const isNew = durationMs < 5000;
 
   useEffect(() => {
     if (isExiting && cardRef.current) {
@@ -184,13 +187,14 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
     >
       <Card 
         className={cn(
-          "group relative transition-all duration-300 border-0 shadow-sm rounded-[24px] overflow-hidden bg-white hover:shadow-lg",
+          "group relative transition-all duration-300 border shadow-sm rounded-[24px] overflow-hidden bg-white hover:shadow-lg",
+          isCritical && "bg-[#fff1f1] border-red-500 ring-1 ring-red-500/20",
           isExiting && cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent")
         )}
       >
         <CardContent className="p-0 flex flex-col h-full relative z-10 text-left">
           {!isExiting && (
-            <div className={cn("absolute left-0 top-0 bottom-0 w-1", (config as any).accent)} />
+            <div className={cn("absolute left-0 top-0 bottom-0 w-1", isCritical ? "bg-red-500" : (config as any).accent)} />
           )}
 
           <div className="p-5 space-y-4">
@@ -199,12 +203,12 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
                 <span className={cn("text-[9px] font-black uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>
                   ORDER ID
                 </span>
-                <h3 className={cn("text-xl font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-2xl font-bold tracking-tight", isExiting ? "text-white" : "text-slate-900")}>
                   {order.orderNumber}
                 </h3>
               </div>
               <div className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black shadow-sm",
+                "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-black shadow-sm",
                 isExiting ? "bg-white text-slate-900" : (config as any).badge
               )}>
                 <Icon className="h-3 w-3" />
@@ -212,30 +216,32 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               </div>
             </div>
 
+            <div className="h-px bg-slate-100 opacity-50 mx-[-20px]" />
+
             <div className="flex items-end justify-between">
-              <div className={cn("space-y-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
+              <div className={cn("space-y-2", isExiting ? "text-white/80" : "text-slate-600")}>
                 <div className="flex items-center gap-2">
-                  <User className="h-3.5 w-3.5 opacity-60" />
-                  <span className="text-xs font-bold whitespace-nowrap">By Staff {order.server}</span>
+                  <User className="h-4 w-4 opacity-60" />
+                  <span className="text-sm font-bold whitespace-nowrap">By Staff {order.server}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Armchair className="h-3.5 w-3.5 opacity-60" />
-                  <span className="text-xs font-bold whitespace-nowrap">Table {order.table}</span>
+                  <Armchair className="h-4 w-4 opacity-60" />
+                  <span className="text-sm font-bold whitespace-nowrap">Table {order.table}</span>
                 </div>
               </div>
 
               <div className={cn(
-                "flex items-center gap-1.5 px-2 py-1 rounded-lg font-black text-[10px] font-mono shadow-inner border",
-                isExiting ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-100 text-slate-400"
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs font-mono border",
+                isExiting ? "bg-white/10 border-white/20 text-white" : isCritical ? "bg-white border-red-200 text-red-600" : "bg-slate-50 border-slate-100 text-slate-500"
               )}>
-                <Clock className="h-3 w-3" />
+                <Clock className={cn("h-3.5 w-3.5", isCritical && !isExiting && "text-red-500")} />
                 {formatDuration(durationMs)}
               </div>
             </div>
 
             <div className={cn(
-              "flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed",
-              isExiting ? "bg-white/10 border-white/20" : "bg-slate-50/50 border-slate-100"
+              "flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed transition-colors",
+              isExiting ? "bg-white/10 border-white/20" : isCritical ? "bg-white/50 border-red-200/50" : "bg-slate-50/50 border-slate-100"
             )}>
                <Box className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-400")} />
                <span className={cn("text-xs font-black uppercase tracking-widest", isExiting ? "text-white" : "text-slate-500")}>
@@ -267,15 +273,17 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Simulate new orders and status movements
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
+        // 15% chance for a new order
         if (rand < 0.15) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
             orderNumber: `#${4800 + Math.floor(Math.random() * 1000)}`,
-            table: `T${Math.floor(Math.random() * 20) + 1}`,
+            table: `T${Math.floor(Math.random() * 24) + 1}`,
             status: 'pending',
             itemsCount: Math.floor(Math.random() * 5) + 1,
             server: servers[Math.floor(Math.random() * servers.length)],
@@ -283,12 +291,14 @@ export default function OrderHubPage() {
           };
           return [newOrder, ...prev];
         }
+        // Move Pending to Accepted
         if (rand > 0.15 && rand < 0.35) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending');
           if (pendingIdx !== -1) {
             return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' as HubStatus } : o);
           }
         }
+        // Move Accepted to Preparing
         if (rand > 0.35 && rand < 0.55) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted');
           if (acceptedIdx !== -1) {
@@ -301,6 +311,7 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Strict 10-second synchronized finalization cycle
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
@@ -314,18 +325,23 @@ export default function OrderHubPage() {
         
         let target: HubOrder | undefined;
         
+        // "COMPLETED" only applies to "Preparing" column
         if (randomExit === 'COMPLETED') {
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {
+              // If no preparing items, we could either skip or force another status
+              // For consistency, let's just skip this 10s tick for COMPLETED if nothing is cooking
               return prev; 
             }
         } else {
+            // Cancel/Reject/Fail can happen at any stage
             target = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
         if (!target) return prev;
         
+        // Log the exit event to synchronize with Activity Log
         const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
@@ -336,11 +352,17 @@ export default function OrderHubPage() {
         };
         
         setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
+
         const updated = prev.map(o => o.id === target!.id ? { ...o, status: 'exiting' as HubStatus, exitType: randomExit, originalStatus: o.status } : o);
-        setTimeout(() => setOrders(current => current.filter(o => o.id !== target!.id)), 3200);
+        
+        // Cleanup after blinking (matching GSAP timeline)
+        setTimeout(() => {
+          setOrders(current => current.filter(o => o.id !== target!.id));
+        }, 3200);
+
         return updated;
       });
-    }, 10000); 
+    }, 10000); // 10s cycle
     return () => clearInterval(finalizationInterval);
   }, []);
 
@@ -414,6 +436,8 @@ export default function OrderHubPage() {
 
       <main className="flex-1 p-6 relative overflow-visible">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-10">
+          
+          {/* Kanban Area - Spanning 75% width */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
@@ -448,9 +472,11 @@ export default function OrderHubPage() {
             })}
           </div>
 
+          {/* Activity & Stats Sidebar - Fixed 25% width */}
           <aside className="xl:col-span-1 sticky top-[88px] self-start text-left h-fit">
             <div className="space-y-6">
-              {longestWait > 600000 && ( 
+              
+              {longestWait > 600000 && ( // 10 minutes wait alert
                 <div className="rounded-[32px] bg-rose-50 p-6 shadow-sm border border-rose-100 text-left animate-pulse">
                   <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200/50">
@@ -466,6 +492,7 @@ export default function OrderHubPage() {
                 </div>
               )}
 
+              {/* Activity Log - Command Center UI */}
               <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[600px]">
                 <CardHeader className="bg-[#18B4A6] text-white p-6 pb-8 shrink-0 relative overflow-hidden">
                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
@@ -490,6 +517,7 @@ export default function OrderHubPage() {
                 </CardHeader>
                 
                 <div className="flex-1 bg-white relative overflow-hidden flex flex-col">
+                  {/* Vertical Axis Line */}
                   <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-dashed border-slate-100 z-0" />
 
                   <ScrollArea className="flex-1">
@@ -542,12 +570,14 @@ export default function OrderHubPage() {
                     </div>
                   </ScrollArea>
                   
+                  {/* End Footer of Scroll */}
                   <div className="p-5 bg-slate-50/50 border-t flex items-center justify-center shrink-0">
                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">End of Feed</p>
                   </div>
                 </div>
               </Card>
 
+              {/* Operational Notice */}
               <div className="rounded-[32px] bg-gradient-to-br from-yellow-50 via-white to-purple-50 p-6 shadow-sm border border-white/80 text-left">
                  <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
@@ -561,6 +591,7 @@ export default function OrderHubPage() {
                     </div>
                  </div>
               </div>
+
             </div>
           </aside>
         </div>

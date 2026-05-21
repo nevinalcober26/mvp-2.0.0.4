@@ -314,13 +314,13 @@ export default function OrderHubPage() {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
         
-        const inPreparing = candidates.filter(o => o.status === 'in_progress');
         const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
         
         let target: HubOrder | undefined;
         
         if (randomExit === 'COMPLETED') {
+            const inPreparing = candidates.filter(o => o.status === 'in_progress');
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {
@@ -514,7 +514,7 @@ export default function OrderHubPage() {
                     </Badge>
                   </div>
                   <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase pl-1">
-                    System Feed Tracker
+                    Track your finalized orders
                   </p>
                 </CardHeader>
                 
@@ -579,11 +579,11 @@ export default function OrderHubPage() {
 
               <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
                  <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 border border-teal-100">
-                      <HelpCircle className="h-5 w-5 text-teal-600" />
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
+                      <HelpCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div className="space-y-1.5 text-left">
-                       <p className="text-[13px] font-bold text-slate-900 leading-none">Operational Help</p>
+                       <p className="text-sm font-black text-slate-900 leading-none">Live Order Tracking</p>
                        <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
                          Timers indicate the total time elapsed since order submission. Items in the Preparing column are prioritized for finalization.
                        </p>

@@ -28,6 +28,7 @@ import {
   Calendar,
   Armchair,
   Box,
+  HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -306,18 +307,22 @@ export default function OrderHubPage() {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
         
-        const exitCandidates = candidates.filter(o => o.status === 'in_progress');
+        const inPreparing = candidates.filter(o => o.status === 'in_progress');
         
         const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
         
         let target: HubOrder | undefined;
+        
         if (randomExit === 'COMPLETED') {
-            if (exitCandidates.length > 0) target = exitCandidates[Math.floor(Math.random() * exitCandidates.length)];
-            else return prev;
+            if (inPreparing.length > 0) {
+              target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
+            } else {
+              return prev; // No preparing orders to complete
+            }
         } else {
-            if (candidates.length > 0) target = candidates[Math.floor(Math.random() * candidates.length)];
-            else return prev;
+            // Cancelled/Rejected/Failed can happen anywhere
+            target = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
         if (!target) return prev;
@@ -336,7 +341,7 @@ export default function OrderHubPage() {
         setTimeout(() => setOrders(current => current.filter(o => o.id !== target!.id)), 3200);
         return updated;
       });
-    }, 10000);
+    }, 10000); // Strictly every 10 seconds
     return () => clearInterval(finalizationInterval);
   }, []);
 

@@ -127,7 +127,7 @@ const formatDuration = (ms: number) => {
 
 const generateMockOrders = (count: number): HubOrder[] => {
   return Array.from({ length: count }, (_, i) => {
-    const minutesAgo = Math.floor(Math.random() * 10) + 1; 
+    const minutesAgo = Math.floor(Math.random() * 8) + 1; 
     const timestamp = subMinutes(new Date(), minutesAgo).getTime();
     
     return {
@@ -318,10 +318,9 @@ export default function OrderHubPage() {
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {
-              return prev; // No preparing orders to complete
+              return prev; 
             }
         } else {
-            // Cancelled/Rejected/Failed can happen anywhere
             target = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
@@ -341,7 +340,7 @@ export default function OrderHubPage() {
         setTimeout(() => setOrders(current => current.filter(o => o.id !== target!.id)), 3200);
         return updated;
       });
-    }, 10000); // Strictly every 10 seconds
+    }, 10000); 
     return () => clearInterval(finalizationInterval);
   }, []);
 
@@ -356,6 +355,11 @@ export default function OrderHubPage() {
              o.table.toLowerCase().includes(search.toLowerCase());
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
+
+  const longestWait = useMemo(() => {
+    if (orders.length === 0) return 0;
+    return Math.max(...orders.map(o => now - o.timestamp));
+  }, [orders, now]);
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500' },
@@ -446,7 +450,23 @@ export default function OrderHubPage() {
 
           <aside className="xl:col-span-1 sticky top-[88px] self-start text-left h-fit">
             <div className="space-y-6">
-              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[680px]">
+              {longestWait > 600000 && ( 
+                <div className="rounded-[32px] bg-rose-50 p-6 shadow-sm border border-rose-100 text-left animate-pulse">
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200/50">
+                      <AlertCircle className="h-6 w-6 text-rose-600" />
+                    </div>
+                    <div className="space-y-1.5 text-left">
+                       <p className="text-sm font-black text-rose-900 leading-none">Critical Wait Alert</p>
+                       <p className="text-[11px] leading-relaxed text-rose-700 font-bold">
+                         One or more orders have exceeded the 10-minute preparation threshold. Immediate attention required.
+                       </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[600px]">
                 <CardHeader className="bg-[#18B4A6] text-white p-6 pb-8 shrink-0 relative overflow-hidden">
                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
                      <Activity className="h-48 w-48 text-white" />

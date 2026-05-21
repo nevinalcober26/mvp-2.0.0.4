@@ -78,8 +78,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     subLabel: 'New orders to review',
     icon: Clock,
     color: 'text-blue-600',
-    dot: 'bg-blue-500',
-    bg: 'bg-blue-50/50',
+    dot: 'bg-[#4379ee]',
+    bg: 'bg-[#f4f7ff]',
     accent: 'bg-blue-500',
     badge: 'bg-blue-500 text-white',
     text: 'PENDING'
@@ -89,8 +89,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     subLabel: 'Confirmed & in queue',
     icon: CheckCircle2,
     color: 'text-indigo-600',
-    dot: 'bg-indigo-500',
-    bg: 'bg-indigo-50/50',
+    dot: 'bg-[#6366f1]',
+    bg: 'bg-[#f5f5ff]',
     accent: 'bg-indigo-500',
     badge: 'bg-indigo-500 text-white',
     text: 'ACCEPTED'
@@ -100,8 +100,8 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     subLabel: 'Kitchen is cooking now',
     icon: Play,
     color: 'text-teal-600',
-    dot: 'bg-teal-500',
-    bg: 'bg-teal-50/50',
+    dot: 'bg-[#50bfa5]',
+    bg: 'bg-[#f4fbf9]',
     accent: 'bg-teal-500',
     badge: 'bg-teal-500 text-white',
     text: 'PREPARING'
@@ -195,18 +195,16 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
     >
       <Card 
         className={cn(
-          "group relative transition-all duration-300 border-0 shadow-sm rounded-2xl overflow-hidden bg-white hover:shadow-lg",
+          "group relative transition-all duration-300 border-0 shadow-sm rounded-[24px] overflow-hidden bg-white hover:shadow-lg",
           isExiting && cn(config.bg, "scale-105 z-20 shadow-xl animate-status-blink text-white border-transparent")
         )}
       >
         <CardContent className="p-0 flex flex-col h-full relative z-10 text-left">
-          {/* Status Left Accent Bar */}
           {!isExiting && (
             <div className={cn("absolute left-0 top-0 bottom-0 w-1", (config as any).accent)} />
           )}
 
           <div className="p-5 space-y-4">
-            {/* Top Row: ID & Status Badge */}
             <div className="flex justify-between items-start">
               <div className="space-y-0.5">
                 <span className={cn("text-[9px] font-black uppercase tracking-widest", isExiting ? "text-white/60" : "text-slate-400")}>
@@ -225,7 +223,6 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               </div>
             </div>
 
-            {/* Middle Row: Server, Table & Timer */}
             <div className="flex items-end justify-between">
               <div className={cn("space-y-1.5", isExiting ? "text-white/80" : "text-slate-500")}>
                 <div className="flex items-center gap-2">
@@ -247,7 +244,6 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               </div>
             </div>
 
-            {/* Bottom Row: Item Summary Box */}
             <div className={cn(
               "flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed",
               isExiting ? "bg-white/10 border-white/20" : "bg-slate-50/50 border-slate-100"
@@ -321,16 +317,23 @@ export default function OrderHubPage() {
       setOrders(prev => {
         const candidates = prev.filter(o => o.status !== 'exiting');
         if (candidates.length === 0) return prev;
+        
+        const exitCandidates = candidates.filter(o => o.status === 'in_progress');
+        const failCandidates = candidates.filter(o => o.status !== 'in_progress');
+        
         const randomExit = Math.random() > 0.8 ? (['CANCELLED', 'REJECTED', 'FAILED'][Math.floor(Math.random() * 3)] as ExitType) : 'COMPLETED';
+        
         let target: HubOrder | undefined;
         if (randomExit === 'COMPLETED') {
-          const preparingCandidates = candidates.filter(o => o.status === 'in_progress');
-          if (preparingCandidates.length > 0) target = preparingCandidates[Math.floor(Math.random() * preparingCandidates.length)];
-          else return prev;
+            if (exitCandidates.length > 0) target = exitCandidates[Math.floor(Math.random() * exitCandidates.length)];
+            else return prev;
         } else {
-          target = candidates[Math.floor(Math.random() * candidates.length)];
+            if (candidates.length > 0) target = candidates[Math.floor(Math.random() * candidates.length)];
+            else return prev;
         }
+
         if (!target) return prev;
+        
         const newLog: EventLog = {
           id: Math.random().toString(),
           orderNumber: target.orderNumber,
@@ -339,6 +342,7 @@ export default function OrderHubPage() {
           server: target.server,
           isNew: true
         };
+        
         setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
         const updated = prev.map(o => o.id === target!.id ? { ...o, status: 'exiting' as HubStatus, exitType: randomExit, originalStatus: o.status } : o);
         setTimeout(() => setOrders(current => current.filter(o => o.id !== target!.id)), 3200);
@@ -413,23 +417,23 @@ export default function OrderHubPage() {
 
       <main className="flex-1 p-6 relative overflow-visible">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-10">
-          {/* Kanban Columns */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
+              const config = statusConfig[col.id];
               return (
                 <div key={col.id} className="flex flex-col min-w-0 h-full text-left">
-                  <div className="flex items-center justify-between mb-5 px-1">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("h-2 w-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.1)]", col.dot)} />
-                        <h2 className="text-sm font-black text-slate-900 tracking-wider">{col.label}</h2>
+                  <div className={cn("mb-5 rounded-[20px] border border-slate-100 p-4 transition-all shadow-sm", config.bg)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("h-2.5 w-2.5 rounded-full shadow-sm", config.dot)} />
+                        <h2 className="text-base font-black text-slate-900 tracking-wider">{config.label}</h2>
                       </div>
-                      <p className="text-[11px] font-bold text-slate-400 pl-4">{col.subLabel}</p>
+                      <div className="bg-[#1e293b] text-white font-black px-2 py-0.5 text-[11px] rounded-md shadow-sm">
+                        {columnOrders.length}
+                      </div>
                     </div>
-                    <Badge className="bg-slate-900 text-white font-black px-2.5 py-1 text-[11px] rounded-lg shadow-sm">
-                      {columnOrders.length}
-                    </Badge>
+                    <p className="text-[11px] font-bold text-slate-400 mt-1 pl-[22px]">{config.subLabel}</p>
                   </div>
                   
                   <div className="flex-1 space-y-4 pb-20">
@@ -447,52 +451,53 @@ export default function OrderHubPage() {
             })}
           </div>
 
-          {/* Activity Log Sidebar */}
           <aside className="xl:col-span-1 sticky top-[88px] self-start text-left h-fit">
             <div className="space-y-6">
-              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[680px]">
                 <CardHeader className="bg-[#18B4A6] text-white p-6 pb-8 shrink-0 relative overflow-hidden">
-                  <div className="relative z-10 flex items-center justify-between mb-4">
+                   <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
+                     <Activity className="h-48 w-48 text-white" />
+                   </div>
+                  <div className="relative z-10 flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
                         <Activity className="h-5 w-5 text-white" />
                       </div>
-                      <CardTitle className="text-lg font-black tracking-tight uppercase">
+                      <CardTitle className="text-xl font-black tracking-tight uppercase">
                         Activity Log
                       </CardTitle>
                     </div>
                     <Badge className="bg-white/20 text-white border-0 font-black px-3 py-1 rounded-full text-xs">
-                      20
+                      {recentExits.length}
                     </Badge>
                   </div>
                   <p className="relative z-10 text-white/80 text-[11px] font-bold uppercase tracking-wider pl-1">
-                    Track your finalized orders
+                    Live Feed Tracker
                   </p>
                 </CardHeader>
                 
                 <div className="flex-1 bg-white relative overflow-hidden flex flex-col">
-                  {/* Timeline Background Line */}
                   <div className="absolute left-10 top-0 bottom-0 w-px border-l-2 border-dashed border-slate-100 z-0" />
 
                   <ScrollArea className="flex-1">
-                    <div className="p-6 pt-2 space-y-8 relative z-10">
+                    <div className="p-6 pt-4 space-y-8 relative z-10">
                       {recentExits.length > 0 ? recentExits.map((event) => {
                         const config = exitConfig[event.type];
                         return (
                           <div 
                             key={event.id} 
                             className={cn(
-                              "relative transition-all duration-500 rounded-2xl",
-                              event.isNew && cn("animate-status-blink z-20 shadow-xl text-white py-4 px-6 scale-[1.02]", config.bg)
+                              "relative transition-all duration-500 rounded-2xl p-4 border border-transparent",
+                              event.isNew && cn("animate-status-blink z-20 shadow-xl text-white px-6 scale-[1.02]", config.bg)
                             )}
                           >
                             <div className="flex items-start gap-4">
                               <div className={cn(
-                                "h-2 w-2 rounded-full mt-2.5 shrink-0 shadow-sm relative z-10", 
-                                event.isNew ? "bg-white ring-4 ring-white/30" : config.dot
+                                "h-2.5 w-2.5 rounded-full mt-2 shrink-0 shadow-sm relative z-10 border-2 border-white", 
+                                event.isNew ? "bg-white" : config.dot
                               )} />
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1.5">
+                                <div className="flex items-center justify-between mb-1">
                                    <span className={cn("text-base font-black tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
                                      Order {event.orderNumber}
                                    </span>
@@ -500,15 +505,15 @@ export default function OrderHubPage() {
                                      JUST NOW
                                    </span>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-3 mt-1.5">
                                    <div className={cn(
-                                     "px-3 py-1 rounded-full text-[9px] font-black tracking-wider uppercase",
+                                     "px-3 py-0.5 rounded-full text-[9px] font-black tracking-wider uppercase border border-transparent shadow-sm",
                                      event.isNew ? "bg-white text-slate-900" : cn(config.bg, "text-white")
                                    )}>
                                       {event.type}
                                     </div>
                                    <span className={cn("text-xs font-bold", event.isNew ? "text-white/80" : "text-slate-500")}>
-                                     Staff {event.server}
+                                     By Staff {event.server}
                                    </span>
                                 </div>
                               </div>
@@ -530,7 +535,6 @@ export default function OrderHubPage() {
                 </div>
               </Card>
 
-              {/* Informational Gradient Box */}
               <div className="rounded-[32px] bg-gradient-to-br from-yellow-50 via-white to-purple-50 p-6 shadow-sm border border-white/80 text-left">
                  <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">

@@ -585,7 +585,7 @@ export default function OrderHubPage() {
                     <div className="space-y-1.5 text-left">
                        <p className="text-sm font-black text-slate-900 leading-none">Live Order Tracking</p>
                        <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                         Timers indicate the total time elapsed since order submission. Items in the Preparing column are prioritized for finalization.
+                         This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
                        </p>
                     </div>
                  </div>

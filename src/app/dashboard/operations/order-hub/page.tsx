@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
@@ -21,29 +20,18 @@ import {
   XCircle,
   AlertCircle,
   Play,
-  Package,
   Search,
   Activity,
-  Timer,
-  HelpCircle,
   User,
   RefreshCw,
   ClipboardList,
   Calendar,
   Armchair,
   Box,
-  Circle,
-  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
 import { subMinutes } from 'date-fns';
-import {
-  Tooltip,
-  TooltipProvider,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
 import gsap from 'gsap';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -119,11 +107,11 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   }
 };
 
-const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string; textColor: string; dot: string }> = {
-  COMPLETED: { bg: 'bg-emerald-500', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-500', textColor: 'text-emerald-500', dot: 'bg-emerald-500' },
-  CANCELLED: { bg: 'bg-rose-500', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-500', textColor: 'text-rose-500', dot: 'bg-rose-500' },
-  REJECTED: { bg: 'bg-rose-600', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-600', textColor: 'text-rose-600', dot: 'bg-rose-600' },
-  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-900', textColor: 'text-slate-900', dot: 'bg-slate-900' },
+const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; dot: string }> = {
+  COMPLETED: { bg: 'bg-emerald-500', text: 'COMPLETED', icon: CheckCircle2, dot: 'bg-emerald-500' },
+  CANCELLED: { bg: 'bg-orange-500', text: 'CANCELLED', icon: XCircle, dot: 'bg-orange-500' },
+  REJECTED: { bg: 'bg-rose-600', text: 'REJECTED', icon: XCircle, dot: 'bg-rose-600' },
+  FAILED: { bg: 'bg-purple-600', text: 'FAILED', icon: AlertCircle, dot: 'bg-purple-600' },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -319,9 +307,9 @@ export default function OrderHubPage() {
         if (candidates.length === 0) return prev;
         
         const exitCandidates = candidates.filter(o => o.status === 'in_progress');
-        const failCandidates = candidates.filter(o => o.status !== 'in_progress');
         
-        const randomExit = Math.random() > 0.8 ? (['CANCELLED', 'REJECTED', 'FAILED'][Math.floor(Math.random() * 3)] as ExitType) : 'COMPLETED';
+        const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
+        const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
         
         let target: HubOrder | undefined;
         if (randomExit === 'COMPLETED') {

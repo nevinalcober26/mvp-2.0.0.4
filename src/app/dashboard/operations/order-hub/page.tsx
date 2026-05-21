@@ -112,11 +112,11 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
   }
 };
 
-const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string }> = {
-  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-50' },
-  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-50' },
-  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-100' },
-  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-100' },
+const exitConfig: Record<ExitType, { bg: string; text: string; icon: any; pulseColor: string; textColor: string }> = {
+  COMPLETED: { bg: 'bg-emerald-600', text: 'COMPLETED', icon: CheckCircle2, pulseColor: 'bg-emerald-500', textColor: 'text-emerald-500' },
+  CANCELLED: { bg: 'bg-rose-600', text: 'CANCELLED', icon: XCircle, pulseColor: 'bg-rose-500', textColor: 'text-rose-500' },
+  REJECTED: { bg: 'bg-rose-700', text: 'REJECTED', icon: XCircle, pulseColor: 'bg-rose-700', textColor: 'text-rose-700' },
+  FAILED: { bg: 'bg-slate-900', text: 'FAILED', icon: AlertCircle, pulseColor: 'bg-slate-900', textColor: 'text-slate-900' },
 };
 
 const servers = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
@@ -477,6 +477,7 @@ export default function OrderHubPage() {
 
       <main className="flex-1 p-6 relative">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-8">
+          {/* Kanban Columns (75% width) */}
           <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0 h-full">
             {columns.map((col) => {
               const columnOrders = getFilteredStatusOrders(col.id);
@@ -512,9 +513,10 @@ export default function OrderHubPage() {
             })}
           </div>
 
+          {/* Sticky Sidebar (25% width) */}
           <aside className="xl:col-span-1 sticky top-[88px] self-start h-fit text-left">
             <div className="space-y-6">
-              <Card className="border shadow-2xl bg-white overflow-hidden flex flex-col rounded-[24px] h-[580px]">
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[24px] h-[620px]">
                 <CardHeader className="bg-slate-900 text-white p-6 shrink-0 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
                     <Activity className="h-32 w-32" />
@@ -534,7 +536,7 @@ export default function OrderHubPage() {
                     </div>
                   </div>
                   <CardDescription className="text-white/40 text-[10px] font-bold uppercase tracking-[0.1em] text-left">
-                    History of finalized and moved tickets.
+                    Real-time operational audit trail.
                   </CardDescription>
                 </CardHeader>
                 
@@ -550,15 +552,14 @@ export default function OrderHubPage() {
                             event.isNew ? cn("animate-status-blink z-10 scale-[1.02] shadow-lg text-white", config.bg) : "hover:bg-slate-50"
                           )}
                         >
-                          <div className="p-5 flex items-start gap-4">
-                            <div className={cn(
-                              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm border transition-colors",
-                              event.isNew ? "bg-white/20 border-white/20" : "bg-white border-slate-100"
-                            )}>
-                               <config.icon className={cn("h-5 w-5", event.isNew ? "text-white" : cn("text-slate-400", event.type === 'COMPLETED' ? "text-emerald-500" : "text-rose-500"))} />
-                            </div>
-                            <div className="flex-1 min-w-0 space-y-1">
-                              <div className="flex items-center justify-between">
+                           {/* Status Accent Line */}
+                           {!event.isNew && (
+                             <div className={cn("absolute left-0 top-0 bottom-0 w-1", config.pulseColor)} />
+                           )}
+
+                          <div className="p-4 flex items-start gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
                                  <span className={cn("text-sm font-black tracking-tight", event.isNew ? "text-white" : "text-slate-900")}>
                                    Order {event.orderNumber}
                                  </span>
@@ -566,14 +567,11 @@ export default function OrderHubPage() {
                                    just now
                                  </span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                 <Badge className={cn(
-                                   "text-[9px] font-black h-4 px-1.5 border-0 rounded-md shadow-sm", 
-                                   event.isNew ? "bg-white text-slate-900" : cn(config.bg, "text-white")
-                                 )}>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                 <span className={cn("text-[10px] font-black uppercase tracking-widest", event.isNew ? "text-white" : config.textColor)}>
                                     {event.type}
-                                  </Badge>
-                                 <span className={cn("text-[11px] font-bold italic truncate", event.isNew ? "text-white/80" : "text-slate-500")}>
+                                  </span>
+                                 <span className={cn("text-[11px] font-bold italic", event.isNew ? "text-white/80" : "text-slate-400")}>
                                    By Staff {event.server}
                                  </span>
                               </div>
@@ -586,7 +584,7 @@ export default function OrderHubPage() {
                         <div className="h-16 w-16 rounded-[20px] bg-slate-100 flex items-center justify-center">
                           <Activity className="h-8 w-8 text-slate-300" />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-1 text-center">
                           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Monitoring Network</p>
                           <p className="text-[10px] text-slate-400 font-medium">Waiting for orders to complete...</p>
                         </div>
@@ -599,6 +597,7 @@ export default function OrderHubPage() {
                 </div>
               </Card>
 
+              {/* Informational Notice */}
               <Card className="bg-teal-50/50 border-teal-100 p-5 rounded-[24px] shadow-sm text-left border-2 border-dashed">
                  <div className="flex items-start gap-3">
                     <div className="h-8 w-8 rounded-xl bg-teal-500/10 flex items-center justify-center shrink-0 border border-teal-500/20">

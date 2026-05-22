@@ -61,6 +61,7 @@ export default function HelpCenterPage() {
     <div className="min-h-screen bg-[#fafbfc]">
       <DashboardHeader />
       
+      {/* Refined Header */}
       <div className="bg-white border-b px-8 py-12 shrink-0 text-left">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-2 text-teal-600 mb-2">
@@ -68,7 +69,7 @@ export default function HelpCenterPage() {
              <span className="text-xs font-semibold uppercase">Merchant Support</span>
           </div>
           <h1 className="text-3xl font-semibold text-slate-900">How can we help you?</h1>
-          <p className="text-slate-500 mt-2 max-w-2xl text-sm leading-relaxed">
+          <p className="text-slate-500 mt-2 max-w-2xl text-sm leading-relaxed font-medium">
             Our specialized Network International support teams are available around the clock to ensure your digital menu operations run at peak performance.
           </p>
         </div>
@@ -77,9 +78,10 @@ export default function HelpCenterPage() {
       <main className="p-8">
         <div className="max-w-5xl mx-auto space-y-12">
           
+          {/* Support Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {SUPPORT_CHANNELS.map((channel) => (
-              <Card key={channel.title} className="group border shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all">
+              <Card key={channel.title} className="group border border-slate-100 shadow-sm rounded-xl overflow-hidden bg-white hover:shadow-md transition-all">
                 <CardContent className="p-0">
                   <div className="p-6 flex items-start gap-4">
                     <div className={cn("h-10 w-10 rounded-lg border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105", channel.color)}>
@@ -95,7 +97,7 @@ export default function HelpCenterPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="px-6 py-3 bg-slate-50 border-t flex justify-end">
+                  <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
                     <Button variant="ghost" className="text-xs font-semibold text-slate-600 hover:text-primary gap-2 h-7 px-2 rounded-md" asChild>
                       <a href={channel.href}>
                         {channel.actionLabel}
@@ -108,8 +110,9 @@ export default function HelpCenterPage() {
             ))}
           </div>
 
+          {/* Institutional Context Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 border shadow-sm rounded-2xl bg-slate-900 text-white overflow-hidden relative">
+            <Card className="lg:col-span-2 border-0 shadow-sm rounded-2xl bg-slate-900 text-white overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                 <ShieldCheck className="h-48 w-48 text-white" />
               </div>
@@ -143,7 +146,7 @@ export default function HelpCenterPage() {
                       Access our comprehensive library of operational guides, from POS integration to menu design best practices.
                     </p>
                   </div>
-                  <Button className="w-full bg-white text-teal-600 hover:bg-slate-50 font-semibold rounded-xl h-11 mt-8 gap-2">
+                  <Button className="w-full bg-white text-teal-600 hover:bg-slate-50 font-semibold rounded-xl h-11 mt-8 gap-2 border-0">
                     Browse Guides
                     <ExternalLink className="h-4 w-4" />
                   </Button>
@@ -151,6 +154,7 @@ export default function HelpCenterPage() {
             </Card>
           </div>
 
+          {/* Footer Assistance */}
           <div className="py-6 px-4 bg-white border border-slate-100 rounded-xl text-center shadow-sm">
             <p className="text-[13px] font-medium text-slate-500">
               Not finding what you need? <span className="text-teal-600 font-semibold cursor-pointer hover:underline">Submit a technical ticket</span> and we'll get back to you shortly.

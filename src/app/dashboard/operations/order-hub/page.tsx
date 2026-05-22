@@ -223,7 +223,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
                     </TooltipProvider>
                   )}
                 </div>
-                <h3 className={cn("text-lg font-bold", isExiting ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-[17px] font-bold", isExiting ? "text-white" : "text-slate-900")}>
                   {order.orderNumber}
                 </h3>
               </div>
@@ -398,11 +398,6 @@ export default function OrderHubPage() {
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
-  const longestWait = useMemo(() => {
-    if (orders.length === 0) return 0;
-    return Math.max(...orders.map(o => now - o.timestamp));
-  }, [orders, now]);
-
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-[#f4f7ff]' },
     { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-[#f5f5ff]' },
@@ -491,22 +486,6 @@ export default function OrderHubPage() {
           </div>
 
           <aside className="xl:col-span-1 sticky top-[108px] self-start space-y-8 z-30">
-            {longestWait > 600000 && ( 
-              <div className="rounded-[24px] bg-rose-50 p-6 shadow-sm border border-rose-100 text-left animate-pulse">
-                <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200/50">
-                    <AlertCircle className="h-5 w-5 text-rose-600" />
-                  </div>
-                  <div className="space-y-1.5 text-left">
-                     <p className="text-sm font-bold text-rose-900 leading-none">Critical Delay Warning</p>
-                     <p className="text-[11px] leading-relaxed text-rose-700 font-semibold">
-                       One or more orders have exceeded the 10-minute threshold. Priority attention required.
-                     </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
               <CardHeader className="bg-[#18B4A6] text-white p-6 shrink-0 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
@@ -599,7 +578,7 @@ export default function OrderHubPage() {
                     <HelpCircle className="h-6 w-6 text-green-600" />
                   </div>
                   <div className="space-y-1.5 text-left">
-                     <p className="text-sm font-black text-slate-900 leading-none">Live Order Tracking</p>
+                     <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
                      <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
                        This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
                      </p>

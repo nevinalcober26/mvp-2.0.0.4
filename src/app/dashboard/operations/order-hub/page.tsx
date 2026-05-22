@@ -223,7 +223,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
                     </TooltipProvider>
                   )}
                 </div>
-                <h3 className={cn("text-[17px] font-bold", isExiting ? "text-white" : "text-slate-900")}>
+                <h3 className={cn("text-lg font-bold", isExiting ? "text-white" : "text-slate-900")}>
                   {order.orderNumber}
                 </h3>
               </div>
@@ -486,6 +486,21 @@ export default function OrderHubPage() {
           </div>
 
           <aside className="xl:col-span-1 sticky top-[108px] self-start space-y-8 z-30">
+            {/* Live Order Tracking Notice */}
+            <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
+               <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
+                    <HelpCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                     <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
+                     <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
+                       This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
+                     </p>
+                  </div>
+               </div>
+            </div>
+
             <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
               <CardHeader className="bg-[#18B4A6] text-white p-6 shrink-0 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
@@ -571,20 +586,6 @@ export default function OrderHubPage() {
                  <p className="text-[10px] font-bold text-slate-300 uppercase">End of Log</p>
               </div>
             </Card>
-
-            <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
-               <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
-                    <HelpCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="space-y-1.5 text-left">
-                     <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
-                     <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                       This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
-                     </p>
-                  </div>
-               </div>
-            </div>
           </aside>
         </div>
       </main>

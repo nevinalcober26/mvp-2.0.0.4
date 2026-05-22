@@ -6,6 +6,7 @@ import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
   BookOpen, 
@@ -98,7 +99,7 @@ export default function BrowseGuidesPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2 mb-4">
-                 <Button variant="ghost" size="sm" asChild className="-ml-2 h-8 px-2 text-slate-500 hover:text-primary">
+                 <Button variant="ghost" size="sm" asChild className="-ml-2 h-8 px-2 text-slate-500 hover:text-primary font-medium">
                     <NextLink href="/dashboard/help-center">
                         <ArrowLeft className="h-4 w-4 mr-1.5" />
                         Back to Support
@@ -134,7 +135,7 @@ export default function BrowseGuidesPage() {
                     <category.icon className="h-5 w-5 text-teal-600" />
                   </div>
                   <h2 className="text-lg font-semibold text-slate-900">{category.title}</h2>
-                  <Badge variant="outline" className="ml-auto bg-white text-slate-500 border-slate-100 font-bold text-[10px]">
+                  <Badge variant="outline" className="ml-auto bg-white text-slate-500 border-slate-100 font-semibold text-[10px]">
                     {category.guides.length} ARTICLES
                   </Badge>
                 </div>
@@ -151,7 +152,7 @@ export default function BrowseGuidesPage() {
                               <Clock className="h-3.5 w-3.5" />
                               {guide.duration} read
                            </div>
-                           <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] font-bold text-teal-600 group-hover:bg-teal-50 rounded-lg">
+                           <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] font-semibold text-teal-600 group-hover:bg-teal-50 rounded-lg">
                               READ GUIDE
                               <ChevronRight className="h-3 w-3 ml-1" />
                            </Button>
@@ -167,17 +168,17 @@ export default function BrowseGuidesPage() {
                   <Search className="h-8 w-8 text-slate-300" />
                 </div>
                 <p className="text-slate-500 font-medium">No guides found matching your search.</p>
-                <Button variant="outline" onClick={() => setSearchQuery('')} className="rounded-xl h-10 px-6 font-bold text-xs">Clear Search</Button>
+                <Button variant="outline" onClick={() => setSearchQuery('')} className="rounded-xl h-10 px-6 font-semibold text-xs">Clear Search</Button>
               </div>
             )}
           </div>
 
           <div className="mt-20 py-10 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-1 text-center md:text-left">
-              <p className="text-sm font-bold text-slate-900">Still have questions?</p>
+              <p className="text-sm font-semibold text-slate-900">Still have questions?</p>
               <p className="text-xs text-slate-500 font-medium">Our support team is available 24/7 to help you with technical setup.</p>
             </div>
-            <Button variant="outline" className="rounded-xl h-11 px-8 font-bold text-xs border-slate-200" asChild>
+            <Button variant="outline" className="rounded-xl h-11 px-8 font-semibold text-xs border-slate-200" asChild>
                <NextLink href="/dashboard/help-center">
                  Contact Support
                </NextLink>

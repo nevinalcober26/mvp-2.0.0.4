@@ -15,6 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Clock,
   CheckCircle2,
   XCircle,
@@ -200,9 +206,23 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
           <div className="p-4 space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-0.5 text-left">
-                <span className={cn("text-[10px] font-bold uppercase", isExiting ? "text-white/60" : "text-slate-400")}>
-                  ORDER ID
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn("text-[10px] font-bold uppercase", isExiting ? "text-white/60" : "text-slate-400")}>
+                    ORDER ID
+                  </span>
+                  {isCritical && !isExiting && (
+                    <TooltipProvider>
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <AlertCircle className="h-3.5 w-3.5 text-rose-500 animate-pulse cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-slate-900 text-white border-0 text-[11px] p-2 rounded-lg shadow-xl">
+                          <p>Late Order: Exceeded 20-minute operational threshold.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
                 <h3 className={cn("text-lg font-bold", isExiting ? "text-white" : "text-slate-900")}>
                   {order.orderNumber}
                 </h3>
@@ -243,7 +263,7 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
               "flex items-center justify-center gap-2 py-2.5 rounded-xl border transition-colors",
               isExiting ? "bg-white/10 border-white/20 text-white" : isCritical ? "bg-white/50 border-rose-200/50" : "bg-slate-50/50 border-slate-100"
             )}>
-               <Box className={cn("h-4 w-4", isExiting ? "text-white" : "text-slate-400")} />
+               <Box className="h-4 w-4" />
                <span className={cn("text-[11px] font-bold uppercase", isExiting ? "text-white" : "text-slate-500")}>
                  {order.itemsCount} Items
                </span>

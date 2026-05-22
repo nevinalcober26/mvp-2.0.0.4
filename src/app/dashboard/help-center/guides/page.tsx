@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -258,7 +259,7 @@ export default function BrowseGuidesPage() {
               <p className="text-sm text-slate-400 font-medium max-w-md">Our technical team is on standby to help with your complex integration or operational setup.</p>
             </div>
             <div className="flex gap-4 relative z-10 w-full md:w-auto">
-              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-semibold text-xs border-white/20 text-white hover:bg-white/10" asChild>
+              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-semibold text-xs border-white/20 text-black hover:bg-white/10" asChild>
                 <NextLink href="/dashboard/help-center">
                   Get Human Help
                 </NextLink>

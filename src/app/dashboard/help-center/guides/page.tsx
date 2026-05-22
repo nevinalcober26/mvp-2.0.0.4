@@ -203,8 +203,8 @@ export default function BrowseGuidesPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {category.guides.map((guide, idx) => (
-                    <Card key={idx} className="group hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm" asChild>
-                      <NextLink href={`/dashboard/help-center/guides/${guide.slug}`}>
+                    <NextLink key={idx} href={`/dashboard/help-center/guides/${guide.slug}`} className="block group">
+                      <Card className="h-full hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm">
                         <CardContent className="p-6 text-left flex flex-col h-full relative">
                           {guide.isPopular && (
                             <div className="absolute top-4 right-4">
@@ -226,8 +226,8 @@ export default function BrowseGuidesPage() {
                              </div>
                           </div>
                         </CardContent>
-                      </NextLink>
-                    </Card>
+                      </Card>
+                    </NextLink>
                   ))}
                 </div>
               </section>

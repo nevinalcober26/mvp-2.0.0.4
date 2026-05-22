@@ -31,9 +31,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-blue-600 bg-blue-50 border-blue-100',
     accent: 'border-blue-200',
     guides: [
-      { title: 'Setting up your business profile', duration: '5 min', isPopular: true },
-      { title: 'Adding your first restaurant branch', duration: '8 min' },
-      { title: 'Inviting staff members to the dashboard', duration: '3 min' },
+      { title: 'Setting up your business profile', slug: 'setup-business-profile', duration: '5 min', isPopular: true },
+      { title: 'Adding your first restaurant branch', slug: 'add-first-branch', duration: '8 min' },
+      { title: 'Inviting staff members to the dashboard', slug: 'invite-staff', duration: '3 min' },
     ]
   },
   {
@@ -43,10 +43,10 @@ const GUIDE_CATEGORIES = [
     color: 'text-teal-600 bg-teal-50 border-teal-100',
     accent: 'border-teal-200',
     guides: [
-      { title: 'Creating product categories', duration: '4 min' },
-      { title: 'Adding products with variations', duration: '10 min', isPopular: true },
-      { title: 'Setting up dietary & allergen tags', duration: '5 min' },
-      { title: 'Using AI to generate descriptions', duration: '2 min' },
+      { title: 'Creating product categories', slug: 'create-categories', duration: '4 min' },
+      { title: 'Adding products with variations', slug: 'add-products-variations', duration: '10 min', isPopular: true },
+      { title: 'Setting up dietary & allergen tags', slug: 'setup-tags', duration: '5 min' },
+      { title: 'Using AI to generate descriptions', slug: 'ai-descriptions', duration: '2 min' },
     ]
   },
   {
@@ -56,9 +56,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
     accent: 'border-indigo-200',
     guides: [
-      { title: 'Managing the Live Order Hub', duration: '6 min', isPopular: true },
-      { title: 'Branding and printing QR codes', duration: '5 min' },
-      { title: 'Updating stock in real-time', duration: '3 min' },
+      { title: 'Managing the Live Order Hub', slug: 'live-order-hub', duration: '6 min', isPopular: true },
+      { title: 'Branding and printing QR codes', slug: 'qr-codes-printing', duration: '5 min' },
+      { title: 'Updating stock in real-time', slug: 'real-time-stock', duration: '3 min' },
     ]
   },
   {
@@ -68,9 +68,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-orange-600 bg-orange-50 border-orange-100',
     accent: 'border-orange-200',
     guides: [
-      { title: 'Connecting your POS machine', duration: '15 min', isPopular: true },
-      { title: 'Configuring payment gateways', duration: '12 min' },
-      { title: 'Whitelisting hardware terminals', duration: '7 min' },
+      { title: 'Connecting your POS machine', slug: 'connect-pos', duration: '15 min', isPopular: true },
+      { title: 'Configuring payment gateways', slug: 'configure-payment-gateways', duration: '12 min' },
+      { title: 'Whitelisting hardware terminals', slug: 'whitelist-terminals', duration: '7 min' },
     ]
   },
   {
@@ -80,9 +80,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     accent: 'border-emerald-200',
     guides: [
-      { title: 'Understanding sales performance', duration: '6 min' },
-      { title: 'Exporting transaction reports', duration: '4 min' },
-      { title: 'Analyzing waiter performance', duration: '5 min' },
+      { title: 'Understanding sales performance', slug: 'sales-performance', duration: '6 min' },
+      { title: 'Exporting transaction reports', slug: 'export-reports', duration: '4 min' },
+      { title: 'Analyzing waiter performance', slug: 'waiter-performance', duration: '5 min' },
     ]
   }
 ];
@@ -114,14 +114,6 @@ export default function BrowseGuidesPage() {
     { label: 'Help Center', href: '/dashboard/help-center' },
     { label: 'Knowledge Base' }
   ];
-
-  const handleScrollToSection = (id: string) => {
-    setActiveFilter(id);
-    const element = document.getElementById(`section-${id}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#fafbfc]">
@@ -160,7 +152,6 @@ export default function BrowseGuidesPage() {
         </div>
       </div>
 
-      {/* Sticky Filter Bar */}
       <div className="sticky top-16 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100 py-3 px-8 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
           <Button 
@@ -204,36 +195,38 @@ export default function BrowseGuidesPage() {
                   </div>
                   <div className="space-y-0.5 text-left">
                     <h2 className="text-xl font-semibold text-slate-900">{category.title}</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      {category.guides.length} TECHNICAL ARTICLES
-                    </p>
+                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-semibold text-[10px]">
+                      {category.guides.length} ARTICLES
+                    </Badge>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {category.guides.map((guide, idx) => (
-                    <Card key={idx} className="group hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm">
-                      <CardContent className="p-6 text-left flex flex-col h-full relative">
-                        {guide.isPopular && (
-                          <div className="absolute top-4 right-4">
-                             <Badge className="bg-teal-50 text-teal-600 border-teal-100 hover:bg-teal-50 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
+                    <Card key={idx} className="group hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm" asChild>
+                      <NextLink href={`/dashboard/help-center/guides/${guide.slug}`}>
+                        <CardContent className="p-6 text-left flex flex-col h-full relative">
+                          {guide.isPopular && (
+                            <div className="absolute top-4 right-4">
+                               <Badge className="bg-teal-50 text-teal-600 border-teal-100 hover:bg-teal-50 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
+                            </div>
+                          )}
+                          <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-10">
+                            {guide.title}
+                          </h3>
+                          <div className="flex items-center justify-between mt-auto">
+                             <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {guide.duration}
+                                </div>
+                             </div>
+                             <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                                <ArrowRight className="h-4 w-4" />
+                             </div>
                           </div>
-                        )}
-                        <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-10">
-                          {guide.title}
-                        </h3>
-                        <div className="flex items-center justify-between mt-auto">
-                           <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                                <Clock className="h-3.5 w-3.5" />
-                                {guide.duration}
-                              </div>
-                           </div>
-                           <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                              <ArrowRight className="h-4 w-4" />
-                           </div>
-                        </div>
-                      </CardContent>
+                        </CardContent>
+                      </NextLink>
                     </Card>
                   ))}
                 </div>
@@ -258,7 +251,6 @@ export default function BrowseGuidesPage() {
             )}
           </div>
 
-          {/* Persistent Help Footer */}
           <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
             <div className="space-y-2 text-center md:text-left relative z-10">

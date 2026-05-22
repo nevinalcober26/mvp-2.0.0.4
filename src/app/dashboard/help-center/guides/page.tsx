@@ -3,24 +3,20 @@
 import React, { useState, useMemo } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
-  BookOpen, 
   Rocket, 
   Palette, 
   Monitor, 
   Plug, 
   ChevronRight,
   FileText,
-  Clock,
-  ArrowLeft
+  Clock
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import NextLink from 'next/link';
 
 const GUIDE_CATEGORIES = [
   {
@@ -90,6 +86,11 @@ export default function BrowseGuidesPage() {
     })).filter(cat => cat.guides.length > 0);
   }, [searchQuery]);
 
+  const breadcrumbItems = [
+    { label: 'Help Center', href: '/dashboard/help-center' },
+    { label: 'Knowledge Base' }
+  ];
+
   return (
     <div className="min-h-screen bg-[#fafbfc]">
       <DashboardHeader />
@@ -97,19 +98,14 @@ export default function BrowseGuidesPage() {
       <div className="bg-white border-b px-8 py-10 shrink-0 text-left">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 mb-4">
-                 <Button variant="ghost" size="sm" asChild className="-ml-2 h-8 px-2 text-slate-500 hover:text-primary font-medium">
-                    <NextLink href="/dashboard/help-center">
-                        <ArrowLeft className="h-4 w-4 mr-1.5" />
-                        Back to Support
-                    </NextLink>
-                 </Button>
+            <div className="space-y-4">
+              <Breadcrumbs items={breadcrumbItems} />
+              <div className="space-y-1">
+                <h1 className="text-3xl font-semibold text-slate-900">Knowledge Base</h1>
+                <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
+                  Comprehensive step-by-step guides to help you master the eMenu Digital Hub and optimize your restaurant operations.
+                </p>
               </div>
-              <h1 className="text-3xl font-semibold text-slate-900">Knowledge Base</h1>
-              <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
-                Comprehensive step-by-step guides to help you master the eMenu Digital Hub and optimize your restaurant operations.
-              </p>
             </div>
             
             <div className="relative w-full max-w-md">

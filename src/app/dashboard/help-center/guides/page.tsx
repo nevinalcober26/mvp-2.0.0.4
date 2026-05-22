@@ -16,16 +16,22 @@ import {
   Plug, 
   ChevronRight,
   FileText,
-  Clock
+  Clock,
+  Sparkles,
+  ArrowRight,
+  LayoutGrid
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const GUIDE_CATEGORIES = [
   {
     id: 'getting-started',
     title: 'Getting Started',
     icon: Rocket,
+    color: 'text-blue-600 bg-blue-50 border-blue-100',
+    accent: 'border-blue-200',
     guides: [
-      { title: 'Setting up your business profile', duration: '5 min' },
+      { title: 'Setting up your business profile', duration: '5 min', isPopular: true },
       { title: 'Adding your first restaurant branch', duration: '8 min' },
       { title: 'Inviting staff members to the dashboard', duration: '3 min' },
     ]
@@ -34,9 +40,11 @@ const GUIDE_CATEGORIES = [
     id: 'menu-studio',
     title: 'Menu Studio',
     icon: Palette,
+    color: 'text-teal-600 bg-teal-50 border-teal-100',
+    accent: 'border-teal-200',
     guides: [
       { title: 'Creating product categories', duration: '4 min' },
-      { title: 'Adding products with variations', duration: '10 min' },
+      { title: 'Adding products with variations', duration: '10 min', isPopular: true },
       { title: 'Setting up dietary & allergen tags', duration: '5 min' },
       { title: 'Using AI to generate descriptions', duration: '2 min' },
     ]
@@ -45,8 +53,10 @@ const GUIDE_CATEGORIES = [
     id: 'operations',
     title: 'Operations',
     icon: Monitor,
+    color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+    accent: 'border-indigo-200',
     guides: [
-      { title: 'Managing the Live Order Hub', duration: '6 min' },
+      { title: 'Managing the Live Order Hub', duration: '6 min', isPopular: true },
       { title: 'Branding and printing QR codes', duration: '5 min' },
       { title: 'Updating stock in real-time', duration: '3 min' },
     ]
@@ -55,8 +65,10 @@ const GUIDE_CATEGORIES = [
     id: 'integrations',
     title: 'Integrations',
     icon: Plug,
+    color: 'text-orange-600 bg-orange-50 border-orange-100',
+    accent: 'border-orange-200',
     guides: [
-      { title: 'Connecting your POS machine', duration: '15 min' },
+      { title: 'Connecting your POS machine', duration: '15 min', isPopular: true },
       { title: 'Configuring payment gateways', duration: '12 min' },
       { title: 'Whitelisting hardware terminals', duration: '7 min' },
     ]
@@ -65,6 +77,8 @@ const GUIDE_CATEGORIES = [
     id: 'analytics',
     title: 'Analytics & Reports',
     icon: FileText,
+    color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+    accent: 'border-emerald-200',
     guides: [
       { title: 'Understanding sales performance', duration: '6 min' },
       { title: 'Exporting transaction reports', duration: '4 min' },
@@ -75,45 +89,69 @@ const GUIDE_CATEGORIES = [
 
 export default function BrowseGuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const filteredCategories = useMemo(() => {
-    if (!searchQuery) return GUIDE_CATEGORIES;
+    let result = GUIDE_CATEGORIES;
     
-    return GUIDE_CATEGORIES.map(cat => ({
-      ...cat,
-      guides: cat.guides.filter(g => 
-        g.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    })).filter(cat => cat.guides.length > 0);
-  }, [searchQuery]);
+    if (activeFilter !== 'all') {
+      result = result.filter(cat => cat.id === activeFilter);
+    }
+
+    if (searchQuery) {
+      result = result.map(cat => ({
+        ...cat,
+        guides: cat.guides.filter(g => 
+          g.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      })).filter(cat => cat.guides.length > 0);
+    }
+
+    return result;
+  }, [searchQuery, activeFilter]);
 
   const breadcrumbItems = [
     { label: 'Help Center', href: '/dashboard/help-center' },
     { label: 'Knowledge Base' }
   ];
 
+  const handleScrollToSection = (id: string) => {
+    setActiveFilter(id);
+    const element = document.getElementById(`section-${id}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#fafbfc]">
       <DashboardHeader />
       
-      <div className="bg-white border-b px-8 py-10 shrink-0 text-left">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white border-b px-8 py-12 shrink-0 text-left relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-20 opacity-[0.03] pointer-events-none">
+          <LayoutGrid className="h-64 w-64" />
+        </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-4">
               <Breadcrumbs items={breadcrumbItems} />
-              <div className="space-y-1">
-                <h1 className="text-3xl font-semibold text-slate-900">Knowledge Base</h1>
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 text-teal-600 border border-teal-100 mb-2">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-bold uppercase">Merchant Knowledge Base</span>
+                </div>
+                <h1 className="text-4xl font-semibold text-slate-900 tracking-tight">Documentation & Guides</h1>
                 <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
-                  Comprehensive step-by-step guides to help you master the eMenu Digital Hub and optimize your restaurant operations.
+                  Step-by-step technical guides and operational best practices for your eMenu Digital Hub.
                 </p>
               </div>
             </div>
             
             <div className="relative w-full max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Search for a specific guide..." 
-                className="pl-11 h-12 bg-slate-50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all shadow-none"
+                placeholder="Search technical documentation..." 
+                className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-teal-500/5 transition-all shadow-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -122,37 +160,78 @@ export default function BrowseGuidesPage() {
         </div>
       </div>
 
-      <main className="p-8">
+      {/* Sticky Filter Bar */}
+      <div className="sticky top-16 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100 py-3 px-8 shadow-sm">
+        <div className="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+          <Button 
+            variant={activeFilter === 'all' ? 'default' : 'ghost'} 
+            size="sm"
+            onClick={() => setActiveFilter('all')}
+            className={cn(
+              "rounded-xl h-9 px-4 text-xs font-semibold whitespace-nowrap",
+              activeFilter === 'all' ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
+            )}
+          >
+            All Categories
+          </Button>
+          <div className="h-4 w-px bg-slate-200 mx-2" />
+          {GUIDE_CATEGORIES.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={activeFilter === cat.id ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveFilter(cat.id)}
+              className={cn(
+                "rounded-xl h-9 px-4 text-xs font-semibold whitespace-nowrap gap-2",
+                activeFilter === cat.id ? "bg-teal-50 text-teal-700 border border-teal-100" : "text-slate-500 hover:bg-slate-50"
+              )}
+            >
+              <cat.icon className="h-3.5 w-3.5" />
+              {cat.title}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <main className="p-8 pb-32">
         <div className="max-w-6xl mx-auto">
-          <div className="space-y-12">
+          <div className="space-y-16">
             {filteredCategories.length > 0 ? filteredCategories.map((category) => (
-              <section key={category.id} className="space-y-6">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                  <div className="h-9 w-9 rounded-lg bg-teal-50 flex items-center justify-center border border-teal-100">
-                    <category.icon className="h-5 w-5 text-teal-600" />
+              <section key={category.id} id={`section-${category.id}`} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div className="flex items-center gap-4">
+                  <div className={cn("h-11 w-11 rounded-xl border flex items-center justify-center shadow-sm shrink-0", category.color)}>
+                    <category.icon className="h-5 w-5" />
                   </div>
-                  <h2 className="text-lg font-semibold text-slate-900">{category.title}</h2>
-                  <Badge variant="outline" className="ml-auto bg-white text-slate-500 border-slate-100 font-semibold text-[10px]">
-                    {category.guides.length} ARTICLES
-                  </Badge>
+                  <div className="space-y-0.5 text-left">
+                    <h2 className="text-xl font-semibold text-slate-900">{category.title}</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      {category.guides.length} TECHNICAL ARTICLES
+                    </p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {category.guides.map((guide, idx) => (
-                    <Card key={idx} className="group hover:border-teal-500/30 hover:shadow-md transition-all border-slate-100 bg-white cursor-pointer rounded-xl overflow-hidden">
-                      <CardContent className="p-5 text-left flex flex-col h-full">
-                        <h3 className="text-sm font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-snug mb-4 flex-1">
+                    <Card key={idx} className="group hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm">
+                      <CardContent className="p-6 text-left flex flex-col h-full relative">
+                        {guide.isPopular && (
+                          <div className="absolute top-4 right-4">
+                             <Badge className="bg-teal-50 text-teal-600 border-teal-100 hover:bg-teal-50 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
+                          </div>
+                        )}
+                        <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-10">
                           {guide.title}
                         </h3>
                         <div className="flex items-center justify-between mt-auto">
-                           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                              <Clock className="h-3.5 w-3.5" />
-                              {guide.duration} read
+                           <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                <Clock className="h-3.5 w-3.5" />
+                                {guide.duration}
+                              </div>
                            </div>
-                           <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] font-semibold text-teal-600 group-hover:bg-teal-50 rounded-lg">
-                              READ GUIDE
-                              <ChevronRight className="h-3 w-3 ml-1" />
-                           </Button>
+                           <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                              <ArrowRight className="h-4 w-4" />
+                           </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -160,26 +239,42 @@ export default function BrowseGuidesPage() {
                 </div>
               </section>
             )) : (
-              <div className="py-32 text-center space-y-4">
-                <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
+              <div className="py-40 text-center space-y-5">
+                <div className="h-20 w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto shadow-inner">
                   <Search className="h-8 w-8 text-slate-300" />
                 </div>
-                <p className="text-slate-500 font-medium">No guides found matching your search.</p>
-                <Button variant="outline" onClick={() => setSearchQuery('')} className="rounded-xl h-10 px-6 font-semibold text-xs">Clear Search</Button>
+                <div className="space-y-1">
+                  <p className="text-slate-900 font-semibold text-lg">No documentation found</p>
+                  <p className="text-slate-500 text-sm font-medium">Try adjusting your filters or searching for something else.</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => { setSearchQuery(''); setActiveFilter('all'); }} 
+                  className="rounded-xl h-11 px-8 font-semibold text-xs border-slate-200 mt-4"
+                >
+                  Clear All Filters
+                </Button>
               </div>
             )}
           </div>
 
-          <div className="mt-20 py-10 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-1 text-center md:text-left">
-              <p className="text-sm font-semibold text-slate-900">Still have questions?</p>
-              <p className="text-xs text-slate-500 font-medium">Our support team is available 24/7 to help you with technical setup.</p>
+          {/* Persistent Help Footer */}
+          <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
+            <div className="space-y-2 text-center md:text-left relative z-10">
+              <h4 className="text-xl font-semibold">Can&apos;t find what you&apos;re looking for?</h4>
+              <p className="text-sm text-slate-400 font-medium max-w-md">Our technical team is on standby to help with your complex integration or operational setup.</p>
             </div>
-            <Button variant="outline" className="rounded-xl h-11 px-8 font-semibold text-xs border-slate-200" asChild>
-               <NextLink href="/dashboard/help-center">
-                 Contact Support
-               </NextLink>
-            </Button>
+            <div className="flex gap-4 relative z-10 w-full md:w-auto">
+              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-semibold text-xs border-white/20 text-white hover:bg-white/10" asChild>
+                <NextLink href="/dashboard/help-center">
+                  Get Human Help
+                </NextLink>
+              </Button>
+              <Button className="flex-1 md:flex-none rounded-xl h-12 px-8 font-bold text-xs bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20">
+                Submit Support Ticket
+              </Button>
+            </div>
           </div>
         </div>
       </main>

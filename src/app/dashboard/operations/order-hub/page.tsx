@@ -411,7 +411,7 @@ export default function OrderHubPage() {
       <div className="bg-white border-b px-8 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1 text-left">
-            <h1 className="text-[24px] font-bold tracking-tight text-slate-900 uppercase">Live Operations</h1>
+            <h1 className="text-[24px] font-bold tracking-tight text-slate-900 uppercase">ORDER HUB</h1>
             <div className="flex items-center gap-3">
                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-3 py-1 font-bold text-[10px]">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -486,106 +486,110 @@ export default function OrderHubPage() {
           </div>
 
           <aside className="xl:col-span-1 sticky top-[108px] self-start space-y-8 z-30">
-            {/* Live Order Tracking Notice */}
-            <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
-               <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
-                    <HelpCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="space-y-1.5 text-left">
-                     <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
-                     <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                       This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
-                     </p>
-                  </div>
-               </div>
-            </div>
-
-            <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
-              <CardHeader className="bg-[#18B4A6] text-white p-6 shrink-0 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
-                  <Activity className="h-48 w-48 text-white" />
-                </div>
-                <div className="relative z-10 flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
-                      <Activity className="h-5 w-5 text-white" />
+            <div className="space-y-4">
+              {/* Live Order Tracking Notice placed on top of Activity Log Card */}
+              <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
+                <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
+                      <HelpCircle className="h-6 w-6 text-green-600" />
                     </div>
-                    <CardTitle className="text-lg font-bold uppercase">Activity Log</CardTitle>
-                  </div>
-                  <Badge className="bg-white/20 text-white border-0 font-bold px-3 py-1 rounded-full text-[10px]">
-                    {recentExits.length} ENTRIES
-                  </Badge>
+                    <div className="space-y-1.5 text-left">
+                      <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
+                      <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
+                        This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
+                      </p>
+                    </div>
                 </div>
-                <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase pl-1 text-left">Track your finalized orders</p>
-              </CardHeader>
-              
-              <ScrollArea className="flex-1 bg-white">
-                <div className="relative p-6 pt-8 space-y-0">
-                  <div className="absolute left-[39px] top-0 bottom-0 w-px border-l border-dashed border-slate-200 z-0" />
-                  
-                  {recentExits.length > 0 ? recentExits.map((event, index) => {
-                    const config = exitConfig[event.type];
-                    return (
-                      <div 
-                        key={event.id} 
-                        className={cn(
-                          "relative group transition-all duration-500 rounded-2xl mb-8",
-                          event.isNew ? "animate-status-blink z-20" : ""
-                        )}
-                      >
-                        {event.isNew && (
-                            <div className={cn("absolute -inset-2 rounded-2xl opacity-10 blur-xl", config.bg)} />
-                        )}
-                        
-                        <div className={cn(
-                            "relative flex items-start gap-4 p-4 rounded-2xl border transition-all",
-                            event.isNew ? cn("bg-white shadow-xl scale-[1.02]", `border-${event.type.toLowerCase()}-500`) : "bg-white border-transparent"
-                        )}>
+              </div>
+
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
+                <CardHeader className="bg-[#18B4A6] text-white p-6 shrink-0 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
+                    <Activity className="h-48 w-48 text-white" />
+                  </div>
+                  <div className="relative z-10 flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
+                        <Activity className="h-5 w-5 text-white" />
+                      </div>
+                      <CardTitle className="text-lg font-bold uppercase">Activity Log</CardTitle>
+                    </div>
+                    <Badge className="bg-white/20 text-white border-0 font-bold px-3 py-1 rounded-full text-[10px]">
+                      {recentExits.length} ENTRIES
+                    </Badge>
+                  </div>
+                  <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase pl-1 text-left">Track your finalized orders</p>
+                </CardHeader>
+                
+                <ScrollArea className="flex-1 bg-white">
+                  <div className="relative p-6 pt-8 space-y-0">
+                    <div className="absolute left-[39px] top-0 bottom-0 w-px border-l border-dashed border-slate-200 z-0" />
+                    
+                    {recentExits.length > 0 ? recentExits.map((event, index) => {
+                      const config = exitConfig[event.type];
+                      const isLatest = index === 0;
+                      return (
+                        <div 
+                          key={event.id} 
+                          className={cn(
+                            "relative group transition-all duration-500 rounded-2xl mb-8",
+                            event.isNew ? "animate-status-blink z-20" : ""
+                          )}
+                        >
                           {event.isNew && (
-                              <div className={cn("absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl", config.bg)} />
+                              <div className={cn("absolute -inset-2 rounded-2xl opacity-10 blur-xl", config.bg)} />
                           )}
                           
                           <div className={cn(
-                            "h-3 w-3 rounded-full mt-1.5 shrink-0 shadow-sm relative z-10 border-2 border-white", 
-                            config.dot
-                          )} />
-                          
-                          <div className="flex-1 min-w-0 text-left">
-                            <div className="flex items-center justify-between mb-2">
-                               <span className="text-[15px] font-bold tracking-tight text-slate-900">
-                                 Order {event.orderNumber}
-                               </span>
-                               <span className="text-[9px] font-bold uppercase text-slate-400">
-                                 JUST NOW
-                               </span>
-                            </div>
+                              "relative flex items-start gap-4 p-4 rounded-2xl border transition-all",
+                              isLatest ? "bg-white shadow-xl scale-[1.02] border-slate-100" : "bg-white border-transparent",
+                              event.isNew ? cn("border-l-4", `border-l-${event.type.toLowerCase()}-500`) : isLatest ? cn("border-l-4", `border-l-${event.type.toLowerCase()}-500`) : ""
+                          )}>
+                            {isLatest && (
+                                <div className={cn("absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl", config.bg)} />
+                            )}
                             
-                            <div className="flex flex-wrap items-center gap-3">
-                               <Badge className={cn("text-[9px] font-bold uppercase px-3 py-0.5 rounded-full border-0", config.bg, "text-white")}>
-                                 {event.type}
-                               </Badge>
-                               <span className="text-[11px] font-semibold text-slate-500">
-                                 Staff {event.server}
-                               </span>
+                            <div className={cn(
+                              "h-3 w-3 rounded-full mt-1.5 shrink-0 shadow-sm relative z-10 border-2 border-white", 
+                              config.dot
+                            )} />
+                            
+                            <div className="flex-1 min-w-0 text-left">
+                              <div className="flex items-center justify-between mb-2">
+                                 <span className="text-[15px] font-bold tracking-tight text-slate-900">
+                                   Order {event.orderNumber}
+                                 </span>
+                                 <span className="text-[9px] font-bold uppercase text-slate-400">
+                                   JUST NOW
+                                 </span>
+                              </div>
+                              
+                              <div className="flex flex-wrap items-center gap-3">
+                                 <Badge className={cn("text-[9px] font-bold uppercase px-3 py-0.5 rounded-full border-0", config.bg, "text-white")}>
+                                   {event.type}
+                                 </Badge>
+                                 <span className="text-[11px] font-semibold text-slate-500">
+                                   By Staff {event.server}
+                                 </span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                      );
+                    }) : (
+                      <div className="py-40 text-center opacity-30 flex flex-col items-center gap-4 px-10">
+                        <Activity className="h-10 w-10 text-slate-200" />
+                        <p className="text-[10px] font-bold uppercase text-slate-400">Monitoring Feeds</p>
                       </div>
-                    );
-                  }) : (
-                    <div className="py-40 text-center opacity-30 flex flex-col items-center gap-4 px-10">
-                      <Activity className="h-10 w-10 text-slate-200" />
-                      <p className="text-[10px] font-bold uppercase text-slate-400">Monitoring Feeds</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                </ScrollArea>
+                
+                <div className="p-5 bg-slate-50 border-t flex items-center justify-center shrink-0">
+                   <p className="text-[10px] font-bold text-slate-300 uppercase">End of Log</p>
                 </div>
-              </ScrollArea>
-              
-              <div className="p-5 bg-slate-50 border-t flex items-center justify-center shrink-0">
-                 <p className="text-[10px] font-bold text-slate-300 uppercase">End of Log</p>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </aside>
         </div>
       </main>

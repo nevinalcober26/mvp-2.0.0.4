@@ -22,7 +22,8 @@ import {
   BookOpen,
   Printer,
   Hash,
-  ArrowRight
+  ArrowRight,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -204,7 +205,7 @@ export default function GuideDetailPage() {
                 <CheckCircle2 className="h-7 w-7" />
               </div>
               <div className="space-y-3 relative z-10">
-                <h4 className="text-xl font-bold text-teal-900">Module Accomplished</h4>
+                <h4 className="text-xl font-bold text-teal-900">Module AccomplISHED</h4>
                 <p className="text-sm text-teal-700/80 font-medium leading-relaxed max-w-xl">
                   You have successfully configured this module. The updates are now live across your digital channels. If you encounter any unexpected behaviors, please sync your POS or reach out to support.
                 </p>

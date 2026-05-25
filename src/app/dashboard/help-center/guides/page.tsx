@@ -40,21 +40,21 @@ const GUIDE_CATEGORIES = [
         slug: 'setup-business-profile', 
         duration: '5 min', 
         isPopular: true, 
-        thumbnailId: 'restaurant-1' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Adding your first restaurant branch', 
         excerpt: 'Learn how to create and manage multiple physical outlets under one account.',
         slug: 'add-first-branch', 
         duration: '8 min', 
-        thumbnailId: 'restaurant-2' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Inviting staff members to the dashboard', 
         excerpt: 'Manage user permissions and team access levels for your dashboard.',
         slug: 'invite-staff', 
         duration: '3 min', 
-        thumbnailId: 'user-avatar' 
+        thumbnailId: 'dashboard-2' 
       },
     ]
   },
@@ -70,7 +70,7 @@ const GUIDE_CATEGORIES = [
         excerpt: 'Organize your menu logically with hierarchical categories and columns.',
         slug: 'create-categories', 
         duration: '4 min', 
-        thumbnailId: 'fresh-garden-salad' 
+        thumbnailId: 'dashboard-1' 
       },
       { 
         title: 'Adding products with variations', 
@@ -78,21 +78,21 @@ const GUIDE_CATEGORIES = [
         slug: 'add-products-variations', 
         duration: '10 min', 
         isPopular: true, 
-        thumbnailId: 'artisanal-pizza' 
+        thumbnailId: 'dashboard-1' 
       },
       { 
         title: 'Setting up dietary & allergen tags', 
         excerpt: 'Protect your guests by correctly labeling allergens and dietary properties.',
         slug: 'setup-tags', 
         duration: '5 min', 
-        thumbnailId: 'spicy-chicken-wings' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Using AI to generate descriptions', 
         excerpt: 'Leverage our GenAI assistant to write mouth-watering product copies.',
         slug: 'ai-descriptions', 
         duration: '2 min', 
-        thumbnailId: 'avocado-toast' 
+        thumbnailId: 'dashboard-1' 
       },
     ]
   },
@@ -109,21 +109,21 @@ const GUIDE_CATEGORIES = [
         slug: 'live-order-hub', 
         duration: '6 min', 
         isPopular: true, 
-        thumbnailId: 'template-2' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Branding and printing QR codes', 
         excerpt: 'Generate and customize high-resolution QR codes for your tables.',
         slug: 'qr-codes-printing', 
         duration: '5 min', 
-        thumbnailId: 'restaurant-logo' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Updating stock in real-time', 
         excerpt: 'Quickly mark items as out-of-stock across all digital channels.',
         slug: 'real-time-stock', 
         duration: '3 min', 
-        thumbnailId: 'ribeye-steak' 
+        thumbnailId: 'dashboard-1' 
       },
     ]
   },
@@ -140,21 +140,21 @@ const GUIDE_CATEGORIES = [
         slug: 'connect-pos', 
         duration: '15 min', 
         isPopular: true, 
-        thumbnailId: 'template-1' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Configuring payment gateways', 
         excerpt: 'Set up Network International or DPO to accept secure digital payments.',
         slug: 'configure-payment-gateways', 
         duration: '12 min', 
-        thumbnailId: 'template-3' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Whitelisting hardware terminals', 
         excerpt: 'Authorize specific physical payment terminals for your outlet.',
         slug: 'whitelist-terminals', 
         duration: '7 min', 
-        thumbnailId: 'restaurant-3' 
+        thumbnailId: 'dashboard-3' 
       },
     ]
   },
@@ -170,21 +170,21 @@ const GUIDE_CATEGORIES = [
         excerpt: 'Analyze revenue, volume, and top-selling items over specific periods.',
         slug: 'sales-performance', 
         duration: '6 min', 
-        thumbnailId: 'template-2' 
+        thumbnailId: 'dashboard-1' 
       },
       { 
         title: 'Exporting transaction reports', 
         excerpt: 'Download full financial audits for accounting and reconcilement.',
         slug: 'export-reports', 
         duration: '4 min', 
-        thumbnailId: 'template-3' 
+        thumbnailId: 'dashboard-1' 
       },
       { 
         title: 'Analyzing waiter performance', 
         excerpt: 'Track tips and sales volume across your front-of-house team.',
         slug: 'waiter-performance', 
         duration: '5 min', 
-        thumbnailId: 'user-avatar' 
+        thumbnailId: 'dashboard-1' 
       },
     ]
   }
@@ -401,4 +401,3 @@ export default function BrowseGuidesPage() {
     </div>
   );
 }
-

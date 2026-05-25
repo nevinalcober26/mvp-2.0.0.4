@@ -23,7 +23,10 @@ import {
   Printer,
   Hash,
   ArrowRight,
-  Users
+  Users,
+  X,
+  FileText,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -172,7 +175,7 @@ export default function GuideDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafbfc]">
+    <div className="min-h-screen bg-[#fafbfc] font-sans">
       <DashboardHeader />
       
       <main className="p-6 md:p-10 pb-32">
@@ -205,21 +208,21 @@ export default function GuideDetailPage() {
                     {guide.duration} READ
                   </div>
                 </div>
-                <h1 className="text-4xl font-bold text-slate-900 tracking-tight">{guide.title}</h1>
-                <p className="text-slate-500 text-base font-medium leading-relaxed max-w-3xl">
+                <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">{guide.title}</h1>
+                <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-3xl">
                   {guide.description}
                 </p>
               </div>
             </div>
 
-            {/* Video Tutorial Section */}
+            {/* Video Tutorial Section - Refined */}
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg">
+                  <div className="h-10 w-10 rounded-xl bg-[#18B4A6] flex items-center justify-center text-white shadow-lg shadow-[#18B4A6]/20">
                     <PlayCircle className="h-5 w-5" />
                   </div>
-                  <h2 className="text-xl font-bold text-slate-900">Visual Walkthrough</h2>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">Visual Walkthrough</h2>
                 </div>
                 <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Optional Module</span>
               </div>
@@ -238,38 +241,38 @@ export default function GuideDetailPage() {
               </div>
             </section>
 
-            {/* Content Steps */}
-            <div className="space-y-16">
+            {/* Content Steps - High Fidelity Redesign */}
+            <div className="space-y-20">
               {guide.sections.map((section, idx) => (
                 <section key={idx} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-left">
-                  <div className="flex items-start gap-6">
-                    <div className="h-12 w-12 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center shrink-0">
-                      <span className="text-xl font-black text-[#18B4A6]">{idx + 1}</span>
+                  <div className="flex items-start gap-8">
+                    <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center shrink-0">
+                      <span className="text-2xl font-black text-[#18B4A6]">{idx + 1}</span>
                     </div>
                     <div className="space-y-4 pt-1">
-                      <h3 className="text-2xl font-bold text-slate-900">{section.title}</h3>
+                      <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{section.title}</h3>
                       <p className="text-slate-600 text-base leading-relaxed font-medium">
                         {section.content}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="ml-0 sm:ml-18">
-                    <Card className="border-slate-100 overflow-hidden rounded-[32px] shadow-sm bg-white p-2">
-                      <div className="relative aspect-[16/9] w-full rounded-[24px] overflow-hidden">
+                  <div className="ml-0 md:ml-22 px-4 md:px-0">
+                    <Card className="border-slate-100 overflow-hidden rounded-[40px] shadow-2xl bg-white p-2.5">
+                      <div className="relative aspect-[16/9] w-full rounded-[32px] overflow-hidden bg-slate-50 border border-slate-100">
                         <Image 
                           src={section.image} 
                           alt={section.title} 
                           fill 
-                          className="object-cover transition-transform hover:scale-105 duration-1000" 
-                          data-ai-hint="technical dashboard"
+                          className="object-cover transition-transform hover:scale-[1.03] duration-1000" 
+                          data-ai-hint="technical dashboard interface"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-40" />
-                        <div className="absolute bottom-6 left-8 flex items-center gap-3">
-                          <Badge className="bg-white/95 text-slate-900 border-0 font-bold text-[10px] backdrop-blur-md px-3 py-1 rounded-lg">
-                            STEP REFERENCE
-                          </Badge>
-                          <span className="text-[10px] text-white font-bold uppercase tracking-[0.2em] drop-shadow-md">Technical Proof</span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-40" />
+                        <div className="absolute bottom-8 left-8 flex items-center gap-3">
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 text-slate-900 border-0 font-bold text-[10px] backdrop-blur-md shadow-sm">
+                             <div className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                             UI REFERENCE
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -278,25 +281,25 @@ export default function GuideDetailPage() {
               ))}
             </div>
 
-            {/* Conclusion */}
-            <div className="p-10 rounded-[40px] bg-teal-50 border border-teal-100 flex items-start gap-8 text-left relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.05] pointer-events-none rotate-12">
-                <CheckCircle2 className="h-32 w-32 text-teal-600" />
+            {/* Accomplishment Footer */}
+            <div className="p-12 rounded-[48px] bg-gradient-to-br from-[#18B4A6] to-[#149d94] flex flex-col md:flex-row items-center gap-10 text-left relative overflow-hidden shadow-2xl shadow-teal-900/20">
+              <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none rotate-12">
+                <ShieldCheck className="h-64 w-64 text-white" />
               </div>
-              <div className="h-14 w-14 rounded-2xl bg-teal-500 flex items-center justify-center text-white shrink-0 shadow-xl shadow-teal-500/20 relative z-10">
-                <CheckCircle2 className="h-7 w-7" />
+              <div className="h-20 w-20 rounded-3xl bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-2xl relative z-10">
+                <CheckCircle2 className="h-10 w-10" />
               </div>
-              <div className="space-y-3 relative z-10">
-                <h4 className="text-xl font-bold text-teal-900">Module AccomplISHED</h4>
-                <p className="text-sm text-teal-700/80 font-medium leading-relaxed max-w-xl">
-                  You have successfully configured this module. The updates are now live across your digital channels. If you encounter any unexpected behaviors, please sync your POS or reach out to support.
+              <div className="space-y-4 relative z-10 flex-1">
+                <h4 className="text-2xl font-bold text-white tracking-tight">Configuration Accomplished</h4>
+                <p className="text-white/80 text-base font-medium leading-relaxed max-w-xl">
+                  You have successfully completed this module. The updates are pushed live to your digital channels instantly. For further optimization, consider exploring our analytics module.
                 </p>
-                <div className="pt-2 flex items-center gap-4">
-                  <Button size="sm" className="bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl h-10 px-6" onClick={() => router.push('/dashboard')}>
+                <div className="pt-4 flex items-center gap-4 flex-wrap">
+                  <Button className="bg-white text-teal-600 hover:bg-slate-50 font-bold rounded-2xl h-14 px-10 shadow-xl" onClick={() => router.push('/dashboard')}>
                     Return to Dashboard
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-teal-700 font-bold hover:bg-teal-100/50 h-10 px-4 rounded-xl">
-                    View Other Modules
+                  <Button variant="ghost" className="text-white font-bold hover:bg-white/10 h-14 px-6 rounded-2xl border border-white/20">
+                    Explore Next Module
                   </Button>
                 </div>
               </div>
@@ -304,103 +307,86 @@ export default function GuideDetailPage() {
 
           </div>
 
-          {/* Sidebar Column */}
+          {/* Sidebar Column - Technical Workspace */}
           <div className="lg:col-span-4">
             <div className="sticky top-24 space-y-8">
               
-              {/* Table of Contents */}
+              {/* Navigation Index */}
               <Card className="border-slate-100 rounded-[32px] shadow-sm bg-white overflow-hidden text-left">
-                <CardHeader className="bg-slate-50/50 border-b p-6">
-                  <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    On this page
+                <CardHeader className="bg-slate-50/50 border-b px-8 py-6">
+                  <CardTitle className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-teal-500" />
+                    Module Index
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-4 pt-4">
                   <div className="space-y-1">
                     {guide.sections.map((section, idx) => (
-                      <button key={idx} className="w-full text-left px-4 py-3 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-all flex items-center gap-3 group">
-                        <span className="text-[10px] h-5 w-5 rounded-lg border border-slate-200 flex items-center justify-center group-hover:border-teal-200 group-hover:bg-teal-50">{idx + 1}</span>
-                        {section.title}
+                      <button key={idx} className="w-full text-left px-5 py-4 rounded-2xl text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:text-teal-600 transition-all flex items-center gap-4 group">
+                        <span className="text-[10px] h-6 w-6 rounded-xl border border-slate-200 flex items-center justify-center group-hover:border-teal-200 group-hover:bg-teal-50 shrink-0">{idx + 1}</span>
+                        <span className="truncate">{section.title}</span>
                       </button>
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Technical Context */}
+              {/* Technical Specifications */}
               <Card className="border-slate-100 rounded-[32px] shadow-sm bg-white overflow-hidden text-left">
-                <CardHeader className="bg-slate-50/50 border-b p-6">
-                  <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                    <Monitor className="h-3.5 w-3.5" />
-                    Operational Parameters
+                <CardHeader className="bg-slate-50/50 border-b px-8 py-6">
+                  <CardTitle className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                    <Monitor className="h-4 w-4 text-teal-500" />
+                    Technical Specs
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/80 border border-slate-100/50">
-                      <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
-                        <Info className="h-4 w-4 text-teal-500" />
+                <CardContent className="p-8 space-y-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 border border-teal-100">
+                        <ShieldCheck className="h-5 w-5 text-teal-600" />
                       </div>
-                      <p className="text-[11px] text-slate-500 font-bold leading-relaxed uppercase tracking-wider">
-                        Requires <span className="text-slate-900 underline decoration-teal-500/30">Workspace Admin</span> permissions.
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Access Level</p>
+                        <p className="text-sm font-bold text-slate-700">Workspace Administrator</p>
+                      </div>
                     </div>
-                    <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/80 border border-slate-100/50">
-                      <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm shrink-0">
-                        <Hash className="h-4 w-4 text-slate-400" />
+                    <div className="flex items-start gap-4">
+                      <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                        <Hash className="h-5 w-5 text-slate-400" />
                       </div>
-                      <p className="text-[11px] text-slate-500 font-bold leading-relaxed uppercase tracking-wider">
-                        Syncs with <span className="text-slate-900">Oracle Micros Simphony</span>.
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Integrations</p>
+                        <p className="text-sm font-bold text-slate-700">POS Core Sync API</p>
+                      </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full rounded-2xl h-12 font-bold text-xs gap-2 border-slate-200 bg-white hover:bg-slate-50 shadow-sm transition-all">
+                  <Button variant="outline" className="w-full rounded-2xl h-14 font-bold text-[13px] gap-3 border-slate-200 bg-white hover:bg-slate-50 shadow-sm transition-all">
                     <Printer className="h-4 w-4" />
-                    Export as PDF
+                    Download PDF Manual
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Related Section */}
-              <div className="space-y-4 text-left px-2">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Related Modules</h4>
-                <div className="space-y-3">
-                  {[
-                    { title: 'Defining tax & service fees', duration: '3 MIN' },
-                    { title: 'Branding your mobile menu', duration: '5 MIN' },
-                    { title: 'Whitelisting hardware IDs', duration: '7 MIN' }
-                  ].map((item, i) => (
-                    <button key={i} className="w-full group text-left p-5 rounded-[28px] bg-white border border-slate-100 hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-between shadow-sm">
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold text-slate-900 group-hover:text-teal-600 transition-colors">{item.title}</p>
-                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{item.duration} READ</p>
-                      </div>
-                      <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-all">
-                         <ArrowRight className="h-4 w-4" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Expert Support Callout */}
-              <div className="bg-slate-900 p-8 rounded-[40px] text-white relative overflow-hidden text-left shadow-2xl ring-4 ring-slate-900/5">
+              {/* Expert Consulting Sidebar */}
+              <div className="bg-[#142424] p-10 rounded-[40px] text-white relative overflow-hidden text-left shadow-2xl">
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] rotate-12 pointer-events-none">
-                  <MessageCircle className="h-32 w-32" />
+                  <MessageCircle className="h-48 w-48" />
                 </div>
-                <div className="relative z-10 space-y-5">
-                  <div className="h-12 w-12 rounded-2xl bg-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
-                     <Users className="h-6 w-6 text-white" />
+                <div className="relative z-10 space-y-8">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 rounded-2xl bg-[#18B4A6] flex items-center justify-center shadow-2xl shadow-teal-500/30">
+                       <Users className="h-7 w-7 text-white" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <h4 className="text-xl font-bold tracking-tight">Expert Help</h4>
+                      <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest">Available Now</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <h4 className="text-xl font-bold tracking-tight">Need expert help?</h4>
-                    <p className="text-xs text-slate-400 font-semibold leading-relaxed">
-                      Our onboarding engineers can walk you through this process via a scheduled screen-share session.
-                    </p>
-                  </div>
-                  <Button className="w-full bg-white text-slate-900 hover:bg-teal-50 font-bold rounded-2xl h-12 shadow-lg shadow-black/20 transition-all active:scale-[0.98]">
-                    Request Consultation
+                  <p className="text-sm text-slate-400 font-medium leading-relaxed">
+                    Our onboarding engineers can provide a direct walkthrough of this configuration via a secure screen-share session.
+                  </p>
+                  <Button className="w-full bg-white text-slate-900 hover:bg-teal-50 font-bold rounded-2xl h-14 shadow-xl shadow-black/20 transition-all active:scale-[0.98]">
+                    Request Live Walkthrough
                   </Button>
                 </div>
               </div>

@@ -122,47 +122,47 @@ export default function BrowseGuidesPage() {
       <DashboardHeader />
       
       {/* 1. High-Fidelity Header Section */}
-      <div className="relative bg-[#0f172a] px-8 py-20 text-left overflow-hidden border-b border-white/5">
-        {/* Animated Background Accents */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#18B4A6]/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
+      <div className="relative bg-gradient-to-br from-[#18B4A6] via-[#18B4A6] to-[#A7F3D0] px-8 py-20 text-left overflow-hidden border-b border-white/10 shadow-sm">
+        {/* Animated Background Accents (Soft light for the teal background) */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" />
         
         <div className="max-w-7xl mx-auto relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-          <div className="space-y-6 max-w-2xl">
+          <div className="space-y-6 max-w-2xl text-white">
             {/* Refined Navigation Trail */}
-            <nav className="flex items-center gap-2 text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">
-              <NextLink href="/dashboard" className="hover:text-[#18B4A6] transition-colors">Workspace</NextLink>
+            <nav className="flex items-center gap-2 text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">
+              <NextLink href="/dashboard" className="hover:text-white transition-colors">Workspace</NextLink>
               <ChevronRight className="h-3 w-3" />
-              <NextLink href="/dashboard/help-center" className="hover:text-[#18B4A6] transition-colors">Support Center</NextLink>
+              <NextLink href="/dashboard/help-center" className="hover:text-white transition-colors">Support Center</NextLink>
               <ChevronRight className="h-3 w-3" />
-              <span className="text-[#18B4A6]">Documentation</span>
+              <span className="text-white">Documentation</span>
             </nav>
 
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18B4A6]/10 text-[#18B4A6] border border-[#18B4A6]/20 backdrop-blur-md">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#18B4A6] animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Merchant Knowledge Hub</span>
+            <div className="space-y-4 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white border border-white/30 backdrop-blur-md">
+                <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Merchant Knowledge Base</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-none">
-                Technical <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#18B4A6] to-emerald-400">Resources</span>
+                Documentation & Guides
               </h1>
-              <p className="text-slate-400 text-lg font-medium leading-relaxed max-w-xl">
-                Comprehensive technical documentation and operational walkthroughs to master your digital infrastructure.
+              <p className="text-white/90 text-lg font-medium leading-relaxed max-w-xl">
+                Comprehensive technical documentation and operational walkthroughs for your digital infrastructure.
               </p>
             </div>
           </div>
           
           <div className="relative w-full max-w-md group">
-             <div className="absolute -inset-1 bg-gradient-to-r from-[#18B4A6]/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+             <div className="absolute -inset-1 bg-white/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/70" />
                 <Input 
                   placeholder="Search parameters or items..." 
-                  className="pl-12 h-16 bg-[#1a2e2e]/50 border-white/10 rounded-2xl text-white font-bold shadow-2xl focus-visible:ring-2 focus-visible:ring-[#18B4A6]/50 transition-all placeholder:text-slate-500 backdrop-blur-xl"
+                  className="pl-12 h-16 bg-white/10 border-white/20 rounded-2xl text-white font-bold shadow-2xl focus-visible:ring-2 focus-visible:ring-white/50 transition-all placeholder:text-white/60 backdrop-blur-xl"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <kbd className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-white/5 border border-white/10 text-[10px] font-black text-slate-500 uppercase">
+                <kbd className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-white/10 border border-white/10 text-[10px] font-black text-white/70 uppercase">
                   KB
                 </kbd>
              </div>

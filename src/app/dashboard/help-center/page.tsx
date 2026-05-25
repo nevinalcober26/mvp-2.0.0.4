@@ -109,7 +109,7 @@ export default function HelpCenterPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
           {/* Reliability Card */}
           <Card className="lg:col-span-8 border-0 shadow-sm rounded-[32px] bg-[#0f172a] text-white overflow-hidden relative">
-            <div className="absolute right-0 bottom-0 p-8 opacity-10 pointer-events-none">
+            <div className="absolute right-0 bottom-0 p-8 opacity-10 pointer-events-none rotate-12">
               <ShieldCheck className="h-48 w-48 text-white" />
             </div>
             <CardContent className="p-10 flex flex-col justify-between h-full relative z-10">
@@ -164,10 +164,10 @@ export default function HelpCenterPage() {
         </div>
 
         {/* Footer Support Ticket Bar */}
-        <div className="p-6 rounded-2xl border border-transparent bg-gradient-to-r from-[#fefce8] via-white to-[#fdf2f8] relative overflow-hidden text-center shadow-sm">
-           <div className="absolute inset-0 border border-transparent [mask-image:linear-gradient(white,white)] before:absolute before:inset-0 before:p-[1px] before:bg-gradient-to-r before:from-yellow-200 before:via-teal-200 before:to-pink-200 before:rounded-2xl" />
+        <div className="relative p-5 rounded-2xl border border-transparent bg-gradient-to-r from-[#fdfdea] via-white to-[#fff1f2] text-center shadow-sm overflow-hidden">
+           <div className="absolute inset-0 border border-transparent before:absolute before:inset-0 before:p-[1px] before:bg-gradient-to-r before:from-indigo-200 before:via-teal-200 before:to-pink-200 before:rounded-2xl before:content-[''] [mask-image:linear-gradient(white,white)] before:[mask-image:none]" />
            <p className="text-sm font-medium text-slate-500 relative z-10">
-            Not finding what you need? <span className="text-[#18B4A6] font-bold cursor-pointer hover:underline">Submit a technical ticket</span> and we&apos;ll get back to you shortly.
+            Not finding what you need? <span className="text-[#18B4A6] font-semibold cursor-pointer hover:underline">Submit a technical ticket</span> and we&apos;ll get back to you shortly.
           </p>
         </div>
 

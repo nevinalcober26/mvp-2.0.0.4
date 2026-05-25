@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,21 +40,21 @@ const GUIDE_CATEGORIES = [
         slug: 'setup-business-profile', 
         duration: '5 min', 
         isPopular: true, 
-        thumbnailId: 'dashboard-2' 
+        thumbnailId: 'dashboard-1' 
       },
       { 
         title: 'Adding your first restaurant branch', 
         excerpt: 'Learn how to create and manage multiple physical outlets under one account.',
         slug: 'add-first-branch', 
         duration: '8 min', 
-        thumbnailId: 'dashboard-3' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Inviting staff members to the dashboard', 
         excerpt: 'Manage user permissions and team access levels for your dashboard.',
         slug: 'invite-staff', 
         duration: '3 min', 
-        thumbnailId: 'dashboard-2' 
+        thumbnailId: 'dashboard-3' 
       },
     ]
   },
@@ -78,7 +78,7 @@ const GUIDE_CATEGORIES = [
         slug: 'add-products-variations', 
         duration: '10 min', 
         isPopular: true, 
-        thumbnailId: 'dashboard-1' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Setting up dietary & allergen tags', 
@@ -109,14 +109,14 @@ const GUIDE_CATEGORIES = [
         slug: 'live-order-hub', 
         duration: '6 min', 
         isPopular: true, 
-        thumbnailId: 'dashboard-2' 
+        thumbnailId: 'dashboard-3' 
       },
       { 
         title: 'Branding and printing QR codes', 
         excerpt: 'Generate and customize high-resolution QR codes for your tables.',
         slug: 'qr-codes-printing', 
         duration: '5 min', 
-        thumbnailId: 'dashboard-3' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Updating stock in real-time', 
@@ -147,14 +147,14 @@ const GUIDE_CATEGORIES = [
         excerpt: 'Set up Network International or DPO to accept secure digital payments.',
         slug: 'configure-payment-gateways', 
         duration: '12 min', 
-        thumbnailId: 'dashboard-3' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Whitelisting hardware terminals', 
         excerpt: 'Authorize specific physical payment terminals for your outlet.',
         slug: 'whitelist-terminals', 
         duration: '7 min', 
-        thumbnailId: 'dashboard-3' 
+        thumbnailId: 'dashboard-1' 
       },
     ]
   },
@@ -177,14 +177,14 @@ const GUIDE_CATEGORIES = [
         excerpt: 'Download full financial audits for accounting and reconcilement.',
         slug: 'export-reports', 
         duration: '4 min', 
-        thumbnailId: 'dashboard-1' 
+        thumbnailId: 'dashboard-2' 
       },
       { 
         title: 'Analyzing waiter performance', 
         excerpt: 'Track tips and sales volume across your front-of-house team.',
         slug: 'waiter-performance', 
         duration: '5 min', 
-        thumbnailId: 'dashboard-1' 
+        thumbnailId: 'dashboard-3' 
       },
     ]
   }
@@ -224,6 +224,20 @@ export default function BrowseGuidesPage() {
     return PlaceHolderImages.find(img => img.id === id);
   };
 
+  const scrollToCategory = (id: string) => {
+    setActiveFilter(id);
+    const element = document.getElementById(`category-${id}`);
+    if (element) {
+        const offset = 120; // sticky header offset
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#fafbfc]">
       <DashboardHeader />
@@ -239,9 +253,9 @@ export default function BrowseGuidesPage() {
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 text-teal-600 border border-teal-100 mb-2">
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-semibold uppercase tracking-tight">Merchant Knowledge Base</span>
+                  <span className="text-[10px] font-bold uppercase tracking-tight">Merchant Knowledge Base</span>
                 </div>
-                <h1 className="text-4xl font-semibold text-slate-900 tracking-tight">Documentation & Guides</h1>
+                <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Documentation & Guides</h1>
                 <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
                   Comprehensive technical documentation and operational walkthroughs for your digital infrastructure.
                 </p>
@@ -268,7 +282,7 @@ export default function BrowseGuidesPage() {
             size="sm"
             onClick={() => setActiveFilter('all')}
             className={cn(
-              "rounded-xl h-9 px-4 text-xs font-semibold whitespace-nowrap",
+              "rounded-xl h-9 px-4 text-xs font-bold whitespace-nowrap",
               activeFilter === 'all' ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
             )}
           >
@@ -280,9 +294,9 @@ export default function BrowseGuidesPage() {
               key={cat.id}
               variant={activeFilter === cat.id ? 'secondary' : 'ghost'}
               size="sm"
-              onClick={() => setActiveFilter(cat.id)}
+              onClick={() => scrollToCategory(cat.id)}
               className={cn(
-                "rounded-xl h-9 px-4 text-xs font-semibold whitespace-nowrap gap-2",
+                "rounded-xl h-9 px-4 text-xs font-bold whitespace-nowrap gap-2",
                 activeFilter === cat.id ? "bg-teal-50 text-teal-700 border border-teal-100" : "text-slate-500 hover:bg-slate-50"
               )}
             >
@@ -297,14 +311,14 @@ export default function BrowseGuidesPage() {
         <div className="max-w-6xl mx-auto">
           <div className="space-y-20">
             {filteredCategories.length > 0 ? filteredCategories.map((category) => (
-              <section key={category.id} id={`section-${category.id}`} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <section key={category.id} id={`category-${category.id}`} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 scroll-mt-32">
                 <div className="flex items-center gap-4">
                   <div className={cn("h-11 w-11 rounded-xl border flex items-center justify-center shadow-sm shrink-0", category.color)}>
                     <category.icon className="h-5 w-5" />
                   </div>
                   <div className="space-y-0.5 text-left">
-                    <h2 className="text-xl font-semibold text-slate-900">{category.title}</h2>
-                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-semibold text-[10px] tracking-tight">
+                    <h2 className="text-xl font-bold text-slate-900">{category.title}</h2>
+                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-bold text-[10px] tracking-tight">
                       {category.guides.length} ARTICLES
                     </Badge>
                   </div>
@@ -337,16 +351,16 @@ export default function BrowseGuidesPage() {
                             )}
                           </div>
                           <CardContent className="p-6 text-left flex flex-col flex-1 gap-2">
-                            <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-snug">
+                            <h3 className="text-base font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-snug">
                               {guide.title}
                             </h3>
                             <p className="text-sm font-medium text-slate-500 leading-relaxed line-clamp-2 mb-4">
                               {guide.excerpt}
                             </p>
                             <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
-                               <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
                                  <Clock className="h-3.5 w-3.5" />
-                                 {guide.duration}
+                                 {guide.duration} READ
                                </div>
                                <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
                                   <ArrowRight className="h-4 w-4" />
@@ -365,13 +379,13 @@ export default function BrowseGuidesPage() {
                   <Search className="h-8 w-8 text-slate-300" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-slate-900 font-semibold text-lg">No documentation found</p>
+                  <p className="text-slate-900 font-bold text-lg">No documentation found</p>
                   <p className="text-slate-500 text-sm font-medium">Try adjusting your filters or searching for something else.</p>
                 </div>
                 <Button 
                   variant="outline" 
                   onClick={() => { setSearchQuery(''); setActiveFilter('all'); }} 
-                  className="rounded-xl h-11 px-8 font-semibold text-xs border-slate-200 mt-4"
+                  className="rounded-xl h-11 px-8 font-bold text-xs border-slate-200 mt-4"
                 >
                   Clear All Filters
                 </Button>
@@ -382,11 +396,11 @@ export default function BrowseGuidesPage() {
           <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
             <div className="space-y-2 text-center md:text-left relative z-10">
-              <h4 className="text-xl font-semibold">Can&apos;t find what you&apos;re looking for?</h4>
+              <h4 className="text-xl font-bold">Can&apos;t find what you&apos;re looking for?</h4>
               <p className="text-sm text-slate-400 font-medium max-w-md">Our technical team is on standby to help with your complex integration or operational setup.</p>
             </div>
             <div className="flex gap-4 relative z-10 w-full md:w-auto">
-              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-semibold text-xs border-white/20 text-black hover:bg-white/10" asChild>
+              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-bold text-xs border-white/20 text-black hover:bg-white/10" asChild>
                 <NextLink href="/dashboard/help-center">
                   Get Human Help
                 </NextLink>

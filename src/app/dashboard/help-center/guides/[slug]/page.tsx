@@ -27,29 +27,31 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Mock data for demonstration - in a real app, this would be fetched based on slug
+/**
+ * Real content steps for eMenu Tutorial
+ */
 const GUIDE_CONTENT = {
   'setup-business-profile': {
     title: 'Setting up your business profile',
     category: 'Getting Started',
     duration: '5 min',
-    lastUpdated: 'May 12, 2024',
+    lastUpdated: 'Jan 15, 2025',
     description: 'Learn how to configure your corporate identity, branding, and legal identifiers for your eMenu Digital Hub account.',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     sections: [
       {
-        title: 'Accessing Profile Settings',
-        content: 'Navigate to the Settings tab in your main dashboard sidebar. Select "Business Profile" from the sub-menu to access your core corporate identity settings.',
+        title: 'Define your Corporate Identity',
+        content: 'Navigate to the Settings tab in your main dashboard sidebar. Select "Manage Branches" and click "Edit" on your primary location. Upload your high-resolution PNG logo and select your primary brand hex color. This color will be applied across your digital menu to buttons, links, and highlights.',
         image: 'https://picsum.photos/seed/setup1/800/450'
       },
       {
-        title: 'Defining Brand Visuals',
-        content: 'Upload your high-resolution PNG logo and select your primary brand hex color. This color will be applied across your digital menu to buttons, links, and highlights.',
+        title: 'Configure Regional & Tax Settings',
+        content: 'Under the "Basic Information" tab, ensure your base currency (e.g., AED) and local timezone are correctly assigned. This ensures your sales reports and order timestamps are accurate. Enter your local VAT or Trade License number in the legal identifiers section to ensure correct tax calculations on digital receipts.',
         image: 'https://picsum.photos/seed/setup2/800/450'
       },
       {
-        title: 'Legal & Regional Identifiers',
-        content: 'Ensure your Trade License number and local VAT identifiers are correct. Select your base currency and timezone to ensure accurate reporting and operations.',
+        title: 'Verify Outlet Mapping',
+        content: 'Assign a unique "Outlet Slug" which will form the base of your public menu URL (e.g., yourbrand.menu/dubai-mall). Once saved, these details are pushed instantly to the mobile ordering interface for your guests.',
         image: 'https://picsum.photos/seed/setup3/800/450'
       }
     ]
@@ -58,19 +60,99 @@ const GUIDE_CONTENT = {
     title: 'Connecting your POS machine',
     category: 'Integrations',
     duration: '15 min',
-    lastUpdated: 'June 02, 2024',
+    lastUpdated: 'Jan 20, 2025',
     description: 'A comprehensive guide to linking your Oracle Micros Simphony or Toast terminal for real-time automated menu synchronization.',
     videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
     sections: [
       {
         title: 'Provider Authentication',
-        content: 'Select your POS provider from the Integration hub. Enter your OIDC and Client ID credentials provided by your POS administrator.',
+        content: 'Navigate to "Integrations > POS" and select your provider. For Oracle Simphony, you will need your OIDC URL, Client ID, and service account credentials. These are typically provided by your POS technical administrator.',
         image: 'https://picsum.photos/seed/pos1/800/450'
       },
       {
-        title: 'Terminal Mapping',
-        content: 'Map your physical hardware to specific outlets in your eMenu dashboard. Ensure each terminal is assigned a unique Revenue Center identifier.',
+        title: 'Terminal & Revenue Center Mapping',
+        content: 'Select the specific Revenue Center you wish to sync (e.g., Dine-in Food or Bar). Map your eMenu outlet to the corresponding Revenue Center ID in your POS. This ensures that orders placed via the digital menu are correctly routed to the proper kitchen or bar printer.',
         image: 'https://picsum.photos/seed/pos2/800/450'
+      },
+      {
+        title: 'Initial Data Ingestion',
+        content: 'Once authenticated, click "Verify & Ingest". eMenu will read your POS database and import all active menu items, prices, and stock levels. You can then review these items in the "Manage Sync Menu" view to toggle visibility.',
+        image: 'https://picsum.photos/seed/pos3/800/450'
+      }
+    ]
+  },
+  'create-categories': {
+    title: 'Creating product categories',
+    category: 'Menu Studio',
+    duration: '6 min',
+    lastUpdated: 'Jan 18, 2025',
+    description: 'Organize your menu logically using hierarchical categories and dynamic columns.',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    sections: [
+      {
+        title: 'Add Category Columns',
+        content: 'In "Catalog > Categories", click "Add Category Column". These serve as the top-level headers in your mobile menu. You can add descriptions and specific display formatting, such as "Grid with Images" or "List Only".',
+        image: 'https://picsum.photos/seed/cat1/800/450'
+      },
+      {
+        title: 'Nesting and Reordering',
+        content: 'Drag and drop categories to create sub-menus (e.g., Pizza > Vegan Pizza). The hierarchical structure is automatically reflected in the mobile sidebar for easy guest navigation.',
+        image: 'https://picsum.photos/seed/cat2/800/450'
+      },
+      {
+        title: 'Applying Scheduling Rules',
+        content: 'Use the "Schedule" action on any category to restrict availability. For example, you can set the "Breakfast" category to be visible only between 08:00 AM and 11:30 AM. Outside of these hours, the category is either hidden or marked as "Not Orderable".',
+        image: 'https://picsum.photos/seed/cat3/800/450'
+      }
+    ]
+  },
+  'add-products-variations': {
+    title: 'Adding products with variations',
+    category: 'Menu Studio',
+    duration: '10 min',
+    lastUpdated: 'Jan 22, 2025',
+    description: 'Set up complex items with modifiers, options, and custom pricing logic.',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    sections: [
+      {
+        title: 'Basic Product Entry',
+        content: 'Add a new product and provide a base price. Use the "AI Operational Pulse" button to generate a mouth-watering description based on your ingredients.',
+        image: 'https://picsum.photos/seed/prod1/800/450'
+      },
+      {
+        title: 'Assigning Variation Groups',
+        content: 'Navigate to the "Variations" tab. You can link pre-defined groups like "Size" or "Extra Toppings". Each option can be set to "Override" the base price, or "Add/Subtract" from it.',
+        image: 'https://picsum.photos/seed/prod2/800/450'
+      },
+      {
+        title: 'Setting Nutritional Facts',
+        content: 'Enable the "Nutrition" toggle to provide transparency for your health-conscious guests. Assign values for Protein, Fat, Carbs, and Calories per serving.',
+        image: 'https://picsum.photos/seed/prod3/800/450'
+      }
+    ]
+  },
+  'qr-codes-printing': {
+    title: 'Branding and printing QR codes',
+    category: 'Operations',
+    duration: '4 min',
+    lastUpdated: 'Jan 25, 2025',
+    description: 'Generate high-resolution branded QR assets for your tables and marketing materials.',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    sections: [
+      {
+        title: 'Visual Branding',
+        content: 'In "Operations > QR Code", select your brand color. Enable the "Add Branding" toggle to overlay your restaurant logo in the center of the code.',
+        image: 'https://picsum.photos/seed/qr1/800/450'
+      },
+      {
+        title: 'Configure Scannability',
+        content: 'Enable "High Error Correction" for codes that will be printed on physical stickers or cards. This ensures the code remains scannable even if the sticker is slightly scratched or damaged.',
+        image: 'https://picsum.photos/seed/qr2/800/450'
+      },
+      {
+        title: 'Exporting Assets',
+        content: 'Download your QR code in "SVG" format for professional printing, or "PNG" for digital use. You can also generate "Table-Specific" codes that automatically assign a table number to the guest\'s session.',
+        image: 'https://picsum.photos/seed/qr3/800/450'
       }
     ]
   }

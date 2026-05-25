@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,204 +16,102 @@ import {
   Monitor, 
   Plug, 
   ChevronRight,
-  FileText,
   Clock,
-  Sparkles,
   ArrowRight,
   LayoutGrid,
-  FileSearch
+  FileSearch,
+  BarChart,
+  Layers
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const GUIDE_CATEGORIES = [
   {
-    id: 'getting-started',
-    title: 'Getting Started',
+    id: 'dashboard-tutorials',
+    title: 'Dashboard Tutorials',
     icon: Rocket,
-    color: 'text-blue-600 bg-blue-50 border-blue-100',
-    accent: 'border-blue-200',
     guides: [
       { 
-        title: 'Setting up your business profile', 
-        excerpt: 'Configure your restaurant identity, logo, and core business identifiers.',
+        title: 'Dashboard Overview', 
+        excerpt: 'Learn the basics of your new dashboard interface, navigation, and key metrics...',
         slug: 'setup-business-profile', 
         duration: '5 min', 
         isPopular: true, 
         thumbnailId: 'dashboard-1' 
       },
       { 
-        title: 'Adding your first restaurant branch', 
-        excerpt: 'Learn how to create and manage multiple physical outlets under one account.',
-        slug: 'add-first-branch', 
+        title: 'Setting up User Roles', 
+        excerpt: 'Configure permissions and access levels for your team members across different...',
+        slug: 'invite-staff', 
         duration: '8 min', 
         thumbnailId: 'dashboard-2' 
       },
       { 
-        title: 'Inviting staff members to the dashboard', 
-        excerpt: 'Manage user permissions and team access levels for your dashboard.',
-        slug: 'invite-staff', 
-        duration: '3 min', 
-        thumbnailId: 'dashboard-3' 
-      },
-    ]
-  },
-  {
-    id: 'menu-studio',
-    title: 'Menu Studio',
-    icon: Palette,
-    color: 'text-teal-600 bg-teal-50 border-teal-100',
-    accent: 'border-teal-200',
-    guides: [
-      { 
-        title: 'Creating product categories', 
-        excerpt: 'Organize your menu logically with hierarchical categories and columns.',
-        slug: 'create-categories', 
-        duration: '4 min', 
-        thumbnailId: 'dashboard-1' 
-      },
-      { 
-        title: 'Adding products with variations', 
-        excerpt: 'Set up complex items with modifiers, options, and custom pricing.',
-        slug: 'add-products-variations', 
-        duration: '10 min', 
-        isPopular: true, 
-        thumbnailId: 'dashboard-2' 
-      },
-      { 
-        title: 'Setting up dietary & allergen tags', 
-        excerpt: 'Protect your guests by correctly labeling allergens and dietary properties.',
-        slug: 'setup-tags', 
-        duration: '5 min', 
-        thumbnailId: 'dashboard-3' 
-      },
-      { 
-        title: 'Using AI to generate descriptions', 
-        excerpt: 'Leverage our GenAI assistant to write mouth-watering product copies.',
-        slug: 'ai-descriptions', 
-        duration: '2 min', 
-        thumbnailId: 'dashboard-1' 
-      },
-    ]
-  },
-  {
-    id: 'operations',
-    title: 'Operations',
-    icon: Monitor,
-    color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-    accent: 'border-indigo-200',
-    guides: [
-      { 
-        title: 'Managing the Live Order Hub', 
-        excerpt: 'Track and update incoming digital orders in real-time from your kitchen.',
-        slug: 'live-order-hub', 
-        duration: '6 min', 
-        isPopular: true, 
-        thumbnailId: 'dashboard-3' 
-      },
-      { 
-        title: 'Branding and printing QR codes', 
-        excerpt: 'Generate and customize high-resolution QR codes for your tables.',
-        slug: 'qr-codes-printing', 
-        duration: '5 min', 
-        thumbnailId: 'dashboard-2' 
-      },
-      { 
-        title: 'Updating stock in real-time', 
-        excerpt: 'Quickly mark items as out-of-stock across all digital channels.',
-        slug: 'real-time-stock', 
-        duration: '3 min', 
-        thumbnailId: 'dashboard-1' 
-      },
-    ]
-  },
-  {
-    id: 'integrations',
-    title: 'Integrations',
-    icon: Plug,
-    color: 'text-orange-600 bg-orange-50 border-orange-100',
-    accent: 'border-orange-200',
-    guides: [
-      { 
-        title: 'Connecting your POS machine', 
-        excerpt: 'Link Simphony or Toast for automated menu and price synchronization.',
-        slug: 'connect-pos', 
-        duration: '15 min', 
-        isPopular: true, 
-        thumbnailId: 'dashboard-3' 
-      },
-      { 
-        title: 'Configuring payment gateways', 
-        excerpt: 'Set up Network International or DPO to accept secure digital payments.',
-        slug: 'configure-payment-gateways', 
-        duration: '12 min', 
-        thumbnailId: 'dashboard-2' 
-      },
-      { 
-        title: 'Whitelisting hardware terminals', 
-        excerpt: 'Authorize specific physical payment terminals for your outlet.',
-        slug: 'whitelist-terminals', 
-        duration: '7 min', 
-        thumbnailId: 'dashboard-1' 
-      },
-    ]
-  },
-  {
-    id: 'analytics',
-    title: 'Analytics & Reports',
-    icon: FileText,
-    color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-    accent: 'border-emerald-200',
-    guides: [
-      { 
-        title: 'Understanding sales performance', 
-        excerpt: 'Analyze revenue, volume, and top-selling items over specific periods.',
+        title: 'Customizing Analytics Views', 
+        excerpt: 'Create personalized data charts and pin important metrics to your primary dashboard',
         slug: 'sales-performance', 
         duration: '6 min', 
+        thumbnailId: 'dashboard-3' 
+      },
+      { 
+        title: 'Managing Data Tables', 
+        excerpt: 'Filter, sort, and export complex datasets directly from the dashboard table...',
+        slug: 'real-time-stock', 
+        duration: '4 min', 
         thumbnailId: 'dashboard-1' 
       },
       { 
-        title: 'Exporting transaction reports', 
-        excerpt: 'Download full financial audits for accounting and reconcilement.',
-        slug: 'export-reports', 
-        duration: '4 min', 
+        title: 'Widget Configuration', 
+        excerpt: 'Drag, drop, and resize widgets to build a custom workspace tailored to your daily...',
+        slug: 'live-order-hub', 
+        duration: '7 min', 
         thumbnailId: 'dashboard-2' 
       },
       { 
-        title: 'Analyzing waiter performance', 
-        excerpt: 'Track tips and sales volume across your front-of-house team.',
-        slug: 'waiter-performance', 
+        title: 'Theme Customization', 
+        excerpt: 'Personalize your dashboard appearance with custom themes, color schemes, and layout...',
+        slug: 'setup-business-profile', 
         duration: '5 min', 
+        thumbnailId: 'dashboard-3' 
+      },
+      { 
+        title: 'Real-Time Notifications', 
+        excerpt: 'Configure alerts, webhooks, and notification preferences for critical dashboard events.',
+        slug: 'live-order-hub', 
+        duration: '6 min', 
+        thumbnailId: 'dashboard-1' 
+      },
+      { 
+        title: 'Data Export & Scheduling', 
+        excerpt: 'Set up automated reports and scheduled data exports in multiple formats from your...',
+        slug: 'export-reports', 
+        duration: '9 min', 
+        thumbnailId: 'dashboard-2' 
+      },
+      { 
+        title: 'Collaboration Features', 
+        excerpt: 'Share dashboards, create team workspaces, and collaborate in real-time with your...',
+        slug: 'invite-staff', 
+        duration: '7 min', 
         thumbnailId: 'dashboard-3' 
       },
     ]
   }
 ];
 
+const NAV_ITEMS = [
+  { id: 'all', label: 'All Categories', icon: null },
+  { id: 'getting-started', label: 'Getting Started', icon: Rocket },
+  { id: 'menu-studio', label: 'Menu Studio', icon: Palette },
+  { id: 'operations', label: 'Operations', icon: Monitor },
+  { id: 'integrations', label: 'Integrations', icon: Plug },
+  { id: 'analytics', label: 'Analytics & Reports', icon: BarChart },
+];
+
 export default function BrowseGuidesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-
-  const filteredCategories = useMemo(() => {
-    let result = GUIDE_CATEGORIES;
-    
-    if (activeFilter !== 'all') {
-      result = result.filter(cat => cat.id === activeFilter);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.map(cat => ({
-        ...cat,
-        guides: cat.guides.filter(g => 
-          g.title.toLowerCase().includes(query) || 
-          g.excerpt.toLowerCase().includes(query)
-        )
-      })).filter(cat => cat.guides.length > 0);
-    }
-
-    return result;
-  }, [searchQuery, activeFilter]);
 
   const breadcrumbItems = [
     { label: 'Help Center', href: '/dashboard/help-center' },
@@ -224,192 +122,139 @@ export default function BrowseGuidesPage() {
     return PlaceHolderImages.find(img => img.id === id);
   };
 
-  const scrollToCategory = (id: string) => {
-    setActiveFilter(id);
-    const element = document.getElementById(`category-${id}`);
-    if (element) {
-        const offset = 120; // sticky header offset
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-        });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-[#fafbfc]">
+    <div className="min-h-screen bg-[#fafbfc] font-sans">
       <DashboardHeader />
       
-      <div className="bg-white border-b px-8 py-12 shrink-0 text-left relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-20 opacity-[0.03] pointer-events-none">
-          <LayoutGrid className="h-64 w-64" />
-        </div>
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="space-y-4">
-              <Breadcrumbs items={breadcrumbItems} />
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 text-teal-600 border border-teal-100 mb-2">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-bold uppercase tracking-tight">Merchant Knowledge Base</span>
-                </div>
-                <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Documentation & Guides</h1>
-                <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
-                  Comprehensive technical documentation and operational walkthroughs for your digital infrastructure.
-                </p>
+      {/* 1. Header Section */}
+      <div className="bg-gradient-to-br from-[#18B4A6] via-[#18B4A6] to-[#A7F3D0] px-8 py-16 text-left relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-10">
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center gap-2 text-white/80 text-xs font-bold mb-2">
+              <NextLink href="/dashboard" className="hover:text-white transition-colors">Home</NextLink>
+              <ChevronRight className="h-3 w-3" />
+              <NextLink href="/dashboard/help-center" className="hover:text-white transition-colors">Help Center</NextLink>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-white">Knowledge Base</span>
+            </div>
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/20 text-white border border-white/30 backdrop-blur-md">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Merchant Knowledge Base</span>
               </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">Documentation & Guides</h1>
+              <p className="text-white/80 text-base font-medium leading-relaxed max-w-xl">
+                Comprehensive technical documentation and operational walkthroughs for your digital infrastructure.
+              </p>
             </div>
-            
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Search technical guides..." 
-                className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-teal-500/5 transition-all shadow-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+          </div>
+          
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input 
+              placeholder="Search technical guides..." 
+              className="pl-12 h-14 bg-white border-0 rounded-2xl text-sm font-medium shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 transition-all placeholder:text-slate-400"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
       </div>
 
-      <div className="sticky top-16 z-20 bg-white/80 backdrop-blur-md border-b border-slate-100 py-3 px-8 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
-          <Button 
-            variant={activeFilter === 'all' ? 'default' : 'ghost'} 
-            size="sm"
-            onClick={() => setActiveFilter('all')}
-            className={cn(
-              "rounded-xl h-9 px-4 text-xs font-bold whitespace-nowrap",
-              activeFilter === 'all' ? "bg-slate-900 text-white" : "text-slate-500 hover:bg-slate-50"
-            )}
-          >
-            All Categories
-          </Button>
-          <div className="h-4 w-px bg-slate-200 mx-2" />
-          {GUIDE_CATEGORIES.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={activeFilter === cat.id ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => scrollToCategory(cat.id)}
-              className={cn(
-                "rounded-xl h-9 px-4 text-xs font-bold whitespace-nowrap gap-2",
-                activeFilter === cat.id ? "bg-teal-50 text-teal-700 border border-teal-100" : "text-slate-500 hover:bg-slate-50"
-              )}
-            >
-              <cat.icon className="h-3.5 w-3.5" />
-              {cat.title}
-            </Button>
+      {/* 2. Sticky Category Navigation */}
+      <div className="sticky top-16 z-30 bg-white border-b border-slate-100 py-4 px-8 shadow-sm overflow-hidden">
+        <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto scrollbar-hide">
+          {NAV_ITEMS.map((item) => (
+            <React.Fragment key={item.id}>
+              <Button
+                variant={activeFilter === item.id ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveFilter(item.id)}
+                className={cn(
+                  "rounded-lg h-10 px-4 text-xs font-bold whitespace-nowrap gap-2 transition-all",
+                  activeFilter === item.id 
+                    ? "bg-[#0f172a] text-white hover:bg-[#0f172a]" 
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                )}
+              >
+                {item.icon && <item.icon className="h-4 w-4" />}
+                {item.label}
+              </Button>
+              {item.id === 'all' && <div className="h-6 w-px bg-slate-200 mx-2" />}
+            </React.Fragment>
           ))}
         </div>
       </div>
 
+      {/* 3. Main Content Grid */}
       <main className="p-8 pb-32">
-        <div className="max-w-6xl mx-auto">
-          <div className="space-y-20">
-            {filteredCategories.length > 0 ? filteredCategories.map((category) => (
-              <section key={category.id} id={`category-${category.id}`} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500 scroll-mt-32">
-                <div className="flex items-center gap-4">
-                  <div className={cn("h-11 w-11 rounded-xl border flex items-center justify-center shadow-sm shrink-0", category.color)}>
-                    <category.icon className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-0.5 text-left">
-                    <h2 className="text-xl font-bold text-slate-900">{category.title}</h2>
-                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-bold text-[10px] tracking-tight">
-                      {category.guides.length} ARTICLES
-                    </Badge>
+        <div className="max-w-7xl mx-auto space-y-20">
+          {GUIDE_CATEGORIES.map((category) => (
+            <section key={category.id} className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center gap-5">
+                <div className="h-12 w-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shadow-sm shrink-0">
+                  <category.icon className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{category.title}</h2>
+                  <div className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    {category.guides.length} Articles
                   </div>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {category.guides.map((guide, idx) => {
-                    const thumb = getThumbnail(guide.thumbnailId);
-                    return (
-                      <NextLink key={idx} href={`/dashboard/help-center/guides/${guide.slug}`} className="block group">
-                        <Card className="h-full hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm flex flex-col">
-                          <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
-                            {thumb ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {category.guides.map((guide, idx) => {
+                  const thumb = getThumbnail(guide.thumbnailId);
+                  return (
+                    <NextLink key={idx} href={`/dashboard/help-center/guides/${guide.slug}`} className="group">
+                      <Card className="h-full border-slate-100 bg-white hover:border-blue-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 rounded-[24px] overflow-hidden shadow-sm flex flex-col">
+                        <div className="relative aspect-[1.8/1] w-full bg-slate-50 p-4 pb-0 overflow-hidden">
+                          <div className="relative w-full h-full rounded-t-xl overflow-hidden bg-white border-x border-t border-slate-100 shadow-sm transition-transform group-hover:scale-[1.02] duration-500">
+                            {thumb && (
                               <Image 
                                 src={thumb.imageUrl} 
                                 alt={guide.title} 
                                 fill 
-                                className="object-cover transition-transform group-hover:scale-105 duration-500" 
+                                className="object-cover opacity-90 group-hover:opacity-100 transition-opacity" 
                                 data-ai-hint={thumb.imageHint}
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                <FileSearch className="h-8 w-8" />
-                              </div>
                             )}
                             {guide.isPopular && (
-                              <div className="absolute top-3 right-3">
-                                <Badge className="bg-teal-50/90 backdrop-blur-sm text-teal-600 border-teal-100 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
+                              <div className="absolute top-3 right-3 z-10">
+                                <Badge className="bg-white/95 backdrop-blur-md text-slate-900 border-0 font-bold text-[9px] px-2.5 py-1 rounded-md shadow-sm uppercase tracking-wider">POPULAR</Badge>
                               </div>
                             )}
                           </div>
-                          <CardContent className="p-6 text-left flex flex-col flex-1 gap-2">
-                            <h3 className="text-base font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-snug">
+                        </div>
+                        
+                        <CardContent className="p-6 text-left flex flex-col flex-1">
+                          <div className="space-y-3 mb-6">
+                            <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
                               {guide.title}
                             </h3>
-                            <p className="text-sm font-medium text-slate-500 leading-relaxed line-clamp-2 mb-4">
+                            <p className="text-sm font-medium text-slate-400 leading-relaxed line-clamp-2">
                               {guide.excerpt}
                             </p>
-                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
-                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400">
-                                 <Clock className="h-3.5 w-3.5" />
-                                 {guide.duration} READ
-                               </div>
-                               <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                                  <ArrowRight className="h-4 w-4" />
-                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </NextLink>
-                    );
-                  })}
-                </div>
-              </section>
-            )) : (
-              <div className="py-40 text-center space-y-5">
-                <div className="h-20 w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto shadow-inner">
-                  <Search className="h-8 w-8 text-slate-300" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-slate-900 font-bold text-lg">No documentation found</p>
-                  <p className="text-slate-500 text-sm font-medium">Try adjusting your filters or searching for something else.</p>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={() => { setSearchQuery(''); setActiveFilter('all'); }} 
-                  className="rounded-xl h-11 px-8 font-bold text-xs border-slate-200 mt-4"
-                >
-                  Clear All Filters
-                </Button>
+                          </div>
+                          
+                          <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-50">
+                             <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
+                               <Clock className="h-3.5 w-3.5" />
+                               {guide.duration}
+                             </div>
+                             <div className="h-9 w-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
+                                <ArrowRight className="h-4 w-4" />
+                             </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </NextLink>
+                  );
+                })}
               </div>
-            )}
-          </div>
-
-          <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
-            <div className="space-y-2 text-center md:text-left relative z-10">
-              <h4 className="text-xl font-bold">Can&apos;t find what you&apos;re looking for?</h4>
-              <p className="text-sm text-slate-400 font-medium max-w-md">Our technical team is on standby to help with your complex integration or operational setup.</p>
-            </div>
-            <div className="flex gap-4 relative z-10 w-full md:w-auto">
-              <Button variant="outline" className="flex-1 md:flex-none rounded-xl h-12 px-8 font-bold text-xs border-white/20 text-black hover:bg-white/10" asChild>
-                <NextLink href="/dashboard/help-center">
-                  Get Human Help
-                </NextLink>
-              </Button>
-              <Button className="flex-1 md:flex-none rounded-xl h-12 px-8 font-bold text-xs bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20">
-                Submit Support Ticket
-              </Button>
-            </div>
-          </div>
+            </section>
+          ))}
         </div>
       </main>
     </div>

@@ -20,7 +20,8 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  LayoutGrid
+  LayoutGrid,
+  FileSearch
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -33,9 +34,28 @@ const GUIDE_CATEGORIES = [
     color: 'text-blue-600 bg-blue-50 border-blue-100',
     accent: 'border-blue-200',
     guides: [
-      { title: 'Setting up your business profile', slug: 'setup-business-profile', duration: '5 min', isPopular: true, thumbnailId: 'restaurant-1' },
-      { title: 'Adding your first restaurant branch', slug: 'add-first-branch', duration: '8 min', thumbnailId: 'restaurant-2' },
-      { title: 'Inviting staff members to the dashboard', slug: 'invite-staff', duration: '3 min', thumbnailId: 'user-avatar' },
+      { 
+        title: 'Setting up your business profile', 
+        excerpt: 'Configure your restaurant identity, logo, and core business identifiers.',
+        slug: 'setup-business-profile', 
+        duration: '5 min', 
+        isPopular: true, 
+        thumbnailId: 'restaurant-1' 
+      },
+      { 
+        title: 'Adding your first restaurant branch', 
+        excerpt: 'Learn how to create and manage multiple physical outlets under one account.',
+        slug: 'add-first-branch', 
+        duration: '8 min', 
+        thumbnailId: 'restaurant-2' 
+      },
+      { 
+        title: 'Inviting staff members to the dashboard', 
+        excerpt: 'Manage user permissions and team access levels for your dashboard.',
+        slug: 'invite-staff', 
+        duration: '3 min', 
+        thumbnailId: 'user-avatar' 
+      },
     ]
   },
   {
@@ -45,10 +65,35 @@ const GUIDE_CATEGORIES = [
     color: 'text-teal-600 bg-teal-50 border-teal-100',
     accent: 'border-teal-200',
     guides: [
-      { title: 'Creating product categories', slug: 'create-categories', duration: '4 min', thumbnailId: 'fresh-garden-salad' },
-      { title: 'Adding products with variations', slug: 'add-products-variations', duration: '10 min', isPopular: true, thumbnailId: 'artisanal-pizza' },
-      { title: 'Setting up dietary & allergen tags', slug: 'setup-tags', duration: '5 min', thumbnailId: 'spicy-chicken-wings' },
-      { title: 'Using AI to generate descriptions', slug: 'ai-descriptions', duration: '2 min', thumbnailId: 'avocado-toast' },
+      { 
+        title: 'Creating product categories', 
+        excerpt: 'Organize your menu logically with hierarchical categories and columns.',
+        slug: 'create-categories', 
+        duration: '4 min', 
+        thumbnailId: 'fresh-garden-salad' 
+      },
+      { 
+        title: 'Adding products with variations', 
+        excerpt: 'Set up complex items with modifiers, options, and custom pricing.',
+        slug: 'add-products-variations', 
+        duration: '10 min', 
+        isPopular: true, 
+        thumbnailId: 'artisanal-pizza' 
+      },
+      { 
+        title: 'Setting up dietary & allergen tags', 
+        excerpt: 'Protect your guests by correctly labeling allergens and dietary properties.',
+        slug: 'setup-tags', 
+        duration: '5 min', 
+        thumbnailId: 'spicy-chicken-wings' 
+      },
+      { 
+        title: 'Using AI to generate descriptions', 
+        excerpt: 'Leverage our GenAI assistant to write mouth-watering product copies.',
+        slug: 'ai-descriptions', 
+        duration: '2 min', 
+        thumbnailId: 'avocado-toast' 
+      },
     ]
   },
   {
@@ -58,9 +103,28 @@ const GUIDE_CATEGORIES = [
     color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
     accent: 'border-indigo-200',
     guides: [
-      { title: 'Managing the Live Order Hub', slug: 'live-order-hub', duration: '6 min', isPopular: true, thumbnailId: 'template-2' },
-      { title: 'Branding and printing QR codes', slug: 'qr-codes-printing', duration: '5 min', thumbnailId: 'restaurant-logo' },
-      { title: 'Updating stock in real-time', slug: 'real-time-stock', duration: '3 min', thumbnailId: 'ribeye-steak' },
+      { 
+        title: 'Managing the Live Order Hub', 
+        excerpt: 'Track and update incoming digital orders in real-time from your kitchen.',
+        slug: 'live-order-hub', 
+        duration: '6 min', 
+        isPopular: true, 
+        thumbnailId: 'template-2' 
+      },
+      { 
+        title: 'Branding and printing QR codes', 
+        excerpt: 'Generate and customize high-resolution QR codes for your tables.',
+        slug: 'qr-codes-printing', 
+        duration: '5 min', 
+        thumbnailId: 'restaurant-logo' 
+      },
+      { 
+        title: 'Updating stock in real-time', 
+        excerpt: 'Quickly mark items as out-of-stock across all digital channels.',
+        slug: 'real-time-stock', 
+        duration: '3 min', 
+        thumbnailId: 'ribeye-steak' 
+      },
     ]
   },
   {
@@ -70,9 +134,28 @@ const GUIDE_CATEGORIES = [
     color: 'text-orange-600 bg-orange-50 border-orange-100',
     accent: 'border-orange-200',
     guides: [
-      { title: 'Connecting your POS machine', slug: 'connect-pos', duration: '15 min', isPopular: true, thumbnailId: 'template-1' },
-      { title: 'Configuring payment gateways', slug: 'configure-payment-gateways', duration: '12 min', thumbnailId: 'template-3' },
-      { title: 'Whitelisting hardware terminals', slug: 'whitelist-terminals', duration: '7 min', thumbnailId: 'restaurant-3' },
+      { 
+        title: 'Connecting your POS machine', 
+        excerpt: 'Link Simphony or Toast for automated menu and price synchronization.',
+        slug: 'connect-pos', 
+        duration: '15 min', 
+        isPopular: true, 
+        thumbnailId: 'template-1' 
+      },
+      { 
+        title: 'Configuring payment gateways', 
+        excerpt: 'Set up Network International or DPO to accept secure digital payments.',
+        slug: 'configure-payment-gateways', 
+        duration: '12 min', 
+        thumbnailId: 'template-3' 
+      },
+      { 
+        title: 'Whitelisting hardware terminals', 
+        excerpt: 'Authorize specific physical payment terminals for your outlet.',
+        slug: 'whitelist-terminals', 
+        duration: '7 min', 
+        thumbnailId: 'restaurant-3' 
+      },
     ]
   },
   {
@@ -82,9 +165,27 @@ const GUIDE_CATEGORIES = [
     color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     accent: 'border-emerald-200',
     guides: [
-      { title: 'Understanding sales performance', slug: 'sales-performance', duration: '6 min', thumbnailId: 'template-2' },
-      { title: 'Exporting transaction reports', slug: 'export-reports', duration: '4 min', thumbnailId: 'template-3' },
-      { title: 'Analyzing waiter performance', slug: 'waiter-performance', duration: '5 min', thumbnailId: 'user-avatar' },
+      { 
+        title: 'Understanding sales performance', 
+        excerpt: 'Analyze revenue, volume, and top-selling items over specific periods.',
+        slug: 'sales-performance', 
+        duration: '6 min', 
+        thumbnailId: 'template-2' 
+      },
+      { 
+        title: 'Exporting transaction reports', 
+        excerpt: 'Download full financial audits for accounting and reconcilement.',
+        slug: 'export-reports', 
+        duration: '4 min', 
+        thumbnailId: 'template-3' 
+      },
+      { 
+        title: 'Analyzing waiter performance', 
+        excerpt: 'Track tips and sales volume across your front-of-house team.',
+        slug: 'waiter-performance', 
+        duration: '5 min', 
+        thumbnailId: 'user-avatar' 
+      },
     ]
   }
 ];
@@ -101,10 +202,12 @@ export default function BrowseGuidesPage() {
     }
 
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       result = result.map(cat => ({
         ...cat,
         guides: cat.guides.filter(g => 
-          g.title.toLowerCase().includes(searchQuery.toLowerCase())
+          g.title.toLowerCase().includes(query) || 
+          g.excerpt.toLowerCase().includes(query)
         )
       })).filter(cat => cat.guides.length > 0);
     }
@@ -136,11 +239,11 @@ export default function BrowseGuidesPage() {
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 text-teal-600 border border-teal-100 mb-2">
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-semibold uppercase">Merchant Knowledge Base</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-tight">Merchant Knowledge Base</span>
                 </div>
                 <h1 className="text-4xl font-semibold text-slate-900 tracking-tight">Documentation & Guides</h1>
                 <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
-                  Step-by-step technical guides and operational best practices for your eMenu Digital Hub.
+                  Comprehensive technical documentation and operational walkthroughs for your digital infrastructure.
                 </p>
               </div>
             </div>
@@ -148,7 +251,7 @@ export default function BrowseGuidesPage() {
             <div className="relative w-full max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Search technical documentation..." 
+                placeholder="Search technical guides..." 
                 className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-2xl text-sm font-medium focus:bg-white focus:ring-4 focus:ring-teal-500/5 transition-all shadow-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -192,7 +295,7 @@ export default function BrowseGuidesPage() {
 
       <main className="p-8 pb-32">
         <div className="max-w-6xl mx-auto">
-          <div className="space-y-16">
+          <div className="space-y-20">
             {filteredCategories.length > 0 ? filteredCategories.map((category) => (
               <section key={category.id} id={`section-${category.id}`} className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 <div className="flex items-center gap-4">
@@ -201,13 +304,13 @@ export default function BrowseGuidesPage() {
                   </div>
                   <div className="space-y-0.5 text-left">
                     <h2 className="text-xl font-semibold text-slate-900">{category.title}</h2>
-                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-semibold text-[10px]">
+                    <Badge variant="outline" className="bg-white text-slate-500 border-slate-100 font-semibold text-[10px] tracking-tight">
                       {category.guides.length} ARTICLES
                     </Badge>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {category.guides.map((guide, idx) => {
                     const thumb = getThumbnail(guide.thumbnailId);
                     return (
@@ -224,7 +327,7 @@ export default function BrowseGuidesPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                <FileText className="h-8 w-8" />
+                                <FileSearch className="h-8 w-8" />
                               </div>
                             )}
                             {guide.isPopular && (
@@ -233,10 +336,13 @@ export default function BrowseGuidesPage() {
                               </div>
                             )}
                           </div>
-                          <CardContent className="p-6 text-left flex flex-col flex-1">
-                            <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-4">
+                          <CardContent className="p-6 text-left flex flex-col flex-1 gap-2">
+                            <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-snug">
                               {guide.title}
                             </h3>
+                            <p className="text-sm font-medium text-slate-500 leading-relaxed line-clamp-2 mb-4">
+                              {guide.excerpt}
+                            </p>
                             <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
                                  <Clock className="h-3.5 w-3.5" />
@@ -273,7 +379,7 @@ export default function BrowseGuidesPage() {
             )}
           </div>
 
-          <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div className="mt-32 p-10 rounded-[32px] bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
             <div className="space-y-2 text-center md:text-left relative z-10">
               <h4 className="text-xl font-semibold">Can&apos;t find what you&apos;re looking for?</h4>
@@ -295,3 +401,4 @@ export default function BrowseGuidesPage() {
     </div>
   );
 }
+

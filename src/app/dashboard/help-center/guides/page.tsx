@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 import NextLink from 'next/link';
 import { 
   Search, 
@@ -22,6 +23,7 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const GUIDE_CATEGORIES = [
   {
@@ -31,9 +33,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-blue-600 bg-blue-50 border-blue-100',
     accent: 'border-blue-200',
     guides: [
-      { title: 'Setting up your business profile', slug: 'setup-business-profile', duration: '5 min', isPopular: true },
-      { title: 'Adding your first restaurant branch', slug: 'add-first-branch', duration: '8 min' },
-      { title: 'Inviting staff members to the dashboard', slug: 'invite-staff', duration: '3 min' },
+      { title: 'Setting up your business profile', slug: 'setup-business-profile', duration: '5 min', isPopular: true, thumbnailId: 'restaurant-1' },
+      { title: 'Adding your first restaurant branch', slug: 'add-first-branch', duration: '8 min', thumbnailId: 'restaurant-2' },
+      { title: 'Inviting staff members to the dashboard', slug: 'invite-staff', duration: '3 min', thumbnailId: 'user-avatar' },
     ]
   },
   {
@@ -43,10 +45,10 @@ const GUIDE_CATEGORIES = [
     color: 'text-teal-600 bg-teal-50 border-teal-100',
     accent: 'border-teal-200',
     guides: [
-      { title: 'Creating product categories', slug: 'create-categories', duration: '4 min' },
-      { title: 'Adding products with variations', slug: 'add-products-variations', duration: '10 min', isPopular: true },
-      { title: 'Setting up dietary & allergen tags', slug: 'setup-tags', duration: '5 min' },
-      { title: 'Using AI to generate descriptions', slug: 'ai-descriptions', duration: '2 min' },
+      { title: 'Creating product categories', slug: 'create-categories', duration: '4 min', thumbnailId: 'fresh-garden-salad' },
+      { title: 'Adding products with variations', slug: 'add-products-variations', duration: '10 min', isPopular: true, thumbnailId: 'artisanal-pizza' },
+      { title: 'Setting up dietary & allergen tags', slug: 'setup-tags', duration: '5 min', thumbnailId: 'spicy-chicken-wings' },
+      { title: 'Using AI to generate descriptions', slug: 'ai-descriptions', duration: '2 min', thumbnailId: 'avocado-toast' },
     ]
   },
   {
@@ -56,9 +58,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-indigo-600 bg-indigo-50 border-indigo-100',
     accent: 'border-indigo-200',
     guides: [
-      { title: 'Managing the Live Order Hub', slug: 'live-order-hub', duration: '6 min', isPopular: true },
-      { title: 'Branding and printing QR codes', slug: 'qr-codes-printing', duration: '5 min' },
-      { title: 'Updating stock in real-time', slug: 'real-time-stock', duration: '3 min' },
+      { title: 'Managing the Live Order Hub', slug: 'live-order-hub', duration: '6 min', isPopular: true, thumbnailId: 'template-2' },
+      { title: 'Branding and printing QR codes', slug: 'qr-codes-printing', duration: '5 min', thumbnailId: 'restaurant-logo' },
+      { title: 'Updating stock in real-time', slug: 'real-time-stock', duration: '3 min', thumbnailId: 'ribeye-steak' },
     ]
   },
   {
@@ -68,9 +70,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-orange-600 bg-orange-50 border-orange-100',
     accent: 'border-orange-200',
     guides: [
-      { title: 'Connecting your POS machine', slug: 'connect-pos', duration: '15 min', isPopular: true },
-      { title: 'Configuring payment gateways', slug: 'configure-payment-gateways', duration: '12 min' },
-      { title: 'Whitelisting hardware terminals', slug: 'whitelist-terminals', duration: '7 min' },
+      { title: 'Connecting your POS machine', slug: 'connect-pos', duration: '15 min', isPopular: true, thumbnailId: 'template-1' },
+      { title: 'Configuring payment gateways', slug: 'configure-payment-gateways', duration: '12 min', thumbnailId: 'template-3' },
+      { title: 'Whitelisting hardware terminals', slug: 'whitelist-terminals', duration: '7 min', thumbnailId: 'restaurant-3' },
     ]
   },
   {
@@ -80,9 +82,9 @@ const GUIDE_CATEGORIES = [
     color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     accent: 'border-emerald-200',
     guides: [
-      { title: 'Understanding sales performance', slug: 'sales-performance', duration: '6 min' },
-      { title: 'Exporting transaction reports', slug: 'export-reports', duration: '4 min' },
-      { title: 'Analyzing waiter performance', slug: 'waiter-performance', duration: '5 min' },
+      { title: 'Understanding sales performance', slug: 'sales-performance', duration: '6 min', thumbnailId: 'template-2' },
+      { title: 'Exporting transaction reports', slug: 'export-reports', duration: '4 min', thumbnailId: 'template-3' },
+      { title: 'Analyzing waiter performance', slug: 'waiter-performance', duration: '5 min', thumbnailId: 'user-avatar' },
     ]
   }
 ];
@@ -115,6 +117,10 @@ export default function BrowseGuidesPage() {
     { label: 'Knowledge Base' }
   ];
 
+  const getThumbnail = (id: string) => {
+    return PlaceHolderImages.find(img => img.id === id);
+  };
+
   return (
     <div className="min-h-screen bg-[#fafbfc]">
       <DashboardHeader />
@@ -130,7 +136,7 @@ export default function BrowseGuidesPage() {
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 text-teal-600 border border-teal-100 mb-2">
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-bold uppercase">Merchant Knowledge Base</span>
+                  <span className="text-[10px] font-semibold uppercase">Merchant Knowledge Base</span>
                 </div>
                 <h1 className="text-4xl font-semibold text-slate-900 tracking-tight">Documentation & Guides</h1>
                 <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
@@ -202,33 +208,49 @@ export default function BrowseGuidesPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {category.guides.map((guide, idx) => (
-                    <NextLink key={idx} href={`/dashboard/help-center/guides/${guide.slug}`} className="block group">
-                      <Card className="h-full hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm">
-                        <CardContent className="p-6 text-left flex flex-col h-full relative">
-                          {guide.isPopular && (
-                            <div className="absolute top-4 right-4">
-                               <Badge className="bg-teal-50 text-teal-600 border-teal-100 hover:bg-teal-50 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
-                            </div>
-                          )}
-                          <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-10">
-                            {guide.title}
-                          </h3>
-                          <div className="flex items-center justify-between mt-auto">
-                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                                  <Clock className="h-3.5 w-3.5" />
-                                  {guide.duration}
-                                </div>
-                             </div>
-                             <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
-                                <ArrowRight className="h-4 w-4" />
-                             </div>
+                  {category.guides.map((guide, idx) => {
+                    const thumb = getThumbnail(guide.thumbnailId);
+                    return (
+                      <NextLink key={idx} href={`/dashboard/help-center/guides/${guide.slug}`} className="block group">
+                        <Card className="h-full hover:border-teal-500/30 hover:shadow-xl hover:-translate-y-1 transition-all border-slate-100 bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                          <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
+                            {thumb ? (
+                              <Image 
+                                src={thumb.imageUrl} 
+                                alt={guide.title} 
+                                fill 
+                                className="object-cover transition-transform group-hover:scale-105 duration-500" 
+                                data-ai-hint={thumb.imageHint}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                <FileText className="h-8 w-8" />
+                              </div>
+                            )}
+                            {guide.isPopular && (
+                              <div className="absolute top-3 right-3">
+                                <Badge className="bg-teal-50/90 backdrop-blur-sm text-teal-600 border-teal-100 font-bold text-[9px] px-2 py-0.5 rounded-md">POPULAR</Badge>
+                              </div>
+                            )}
                           </div>
-                        </CardContent>
-                      </Card>
-                    </NextLink>
-                  ))}
+                          <CardContent className="p-6 text-left flex flex-col flex-1">
+                            <h3 className="text-base font-semibold text-slate-900 group-hover:text-teal-600 transition-colors leading-relaxed mb-6 flex-1 pr-4">
+                              {guide.title}
+                            </h3>
+                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+                               <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                                 <Clock className="h-3.5 w-3.5" />
+                                 {guide.duration}
+                               </div>
+                               <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+                                  <ArrowRight className="h-4 w-4" />
+                               </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </NextLink>
+                    );
+                  })}
                 </div>
               </section>
             )) : (
@@ -273,4 +295,3 @@ export default function BrowseGuidesPage() {
     </div>
   );
 }
-

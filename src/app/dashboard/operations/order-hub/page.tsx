@@ -36,6 +36,10 @@ import {
   Box,
   HelpCircle,
   Ban,
+  LayoutGrid,
+  Columns,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -73,11 +77,11 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     label: 'PENDING',
     subLabel: 'New orders to review',
     icon: Clock,
-    color: 'text-blue-600',
-    dot: 'bg-blue-500',
-    bg: 'bg-[#f4f7ff]',
-    accent: 'bg-blue-500',
-    badge: 'bg-blue-600 text-white',
+    color: 'text-yellow-600',
+    dot: 'bg-yellow-400',
+    bg: 'bg-[#fffbeb]',
+    accent: 'bg-yellow-400',
+    badge: 'bg-yellow-400 text-yellow-900',
     text: 'PENDING'
   },
   accepted: {
@@ -275,12 +279,33 @@ const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
   );
 };
 
+const GridItem = ({ order }: { order?: HubOrder }) => {
+  if (!order) {
+    return <div className="aspect-[4/2.2] rounded-lg bg-slate-50/50 border border-slate-100/50" />;
+  }
+
+  const config = statusConfig[order.status === 'exiting' ? (order.originalStatus || 'pending') : order.status];
+  
+  return (
+    <div className={cn(
+      "aspect-[4/2.2] rounded-lg p-2 flex flex-col justify-center gap-0.5 text-white transition-all shadow-sm",
+      config.accent
+    )}>
+      <p className="text-[15px] font-black leading-none">{order.orderNumber.replace('#', '')}</p>
+      <p className="text-[9px] font-bold opacity-80 truncate uppercase tracking-tighter">
+        #NDAGPJC{order.orderNumber.replace('#', '')}...
+      </p>
+    </div>
+  );
+};
+
 export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
   const [lookbackHours, setLookbackHours] = useState('24');
   const [now, setNow] = useState(Date.now());
+  const [view, setView] = useState<'grid' | 'board'>('grid');
 
   useEffect(() => {
     setOrders(generateMockOrders(20));
@@ -398,8 +423,17 @@ export default function OrderHubPage() {
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
+  const activeOrders = useMemo(() => orders.filter(o => o.status !== 'exiting'), [orders]);
+  
+  const gridSlots = useMemo(() => {
+    const sorted = [...activeOrders].sort((a, b) => a.timestamp - b.timestamp);
+    const slots = Array(80).fill(null);
+    sorted.forEach((o, i) => { if (i < 80) slots[i] = o; });
+    return slots;
+  }, [activeOrders]);
+
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
-    { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-blue-500', bg: 'bg-[#f4f7ff]' },
+    { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-yellow-400', bg: 'bg-[#fffbeb]' },
     { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-[#f5f5ff]' },
     { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-[#f4fbf9]' },
   ];
@@ -410,40 +444,67 @@ export default function OrderHubPage() {
       
       <div className="bg-white border-b px-8 py-6 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1 text-left">
-            <h1 className="text-[24px] font-bold tracking-tight text-slate-900 uppercase">ORDER HUB</h1>
-            <div className="flex items-center gap-3">
-               <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 gap-1.5 px-3 py-1 font-bold text-[10px]">
-                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                 REAL-TIME SYNC
-               </Badge>
-               <span className="text-[10px] font-bold text-slate-400 uppercase">{orders.filter(o => o.status !== 'exiting').length} ACTIVE TICKETS</span>
+          <div className="flex items-center gap-6">
+            <h1 className="text-[28px] font-black tracking-tight text-slate-900">Live Order Hub</h1>
+            <div className="flex items-center gap-1.5 bg-slate-50 border rounded-lg p-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-slate-400 hover:text-slate-600"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-slate-400 hover:text-slate-600"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-             <div className="relative w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input 
-                  placeholder="Order ID, table, or staff..." 
-                  className="pl-11 h-11 bg-slate-50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all shadow-none placeholder:text-slate-400"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+          <div className="flex flex-wrap items-center gap-6">
+             <div className="flex items-center gap-5 px-6 py-2.5 bg-white border border-slate-100 rounded-xl shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-[#10b981]" />
+                  <span className="text-[11px] font-bold text-slate-900 uppercase">Live <span className="text-slate-400 ml-0.5">{activeOrders.length}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-yellow-400" />
+                  <span className="text-[11px] font-bold text-slate-900 uppercase">Pending <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'pending').length}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="text-[11px] font-bold text-slate-900 uppercase">Accepted <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'accepted').length}</span></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-teal-500" />
+                  <span className="text-[11px] font-bold text-slate-900 uppercase">In Progress <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'in_progress').length}</span></span>
+                </div>
              </div>
-             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 h-11">
-               <Calendar className="h-4 w-4 text-slate-400" />
-               <Label className="text-[11px] font-bold text-slate-500 uppercase">Period:</Label>
-               <Select value={lookbackHours} onValueChange={setLookbackHours}>
-                 <SelectTrigger className="w-[140px] border-0 bg-transparent shadow-none focus:ring-0 font-bold text-slate-900 p-0 h-auto">
-                   <SelectValue placeholder="Lookback" />
-                 </SelectTrigger>
-                 <SelectContent className="rounded-xl shadow-2xl">
-                   <SelectItem value="1" className="font-bold">Last Hour</SelectItem>
-                   <SelectItem value="6" className="font-bold">Last 6 Hours</SelectItem>
-                   <SelectItem value="24" className="font-bold">Today Only</SelectItem>
-                 </SelectContent>
-               </Select>
+
+             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+               <Button 
+                size="sm"
+                onClick={() => setView('grid')}
+                className={cn(
+                  "rounded-lg h-9 px-4 font-bold transition-all",
+                  view === 'grid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                )}
+               >
+                 <LayoutGrid className="h-4 w-4 mr-2" /> Grid
+               </Button>
+               <Button 
+                size="sm"
+                onClick={() => setView('board')}
+                className={cn(
+                  "rounded-lg h-9 px-4 font-bold transition-all",
+                  view === 'board' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                )}
+               >
+                 <Columns className="h-4 w-4 mr-2" /> Board
+               </Button>
              </div>
           </div>
         </div>
@@ -452,51 +513,86 @@ export default function OrderHubPage() {
       <main className="p-8">
         <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-4 gap-12">
           
-          <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 min-w-0">
-            {columns.map((col) => {
-              const columnOrders = getFilteredStatusOrders(col.id);
-              return (
-                <div key={col.id} className="flex flex-col min-w-0">
-                  <div className={cn("mb-6 rounded-2xl border border-slate-100 p-4 transition-all shadow-sm", col.bg)}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={cn("h-2 w-2 rounded-full", col.dot)} />
-                        <h2 className="text-sm font-bold text-slate-900 uppercase">{col.label}</h2>
+          <div className="xl:col-span-3 min-w-0">
+            {view === 'grid' ? (
+              <div className="animate-in fade-in zoom-in-95 duration-500">
+                <Card className="border-0 shadow-sm overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100">
+                  <div className="p-1 gap-1 grid grid-cols-10 border border-slate-100 bg-slate-50/20">
+                    {gridSlots.map((order, idx) => (
+                      <GridItem key={idx} order={order} />
+                    ))}
+                  </div>
+                </Card>
+                
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {columns.map(col => {
+                    const count = activeOrders.filter(o => o.status === col.id).length;
+                    return (
+                      <Card key={col.id} className="border shadow-none rounded-2xl overflow-hidden group hover:shadow-md transition-all">
+                        <CardHeader className={cn("p-5 border-b transition-colors", col.bg)}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={cn("h-3 w-3 rounded-full", col.dot)} />
+                              <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">{col.label}</span>
+                            </div>
+                            <span className="text-xl font-black text-slate-900">{count}</span>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
+                {columns.map((col) => {
+                  const columnOrders = getFilteredStatusOrders(col.id);
+                  return (
+                    <div key={col.id} className="flex flex-col min-w-0">
+                      <div className={cn("mb-6 rounded-2xl border border-slate-100 p-4 transition-all shadow-sm", col.bg)}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={cn("h-2 w-2 rounded-full", col.dot)} />
+                            <h2 className="text-sm font-bold text-slate-900 uppercase">{col.label}</h2>
+                          </div>
+                          <div className="bg-[#1e293b] text-white font-bold px-2 py-1 text-[10px] rounded shadow-sm min-w-[24px] text-center">
+                            {columnOrders.length}
+                          </div>
+                        </div>
+                        <p className="text-[11px] font-semibold text-slate-400 mt-1 pl-[20px] text-left">{col.subLabel}</p>
                       </div>
-                      <div className="bg-[#1e293b] text-white font-bold px-2 py-1 text-[10px] rounded shadow-sm min-w-[24px] text-center">
-                        {columnOrders.length}
+                      
+                      <div className="space-y-5">
+                        {columnOrders.length > 0 ? columnOrders.map((order) => (
+                          <OrderCard key={order.id} order={order} now={now} />
+                        )) : (
+                          <div className="py-24 text-center opacity-25 flex flex-col items-center">
+                            <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
+                            <p className="text-[10px] font-bold uppercase text-slate-400">Queue Clear</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <p className="text-[11px] font-semibold text-slate-400 mt-1 pl-[20px] text-left">{col.subLabel}</p>
-                  </div>
-                  
-                  <div className="space-y-5">
-                    {columnOrders.length > 0 ? columnOrders.map((order) => (
-                      <OrderCard key={order.id} order={order} now={now} />
-                    )) : (
-                      <div className="py-24 text-center opacity-25 flex flex-col items-center">
-                        <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
-                        <p className="text-[10px] font-bold uppercase text-slate-400">Queue Clear</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <aside className="xl:col-span-1 sticky top-[108px] self-start space-y-8 z-30">
             <div className="space-y-4">
-              {/* Live Order Tracking Notice placed on top of Activity Log Card */}
               <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
                 <div className="flex items-start gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
                       <HelpCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div className="space-y-1.5 text-left">
-                      <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
+                      <p className="text-sm font-bold text-slate-900 leading-none">Order Tracking</p>
                       <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                        This board simulates real kitchen flow. Timers show exactly how many minutes have passed since the customer ordered.
+                        {view === 'grid' 
+                          ? "Grid View provides a bird's eye view of all active machine IDs currently in processing."
+                          : "Board View tracks specific ticket timers to help staff manage throughput speed."
+                        }
                       </p>
                     </div>
                 </div>

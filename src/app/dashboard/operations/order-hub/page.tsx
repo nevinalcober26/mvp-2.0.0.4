@@ -469,7 +469,7 @@ export default function OrderHubPage() {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3 px-4 py-2 bg-[#f0fdf4] border border-[#bbf7d0] rounded-2xl shadow-sm">
                 <div className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
-                <span className="text-[11px] font-black text-[#166534] uppercase tracking-[0.15em]">Real-time Sync</span>
+                <span className="text-[11px] font-black text-[#166534] uppercase">Real-time Sync</span>
               </div>
               
               <div className="flex items-baseline gap-2.5">
@@ -547,7 +547,7 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#10b981]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Live</span>
+                      <span className="text-[11px] font-black uppercase">Live</span>
                       <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'all' ? "text-[#166534]/60" : "text-slate-300")}>
                         {orders.filter(o => o.status !== 'exiting').length}
                       </span>
@@ -565,7 +565,7 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#f59e0b]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Pending</span>
+                      <span className="text-[11px] font-black uppercase">Pending</span>
                       <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'pending' ? "text-yellow-700/60" : "text-slate-300")}>
                         {orders.filter(o => o.status === 'pending').length}
                       </span>
@@ -581,7 +581,7 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Accepted</span>
+                      <span className="text-[11px] font-black uppercase">Accepted</span>
                       <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'accepted' ? "text-indigo-700/60" : "text-slate-300")}>
                         {orders.filter(o => o.status === 'accepted').length}
                       </span>
@@ -597,7 +597,7 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#149d94]" />
-                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Preparing</span>
+                      <span className="text-[11px] font-black uppercase">Preparing</span>
                       <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'in_progress' ? "text-[#149d94]/60" : "text-slate-300")}>
                         {orders.filter(o => o.status === 'in_progress').length}
                       </span>
@@ -721,7 +721,7 @@ export default function OrderHubPage() {
                 </CardHeader>
                 
                 <ScrollArea className="flex-1 bg-white">
-                  <div className="relative p-6 pt-8 space-y-0">
+                  <div className="relative p-6 pt-8 space-y-0 text-left">
                     <div className="absolute left-[39px] top-0 bottom-0 w-px border-l border-dashed border-slate-200 z-0" />
                     
                     {recentExits.length > 0 ? recentExits.map((event, index) => {

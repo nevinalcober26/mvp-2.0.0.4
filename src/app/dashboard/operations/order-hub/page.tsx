@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -41,6 +41,7 @@ import {
   Columns,
   ZoomIn,
   ZoomOut,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
@@ -307,6 +308,7 @@ export default function OrderHubPage() {
   const [lookbackHours, setLookbackHours] = useState('24');
   const [now, setNow] = useState(Date.now());
   const [view, setView] = useState<'grid' | 'board'>('grid');
+  const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
     setOrders(generateMockOrders(20));
@@ -366,7 +368,7 @@ export default function OrderHubPage() {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
         const candidates = prev.filter(o => o.status !== 'exiting');
-        if (candidates.length < 5) return prev; // Keep the board busy
+        if (candidates.length < 5) return prev; 
         
         const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
@@ -378,11 +380,7 @@ export default function OrderHubPage() {
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {
-              const fallbackExits: ExitType[] = ['CANCELLED', 'REJECTED', 'FAILED'];
-              const fallbackExit = fallbackExits[Math.floor(Math.random() * fallbackExits.length)];
               target = candidates[Math.floor(Math.random() * candidates.length)];
-              if (!target) return prev;
-              return executeExit(prev, target, fallbackExit);
             }
         } else {
             target = candidates[Math.floor(Math.random() * candidates.length)];
@@ -391,7 +389,7 @@ export default function OrderHubPage() {
         if (!target) return prev;
         return executeExit(prev, target, randomExit);
       });
-    }, 8000); // Regular exits to maintain log flow
+    }, 8000); 
     return () => clearInterval(finalizationInterval);
   }, []);
 
@@ -452,11 +450,10 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-[#fafbfc]", inter.className)}>
       <DashboardHeader />
       
-      {/* Refined Strategic Header (Image-Match Design) */}
+      {/* Tactical Header */}
       <div className="bg-white border-b px-8 py-4 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
           
-          {/* Left: Strategic Modules */}
           <div className="flex items-center gap-6">
             <h1 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">Order Hub</h1>
             
@@ -472,7 +469,7 @@ export default function OrderHubPage() {
                 <span className="text-3xl font-black text-slate-900 tabular-nums leading-none">
                   {activeOrders.length}
                 </span>
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
                     Active
                   </span>
@@ -484,7 +481,6 @@ export default function OrderHubPage() {
             </div>
           </div>
 
-          {/* Right: Operational Control Center */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-5 py-3 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all shadow-sm group">
               <Calendar className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
@@ -529,14 +525,80 @@ export default function OrderHubPage() {
           
           <div className="xl:col-span-3 min-w-0">
             {view === 'grid' ? (
-              <div className="animate-in fade-in zoom-in-95 duration-500">
-                <Card className="border-0 shadow-sm overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100">
-                  <div className="p-1 gap-1 grid grid-cols-10 border border-slate-100 bg-slate-50/20">
-                    {gridSlots.map((order, idx) => (
-                      <GridItem key={idx} order={order || undefined} />
-                    ))}
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                
+                {/* Tactical Grid Controls (Reference-Match) */}
+                <div className="flex items-center justify-between">
+                  <div className="bg-white border border-slate-100 rounded-full px-5 py-2.5 flex items-center gap-6 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-[#10b981]" />
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Live</span>
+                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{orders.filter(o => o.status !== 'exiting').length}</span>
+                    </div>
+                    
+                    <div className="h-4 w-px bg-slate-100" />
+
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-[#f59e0b]" />
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Pending</span>
+                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{getFilteredStatusOrders('pending').length}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Accepted</span>
+                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{getFilteredStatusOrders('accepted').length}</span>
+                    </div>
+
+                    <div className="bg-[#f0fdfa] border border-[#ccfbf1] px-4 py-1.5 rounded-full flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-[#149d94]" />
+                      <span className="text-[11px] font-black text-[#149d94] uppercase tracking-wider">Preparing</span>
+                      <span className="text-[11px] font-black text-[#149d94]/60 ml-0.5">{getFilteredStatusOrders('in_progress').length}</span>
+                    </div>
                   </div>
-                </Card>
+
+                  <div className="flex items-center gap-2">
+                    {zoom !== 100 && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                        onClick={() => setZoom(100)}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <div className="bg-white border border-slate-100 rounded-[20px] p-1 flex items-center shadow-sm">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10 rounded-2xl text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                        onClick={() => setZoom(prev => Math.max(50, prev - 25))}
+                      >
+                        <ZoomOut className="h-5 w-5" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10 rounded-2xl text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+                        onClick={() => setZoom(prev => Math.min(300, prev + 25))}
+                      >
+                        <ZoomIn className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <ScrollArea className="w-full">
+                  <Card className="border-0 shadow-sm overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100" style={{ width: zoom > 100 ? `${zoom}%` : '100%' }}>
+                    <div className="p-1 gap-1 grid grid-cols-10 border border-slate-100 bg-slate-50/20">
+                      {gridSlots.map((order, idx) => (
+                        <GridItem key={idx} order={order || undefined} />
+                      ))}
+                    </div>
+                  </Card>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -546,7 +608,7 @@ export default function OrderHubPage() {
                     <div key={col.id} className="flex flex-col min-w-0 h-[800px]">
                       <div className={cn("mb-6 rounded-2xl border border-slate-100 p-4 transition-all shadow-sm shrink-0", col.bg)}>
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 text-left">
                             <div className={cn("h-2 w-2 rounded-full", col.dot)} />
                             <h2 className="text-sm font-bold text-slate-900 uppercase">{col.label}</h2>
                           </div>
@@ -578,37 +640,34 @@ export default function OrderHubPage() {
 
           <aside className="xl:col-span-1 sticky top-[108px] self-start space-y-8 z-30">
             <div className="space-y-4">
-              <div className="rounded-[24px] bg-white p-6 shadow-sm border border-slate-100 text-left">
-                <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50">
+              <div className="rounded-[24px] bg-gradient-to-br from-[#fefce8] via-white to-[#f5f3ff] p-6 shadow-sm border border-slate-100 text-left relative overflow-hidden">
+                <div className="relative z-10 flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center shrink-0 border border-green-200/50 shadow-sm">
                       <HelpCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div className="space-y-1.5 text-left">
-                      <p className="text-sm font-bold text-slate-900 leading-none">Order Tracking</p>
+                      <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
                       <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                        {view === 'grid' 
-                          ? "Grid View provides a bird's eye view of all active machine IDs currently in processing."
-                          : "Board View tracks specific ticket timers to help staff manage throughput speed."
-                        }
+                        Real-time feed of all finalized transactions across the RAK branch network.
                       </p>
                     </div>
                 </div>
               </div>
 
-              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[640px]">
+              <Card className="border-0 shadow-2xl bg-white overflow-hidden flex flex-col rounded-[32px] h-[680px]">
                 <CardHeader className="bg-[#18B4A6] text-white p-6 shrink-0 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none rotate-12">
                     <Activity className="h-48 w-48 text-white" />
                   </div>
                   <div className="relative z-10 flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md">
+                      <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-md shadow-inner">
                         <Activity className="h-5 w-5 text-white" />
                       </div>
-                      <CardTitle className="text-lg font-bold uppercase">Activity Log</CardTitle>
+                      <CardTitle className="text-lg font-black uppercase tracking-tight">Activity Log</CardTitle>
                     </div>
-                    <Badge className="bg-white/20 text-white border-0 font-bold px-3 py-1 rounded-full text-[10px]">
-                      {recentExits.length} ENTRIES
+                    <Badge className="bg-white/20 text-white border-0 font-bold px-3 py-1 rounded-full text-[10px] shadow-sm">
+                      20 ENTRIES
                     </Badge>
                   </div>
                   <p className="relative z-10 text-white/80 text-[10px] font-bold uppercase pl-1 text-left">Track your finalized orders</p>
@@ -625,23 +684,15 @@ export default function OrderHubPage() {
                         <div 
                           key={event.id} 
                           className={cn(
-                            "relative group transition-all duration-500 rounded-2xl mb-8",
-                            event.isNew ? "animate-status-blink z-20" : ""
+                            "relative group transition-all duration-500 my-12",
+                            event.isNew ? "z-20" : ""
                           )}
                         >
-                          {event.isNew && (
-                              <div className={cn("absolute -inset-2 rounded-2xl opacity-10 blur-xl", config.bg)} />
-                          )}
-                          
                           <div className={cn(
                               "relative flex items-start gap-4 p-4 rounded-2xl border transition-all",
-                              isLatest ? "bg-white shadow-xl scale-[1.02] border-slate-100" : "bg-white border-transparent",
-                              event.isNew ? cn("border-l-4", `border-l-${event.type.toLowerCase()}-500`) : isLatest ? cn("border-l-4", `border-l-${event.type.toLowerCase()}-500`) : ""
+                              isLatest ? "bg-white shadow-[0_20px_50px_rgba(0,0,0,0.08)] scale-[1.02] border-slate-100 animate-status-blink" : "bg-white border-transparent",
+                              isLatest && cn("border-l-4", `border-l-${event.type === 'FAILED' ? 'slate-900' : event.type === 'REJECTED' ? 'orange-500' : event.type === 'CANCELLED' ? 'rose-500' : 'emerald-500'}`)
                           )}>
-                            {isLatest && (
-                                <div className={cn("absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl", config.bg)} />
-                            )}
-                            
                             <div className={cn(
                               "h-3 w-3 rounded-full mt-1.5 shrink-0 shadow-sm relative z-10 border-2 border-white", 
                               config.dot
@@ -649,20 +700,20 @@ export default function OrderHubPage() {
                             
                             <div className="flex-1 min-w-0 text-left">
                               <div className="flex items-center justify-between mb-2">
-                                 <span className="text-[15px] font-bold tracking-tight text-slate-900">
+                                 <span className="text-[15px] font-black tracking-tight text-slate-900">
                                    Order {event.orderNumber}
                                  </span>
-                                 <span className="text-[9px] font-bold uppercase text-slate-400">
+                                 <span className="text-[9px] font-black uppercase text-slate-300 tracking-[0.1em]">
                                    JUST NOW
                                  </span>
                               </div>
                               
                               <div className="flex flex-wrap items-center gap-3">
-                                 <Badge className={cn("text-[9px] font-bold uppercase px-3 py-0.5 rounded-full border-0", config.bg, "text-white")}>
+                                 <Badge className={cn("text-[9px] font-black uppercase px-3 py-0.5 rounded-full border-0", config.bg, "text-white")}>
                                    {event.type}
                                  </Badge>
-                                 <span className="text-[11px] font-semibold text-slate-500">
-                                   By Staff {event.server}
+                                 <span className="text-[11px] font-bold text-slate-400">
+                                   Staff {event.server}
                                  </span>
                               </div>
                             </div>
@@ -678,8 +729,12 @@ export default function OrderHubPage() {
                   </div>
                 </ScrollArea>
                 
-                <div className="p-5 bg-slate-50 border-t flex items-center justify-center shrink-0">
-                   <p className="text-[10px] font-bold text-slate-300 uppercase">End of Log</p>
+                <div className="p-8 bg-slate-50/50 border-t flex items-center justify-center shrink-0">
+                   <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em] flex items-center gap-4">
+                     <span className="h-px w-8 bg-slate-200" />
+                     End of Feed
+                     <span className="h-px w-8 bg-slate-200" />
+                   </p>
                 </div>
               </Card>
             </div>

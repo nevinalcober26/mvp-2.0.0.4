@@ -309,6 +309,7 @@ export default function OrderHubPage() {
   const [now, setNow] = useState(Date.now());
   const [view, setView] = useState<'grid' | 'board'>('grid');
   const [zoom, setZoom] = useState(100);
+  const [gridStatusFilter, setGridStatusFilter] = useState<HubStatus | 'all'>('all');
 
   useEffect(() => {
     setOrders(generateMockOrders(20));
@@ -434,11 +435,17 @@ export default function OrderHubPage() {
   const activeOrders = useMemo(() => orders.filter(o => o.status !== 'exiting'), [orders]);
   
   const gridSlots = useMemo(() => {
-    const sorted = [...activeOrders].sort((a, b) => a.timestamp - b.timestamp);
+    const sorted = [...orders].filter(o => {
+      const isExiting = o.status === 'exiting';
+      if (isExiting) return false;
+      if (gridStatusFilter === 'all') return true;
+      return o.status === gridStatusFilter;
+    }).sort((a, b) => a.timestamp - b.timestamp);
+    
     const slots = Array(80).fill(null);
     sorted.forEach((o, i) => { if (i < 80) slots[i] = o; });
     return slots;
-  }, [activeOrders]);
+  }, [orders, gridStatusFilter]);
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-yellow-400', bg: 'bg-[#fffbeb]' },
@@ -527,34 +534,74 @@ export default function OrderHubPage() {
             {view === 'grid' ? (
               <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* Tactical Grid Controls (Reference-Match) */}
+                {/* Tactical Grid Controls */}
                 <div className="flex items-center justify-between">
-                  <div className="bg-white border border-slate-100 rounded-full px-5 py-2.5 flex items-center gap-6 shadow-sm">
-                    <div className="flex items-center gap-2">
+                  <div className="bg-white border border-slate-100 rounded-full p-1.5 flex items-center shadow-sm">
+                    <button 
+                      onClick={() => setGridStatusFilter('all')}
+                      className={cn(
+                        "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
+                        gridStatusFilter === 'all' 
+                          ? "bg-[#f0fdf4]/50 border border-[#bbf7d0] text-[#166534]" 
+                          : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
                       <div className="h-2 w-2 rounded-full bg-[#10b981]" />
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Live</span>
-                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{orders.filter(o => o.status !== 'exiting').length}</span>
-                    </div>
+                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Live</span>
+                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'all' ? "text-[#166534]/60" : "text-slate-300")}>
+                        {orders.filter(o => o.status !== 'exiting').length}
+                      </span>
+                    </button>
                     
-                    <div className="h-4 w-px bg-slate-100" />
+                    <div className="h-4 w-px bg-slate-100 mx-2" />
 
-                    <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setGridStatusFilter('pending')}
+                      className={cn(
+                        "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
+                        gridStatusFilter === 'pending' 
+                          ? "bg-yellow-50/50 border border-yellow-200 text-yellow-700" 
+                          : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
                       <div className="h-2 w-2 rounded-full bg-[#f59e0b]" />
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Pending</span>
-                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{getFilteredStatusOrders('pending').length}</span>
-                    </div>
+                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Pending</span>
+                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'pending' ? "text-yellow-700/60" : "text-slate-300")}>
+                        {orders.filter(o => o.status === 'pending').length}
+                      </span>
+                    </button>
 
-                    <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setGridStatusFilter('accepted')}
+                      className={cn(
+                        "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
+                        gridStatusFilter === 'accepted' 
+                          ? "bg-indigo-50/50 border border-indigo-200 text-indigo-700" 
+                          : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
                       <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Accepted</span>
-                      <span className="text-[11px] font-black text-slate-300 ml-0.5">{getFilteredStatusOrders('accepted').length}</span>
-                    </div>
+                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Accepted</span>
+                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'accepted' ? "text-indigo-700/60" : "text-slate-300")}>
+                        {orders.filter(o => o.status === 'accepted').length}
+                      </span>
+                    </button>
 
-                    <div className="bg-[#f0fdfa] border border-[#ccfbf1] px-4 py-1.5 rounded-full flex items-center gap-2">
+                    <button 
+                      onClick={() => setGridStatusFilter('in_progress')}
+                      className={cn(
+                        "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
+                        gridStatusFilter === 'in_progress' 
+                          ? "bg-[#f0fdfa] border border-[#ccfbf1] text-[#149d94]" 
+                          : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
                       <div className="h-2 w-2 rounded-full bg-[#149d94]" />
-                      <span className="text-[11px] font-black text-[#149d94] uppercase tracking-wider">Preparing</span>
-                      <span className="text-[11px] font-black text-[#149d94]/60 ml-0.5">{getFilteredStatusOrders('in_progress').length}</span>
-                    </div>
+                      <span className="text-[11px] font-black uppercase tracking-[0.15em]">Preparing</span>
+                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'in_progress' ? "text-[#149d94]/60" : "text-slate-300")}>
+                        {orders.filter(o => o.status === 'in_progress').length}
+                      </span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-2">

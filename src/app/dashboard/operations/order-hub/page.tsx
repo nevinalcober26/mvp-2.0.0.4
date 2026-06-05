@@ -452,71 +452,70 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-[#fafbfc]", inter.className)}>
       <DashboardHeader />
       
-      <div className="bg-white border-b px-8 py-6 shrink-0 text-left">
-        <div className="max-w-[1800px] mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      {/* Redesigned High-Fidelity Header */}
+      <div className="bg-white border-b px-8 py-5 shrink-0 text-left">
+        <div className="max-w-[1800px] mx-auto flex items-center justify-between">
+          
+          {/* Left: Strategic Modules */}
           <div className="flex items-center gap-6">
-            <h1 className="text-[28px] font-black tracking-tight text-slate-900">Live Order Hub</h1>
-            <div className="flex items-center gap-1.5 bg-slate-50 border rounded-lg p-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 text-slate-400 hover:text-slate-600"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 text-slate-400 hover:text-slate-600"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
+            <h1 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">Order Hub</h1>
+            
+            <div className="h-8 w-px bg-slate-100 mx-2" />
+
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f0fdfa] border border-[#ccfbf1] rounded-full">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                <span className="text-[10px] font-black text-[#149d94] uppercase tracking-[0.2em]">Real-time Sync</span>
+              </div>
+              
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 tabular-nums leading-none">
+                  {activeOrders.length}
+                </span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                  Active Tickets
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6">
-             <div className="flex items-center gap-5 px-6 py-2.5 bg-white border border-slate-100 rounded-xl shadow-sm">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-[#10b981]" />
-                  <span className="text-[11px] font-bold text-slate-900 uppercase">Live <span className="text-slate-400 ml-0.5">{activeOrders.length}</span></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-yellow-400" />
-                  <span className="text-[11px] font-bold text-slate-900 uppercase">Pending <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'pending').length}</span></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                  <span className="text-[11px] font-bold text-slate-900 uppercase">Accepted <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'accepted').length}</span></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-teal-500" />
-                  <span className="text-[11px] font-bold text-slate-900 uppercase">In Progress <span className="text-slate-400 ml-0.5">{activeOrders.filter(o => o.status === 'in_progress').length}</span></span>
-                </div>
-             </div>
+          {/* Right: Operational Controls */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 bg-slate-50/50 border border-slate-200/60 px-5 py-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition-all group">
+              <Calendar className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+              <span className="text-sm font-bold text-slate-700">Today</span>
+            </div>
 
-             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-               <Button 
-                size="sm"
+            <div className="h-8 w-px bg-slate-100 mx-2" />
+
+            <div className="flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/40">
+              <button 
                 onClick={() => setView('grid')}
                 className={cn(
-                  "rounded-lg h-9 px-4 font-bold transition-all",
-                  view === 'grid' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                  "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  view === 'grid' 
+                    ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]" 
+                    : "text-slate-400 hover:text-slate-600"
                 )}
-               >
-                 <LayoutGrid className="h-4 w-4 mr-2" /> Grid
-               </Button>
-               <Button 
-                size="sm"
+              >
+                <LayoutGrid className={cn("h-4 w-4", view === 'grid' ? "text-slate-900" : "text-slate-400")} /> 
+                Grid
+              </button>
+              <button 
                 onClick={() => setView('board')}
                 className={cn(
-                  "rounded-lg h-9 px-4 font-bold transition-all",
-                  view === 'board' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                  "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  view === 'board' 
+                    ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]" 
+                    : "text-slate-400 hover:text-slate-600"
                 )}
-               >
-                 <Columns className="h-4 w-4 mr-2" /> Board
-               </Button>
-             </div>
+              >
+                <Columns className={cn("h-4 w-4", view === 'board' ? "text-slate-900" : "text-slate-400")} /> 
+                Board
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
 

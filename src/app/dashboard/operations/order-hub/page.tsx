@@ -45,8 +45,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Inter } from 'next/font/google';
-import { subMinutes } from 'date-fns';
+import { subMinutes, isSameDay, format } from 'date-fns';
 import gsap from 'gsap';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -305,11 +307,11 @@ export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
-  const [lookbackHours, setLookbackHours] = useState('24');
   const [now, setNow] = useState(Date.now());
   const [view, setView] = useState<'grid' | 'board'>('grid');
   const [zoom, setZoom] = useState(100);
   const [gridStatusFilter, setGridStatusFilter] = useState<HubStatus | 'all'>('all');
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   useEffect(() => {
     setOrders(generateMockOrders(20));
@@ -421,23 +423,33 @@ export default function OrderHubPage() {
   };
 
   const getFilteredStatusOrders = (status: HubStatus) => {
-    const lookbackThreshold = now - (parseInt(lookbackHours) * 60 * 60 * 1000);
     return orders.filter(o => {
       const activeStatus = o.status === 'exiting' ? o.originalStatus : o.status;
       if (activeStatus !== status) return false;
-      if (o.timestamp < lookbackThreshold) return false;
+      
+      const orderDate = new Date(o.timestamp);
+      if (date && !isSameDay(orderDate, date)) return false;
+
       return o.orderNumber.toLowerCase().includes(search.toLowerCase()) || 
              o.server.toLowerCase().includes(search.toLowerCase()) ||
              o.table.toLowerCase().includes(search.toLowerCase());
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
-  const activeOrders = useMemo(() => orders.filter(o => o.status !== 'exiting'), [orders]);
+  const activeOrders = useMemo(() => orders.filter(o => {
+    if (o.status === 'exiting') return false;
+    const orderDate = new Date(o.timestamp);
+    return date ? isSameDay(orderDate, date) : true;
+  }), [orders, date]);
   
   const gridSlots = useMemo(() => {
     const sorted = [...orders].filter(o => {
       const isExiting = o.status === 'exiting';
       if (isExiting) return false;
+
+      const orderDate = new Date(o.timestamp);
+      if (date && !isSameDay(orderDate, date)) return false;
+
       if (gridStatusFilter === 'all') return true;
       return o.status === gridStatusFilter;
     }).sort((a, b) => a.timestamp - b.timestamp);
@@ -445,7 +457,7 @@ export default function OrderHubPage() {
     const slots = Array(80).fill(null);
     sorted.forEach((o, i) => { if (i < 80) slots[i] = o; });
     return slots;
-  }, [orders, gridStatusFilter]);
+  }, [orders, gridStatusFilter, date]);
 
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-yellow-400', bg: 'bg-[#fffbeb]' },
@@ -489,10 +501,19 @@ export default function OrderHubPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-5 py-3 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all shadow-sm group">
-              <Calendar className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-              <span className="text-sm font-black text-slate-900">Today</span>
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-5 py-3 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all shadow-sm group">
+                  <Calendar className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                  <span className="text-sm font-black text-slate-900">
+                    {date && isSameDay(date, new Date()) ? 'Today' : date ? format(date, 'MMM d, yyyy') : 'Select Date'}
+                  </span>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <CalendarComponent mode="single" selected={date} onSelect={setDate} initialFocus />
+              </PopoverContent>
+            </Popover>
 
             <div className="h-10 w-px bg-slate-100 mx-2" />
 
@@ -547,9 +568,12 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#10b981]" />
-                      <span className="text-[11px] font-black uppercase">Live</span>
-                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'all' ? "text-[#166534]/60" : "text-slate-300")}>
-                        {orders.filter(o => o.status !== 'exiting').length}
+                      <span className="text-[11px] font-bold uppercase">Live</span>
+                      <span className={cn("text-[11px] font-bold ml-0.5", gridStatusFilter === 'all' ? "text-[#166534]/60" : "text-slate-300")}>
+                        {orders.filter(o => {
+                          const orderDate = new Date(o.timestamp);
+                          return o.status !== 'exiting' && (date ? isSameDay(orderDate, date) : true);
+                        }).length}
                       </span>
                     </button>
                     
@@ -565,9 +589,12 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#f59e0b]" />
-                      <span className="text-[11px] font-black uppercase">Pending</span>
-                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'pending' ? "text-yellow-700/60" : "text-slate-300")}>
-                        {orders.filter(o => o.status === 'pending').length}
+                      <span className="text-[11px] font-bold uppercase">Pending</span>
+                      <span className={cn("text-[11px] font-bold ml-0.5", gridStatusFilter === 'pending' ? "text-yellow-700/60" : "text-slate-300")}>
+                        {orders.filter(o => {
+                          const orderDate = new Date(o.timestamp);
+                          return o.status === 'pending' && (date ? isSameDay(orderDate, date) : true);
+                        }).length}
                       </span>
                     </button>
 
@@ -581,9 +608,12 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
-                      <span className="text-[11px] font-black uppercase">Accepted</span>
-                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'accepted' ? "text-indigo-700/60" : "text-slate-300")}>
-                        {orders.filter(o => o.status === 'accepted').length}
+                      <span className="text-[11px] font-bold uppercase">Accepted</span>
+                      <span className={cn("text-[11px] font-bold ml-0.5", gridStatusFilter === 'accepted' ? "text-indigo-700/60" : "text-slate-300")}>
+                        {orders.filter(o => {
+                          const orderDate = new Date(o.timestamp);
+                          return o.status === 'accepted' && (date ? isSameDay(orderDate, date) : true);
+                        }).length}
                       </span>
                     </button>
 
@@ -597,9 +627,12 @@ export default function OrderHubPage() {
                       )}
                     >
                       <div className="h-2 w-2 rounded-full bg-[#149d94]" />
-                      <span className="text-[11px] font-black uppercase">Preparing</span>
-                      <span className={cn("text-[11px] font-black ml-0.5", gridStatusFilter === 'in_progress' ? "text-[#149d94]/60" : "text-slate-300")}>
-                        {orders.filter(o => o.status === 'in_progress').length}
+                      <span className="text-[11px] font-bold uppercase">Preparing</span>
+                      <span className={cn("text-[11px] font-bold ml-0.5", gridStatusFilter === 'in_progress' ? "text-[#149d94]/60" : "text-slate-300")}>
+                        {orders.filter(o => {
+                          const orderDate = new Date(o.timestamp);
+                          return o.status === 'in_progress' && (date ? isSameDay(orderDate, date) : true);
+                        }).length}
                       </span>
                     </button>
                   </div>

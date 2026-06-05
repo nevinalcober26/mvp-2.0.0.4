@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
@@ -364,7 +365,7 @@ export default function OrderHubPage() {
         let target: HubOrder | undefined;
         
         if (randomExit === 'COMPLETED') {
-            const inPreparing = candidates.filter(o => o.status === 'in_progress');
+            const in Preparing = candidates.filter(o => o.status === 'in_progress');
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {

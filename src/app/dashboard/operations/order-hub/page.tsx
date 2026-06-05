@@ -452,49 +452,54 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-[#fafbfc]", inter.className)}>
       <DashboardHeader />
       
-      {/* Redesigned High-Fidelity Header */}
-      <div className="bg-white border-b px-8 py-5 shrink-0 text-left">
+      {/* Refined Strategic Header (Image-Match Design) */}
+      <div className="bg-white border-b px-8 py-4 shrink-0 text-left">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
           
           {/* Left: Strategic Modules */}
           <div className="flex items-center gap-6">
             <h1 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">Order Hub</h1>
             
-            <div className="h-8 w-px bg-slate-100 mx-2" />
+            <div className="h-10 w-px bg-slate-100 mx-2" />
 
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f0fdfa] border border-[#ccfbf1] rounded-full">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                <span className="text-[10px] font-black text-[#149d94] uppercase tracking-[0.2em]">Real-time Sync</span>
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-3 px-4 py-2 bg-[#f0fdf4] border border-[#bbf7d0] rounded-2xl shadow-sm">
+                <div className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
+                <span className="text-[11px] font-black text-[#166534] uppercase tracking-[0.15em]">Real-time Sync</span>
               </div>
               
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-slate-900 tabular-nums leading-none">
+              <div className="flex items-baseline gap-2.5">
+                <span className="text-3xl font-black text-slate-900 tabular-nums leading-none">
                   {activeOrders.length}
                 </span>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-                  Active Tickets
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                    Active
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">
+                    Tickets
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right: Operational Controls */}
+          {/* Right: Operational Control Center */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-slate-50/50 border border-slate-200/60 px-5 py-2.5 rounded-xl cursor-pointer hover:bg-slate-100 transition-all group">
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 px-5 py-3 rounded-2xl cursor-pointer hover:bg-slate-100 transition-all shadow-sm group">
               <Calendar className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-              <span className="text-sm font-bold text-slate-700">Today</span>
+              <span className="text-sm font-black text-slate-900">Today</span>
             </div>
 
-            <div className="h-8 w-px bg-slate-100 mx-2" />
+            <div className="h-10 w-px bg-slate-100 mx-2" />
 
-            <div className="flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/40">
+            <div className="flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-[20px] border border-slate-200/40 shadow-inner">
               <button 
                 onClick={() => setView('grid')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
                   view === 'grid' 
-                    ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]" 
+                    ? "bg-white text-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-slate-100" 
                     : "text-slate-400 hover:text-slate-600"
                 )}
               >
@@ -504,9 +509,9 @@ export default function OrderHubPage() {
               <button 
                 onClick={() => setView('board')}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-300",
+                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
                   view === 'board' 
-                    ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]" 
+                    ? "bg-white text-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-slate-100" 
                     : "text-slate-400 hover:text-slate-600"
                 )}
               >
@@ -532,25 +537,6 @@ export default function OrderHubPage() {
                     ))}
                   </div>
                 </Card>
-                
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {columns.map(col => {
-                    const count = activeOrders.filter(o => o.status === col.id).length;
-                    return (
-                      <Card key={col.id} className="border shadow-none rounded-2xl overflow-hidden group hover:shadow-md transition-all">
-                        <CardHeader className={cn("p-5 border-b transition-colors", col.bg)}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={cn("h-3 w-3 rounded-full", col.dot)} />
-                              <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">{col.label}</span>
-                            </div>
-                            <span className="text-xl font-black text-slate-900">{count}</span>
-                          </div>
-                        </CardHeader>
-                      </Card>
-                    )
-                  })}
-                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">

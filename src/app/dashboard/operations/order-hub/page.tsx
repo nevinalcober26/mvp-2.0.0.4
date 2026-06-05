@@ -365,7 +365,7 @@ export default function OrderHubPage() {
         let target: HubOrder | undefined;
         
         if (randomExit === 'COMPLETED') {
-            const in Preparing = candidates.filter(o => o.status === 'in_progress');
+            const inPreparing = candidates.filter(o => o.status === 'in_progress');
             if (inPreparing.length > 0) {
               target = inPreparing[Math.floor(Math.random() * inPreparing.length)];
             } else {

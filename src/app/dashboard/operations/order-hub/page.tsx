@@ -319,45 +319,54 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // Aggressive Inflow Simulation
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
-        if (rand < 0.15) {
+        
+        // High frequency new order (40% chance every 3s)
+        if (rand < 0.40) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
-            orderNumber: `#${4800 + Math.floor(Math.random() * 1000)}`,
+            orderNumber: `#${4800 + Math.floor(Math.random() * 5000)}`,
             table: `T${Math.floor(Math.random() * 24) + 1}`,
             status: 'pending',
-            itemsCount: Math.floor(Math.random() * 5) + 1,
+            itemsCount: Math.floor(Math.random() * 8) + 1,
             server: servers[Math.floor(Math.random() * servers.length)],
             timestamp: Date.now(),
           };
           return [newOrder, ...prev];
         }
-        if (rand > 0.15 && rand < 0.35) {
+
+        // Fast transition Pending -> Accepted
+        if (rand > 0.40 && rand < 0.65) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending' && o.status !== 'exiting');
           if (pendingIdx !== -1) {
             return prev.map((o, i) => i === pendingIdx ? { ...o, status: 'accepted' as HubStatus } : o);
           }
         }
-        if (rand > 0.35 && rand < 0.55) {
+
+        // Fast transition Accepted -> In Progress
+        if (rand > 0.65 && rand < 0.85) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted' && o.status !== 'exiting');
           if (acceptedIdx !== -1) {
             return prev.map((o, i) => i === acceptedIdx ? { ...o, status: 'in_progress' as HubStatus } : o);
           }
         }
+
         return prev;
       });
-    }, 5000);
+    }, 3000); // Accelerated generation loop
     return () => clearInterval(interval);
   }, []);
 
+  // Exit Simulation
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
         const candidates = prev.filter(o => o.status !== 'exiting');
-        if (candidates.length === 0) return prev;
+        if (candidates.length < 5) return prev; // Keep the board busy
         
         const exitOptions: ExitType[] = ['COMPLETED', 'CANCELLED', 'REJECTED', 'FAILED'];
         const randomExit = exitOptions[Math.floor(Math.random() * exitOptions.length)];
@@ -382,7 +391,7 @@ export default function OrderHubPage() {
         if (!target) return prev;
         return executeExit(prev, target, randomExit);
       });
-    }, 10000);
+    }, 8000); // Regular exits to maintain log flow
     return () => clearInterval(finalizationInterval);
   }, []);
 
@@ -396,7 +405,7 @@ export default function OrderHubPage() {
       isNew: true
     };
     
-    setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 20));
+    setRecentExits(prevExits => [newLog, ...prevExits.map(le => ({ ...le, isNew: false }))].slice(0, 30));
 
     const updated = prev.map(o => o.id === target.id ? { 
       ...o, 
@@ -520,7 +529,7 @@ export default function OrderHubPage() {
                 <Card className="border-0 shadow-sm overflow-hidden rounded-[24px] bg-white ring-1 ring-slate-100">
                   <div className="p-1 gap-1 grid grid-cols-10 border border-slate-100 bg-slate-50/20">
                     {gridSlots.map((order, idx) => (
-                      <GridItem key={idx} order={order} />
+                      <GridItem key={idx} order={order || undefined} />
                     ))}
                   </div>
                 </Card>
@@ -549,8 +558,8 @@ export default function OrderHubPage() {
                 {columns.map((col) => {
                   const columnOrders = getFilteredStatusOrders(col.id);
                   return (
-                    <div key={col.id} className="flex flex-col min-w-0">
-                      <div className={cn("mb-6 rounded-2xl border border-slate-100 p-4 transition-all shadow-sm", col.bg)}>
+                    <div key={col.id} className="flex flex-col min-w-0 h-[800px]">
+                      <div className={cn("mb-6 rounded-2xl border border-slate-100 p-4 transition-all shadow-sm shrink-0", col.bg)}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className={cn("h-2 w-2 rounded-full", col.dot)} />
@@ -563,16 +572,18 @@ export default function OrderHubPage() {
                         <p className="text-[11px] font-semibold text-slate-400 mt-1 pl-[20px] text-left">{col.subLabel}</p>
                       </div>
                       
-                      <div className="space-y-5">
-                        {columnOrders.length > 0 ? columnOrders.map((order) => (
-                          <OrderCard key={order.id} order={order} now={now} />
-                        )) : (
-                          <div className="py-24 text-center opacity-25 flex flex-col items-center">
-                            <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
-                            <p className="text-[10px] font-bold uppercase text-slate-400">Queue Clear</p>
-                          </div>
-                        )}
-                      </div>
+                      <ScrollArea className="flex-1">
+                        <div className="space-y-5 pr-4 pb-12">
+                          {columnOrders.length > 0 ? columnOrders.map((order) => (
+                            <OrderCard key={order.id} order={order} now={now} />
+                          )) : (
+                            <div className="py-24 text-center opacity-25 flex flex-col items-center">
+                              <ClipboardList className="h-10 w-10 mb-2 text-slate-300" />
+                              <p className="text-[10px] font-bold uppercase text-slate-400">Queue Clear</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
                     </div>
                   );
                 })}

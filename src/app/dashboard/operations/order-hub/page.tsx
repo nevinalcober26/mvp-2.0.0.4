@@ -162,7 +162,6 @@ const generateMockOrders = (count: number): HubOrder[] => {
 const OrderCard = ({ order, now }: { order: HubOrder; now: number | null }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   
-  // Guard for hydration
   if (now === null) return <div className="w-full h-32 bg-slate-50 animate-pulse rounded-2xl" />;
 
   const isExiting = order.status === 'exiting';
@@ -293,18 +292,28 @@ const GridItem = ({ order }: { order?: HubOrder }) => {
     return <div className="aspect-[4/2.2] rounded-lg bg-slate-50/50 border border-slate-100/50" />;
   }
 
-  const config = statusConfig[order.status === 'exiting' ? (order.originalStatus || 'pending') : order.status];
+  const effectiveStatus = order.status === 'exiting' ? (order.originalStatus || 'pending') : order.status;
+  const config = statusConfig[effectiveStatus];
   
   return (
-    <div className={cn(
-      "aspect-[4/2.2] rounded-lg p-2 flex flex-col justify-center gap-0.5 text-white transition-all shadow-sm",
-      config.accent
-    )}>
-      <p className="text-[15px] font-black leading-none">{order.orderNumber.replace('#', '')}</p>
-      <p className="text-[9px] font-bold opacity-80 truncate uppercase tracking-tighter">
-        #NDAGPJC{order.orderNumber.replace('#', '')}...
-      </p>
-    </div>
+    <TooltipProvider>
+      <Tooltip delayDuration={100}>
+        <TooltipTrigger asChild>
+          <div className={cn(
+            "aspect-[4/2.2] rounded-lg p-2 flex flex-col justify-center gap-0.5 text-white transition-all shadow-sm cursor-help",
+            config.accent
+          )}>
+            <p className="text-[15px] font-black leading-none">{order.orderNumber.replace('#', '')}</p>
+            <p className="text-[9px] font-bold opacity-80 truncate uppercase tracking-tighter">
+              #NDAGPJC{order.orderNumber.replace('#', '')}...
+            </p>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="bg-slate-900 text-white border-slate-700 shadow-xl px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+          {config.text}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -312,13 +321,12 @@ export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
-  const [now, setNow] = useState<number | null>(null); // Hydration safe initialization
+  const [now, setNow] = useState<number | null>(null); 
   const [view, setView] = useState<'grid' | 'board'>('grid');
   const [zoom, setZoom] = useState(100);
   const [gridStatusFilter, setGridStatusFilter] = useState<HubStatus | 'all'>('all');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined); // Hydration safe initialization
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined); 
 
-  // Post-mount initialization to fix ChunkLoadError / Hydration mismatch
   useEffect(() => {
     setNow(Date.now());
     setDateRange({ from: new Date(), to: new Date() });
@@ -330,13 +338,11 @@ export default function OrderHubPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Aggressive Inflow Simulation
   useEffect(() => {
     const interval = setInterval(() => {
       setOrders(prev => {
         const rand = Math.random();
         
-        // High frequency new order (40% chance every 3s)
         if (rand < 0.40) {
           const newOrder: HubOrder = {
             id: Math.random().toString(36).substr(2, 9),
@@ -350,7 +356,6 @@ export default function OrderHubPage() {
           return [newOrder, ...prev];
         }
 
-        // Fast transition Pending -> Accepted
         if (rand > 0.40 && rand < 0.65) {
           const pendingIdx = prev.findIndex(o => o.status === 'pending' && o.status !== 'exiting');
           if (pendingIdx !== -1) {
@@ -358,7 +363,6 @@ export default function OrderHubPage() {
           }
         }
 
-        // Fast transition Accepted -> In Progress
         if (rand > 0.65 && rand < 0.85) {
           const acceptedIdx = prev.findIndex(o => o.status === 'accepted' && o.status !== 'exiting');
           if (acceptedIdx !== -1) {
@@ -372,7 +376,6 @@ export default function OrderHubPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Exit Simulation
   useEffect(() => {
     const finalizationInterval = setInterval(() => {
       setOrders(prev => {
@@ -487,7 +490,6 @@ export default function OrderHubPage() {
     <div className={cn("min-h-screen bg-[#fafbfc]", inter.className)}>
       <DashboardHeader />
       
-      {/* Tactical Strategic Header */}
       <div className="bg-white border-b px-8 py-4 shrink-0 text-left sticky top-16 z-40 shadow-sm">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
           
@@ -518,7 +520,6 @@ export default function OrderHubPage() {
             </div>
           </div>
 
-          {/* Operational Control Right */}
           <div className="flex items-center gap-4">
             <Popover>
               <PopoverTrigger asChild>
@@ -574,7 +575,6 @@ export default function OrderHubPage() {
             {view === 'grid' ? (
               <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* Tactical Grid Filter Pill & Zoom */}
                 <div className="flex items-center justify-between">
                   <div className="bg-white border border-slate-100 rounded-full p-1.5 flex items-center shadow-sm">
                     <button 

@@ -309,8 +309,35 @@ const GridItem = ({ order }: { order?: HubOrder }) => {
             </p>
           </div>
         </TooltipTrigger>
-        <TooltipContent className="bg-slate-900 text-white border-slate-700 shadow-xl px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
-          {config.text}
+        <TooltipContent className="bg-slate-900 text-white border-slate-700 shadow-xl p-4 rounded-xl text-[12px] min-w-[200px]">
+          <div className="space-y-2">
+            <div className="flex justify-between border-b border-white/10 pb-1.5 mb-1.5">
+              <span className="font-black text-[#18B4A6] uppercase tracking-widest text-[10px]">Order Details</span>
+              <span className={cn("font-black uppercase text-[10px]", config.color)}>{config.text}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <div className="space-y-0.5 text-left">
+                <p className="text-slate-500 font-bold uppercase text-[9px]">ID</p>
+                <p className="font-bold">{order.orderNumber}</p>
+              </div>
+              <div className="space-y-0.5 text-left">
+                <p className="text-slate-500 font-bold uppercase text-[9px]">Time</p>
+                <p className="font-bold">{format(order.timestamp, 'hh:mm a')}</p>
+              </div>
+              <div className="space-y-0.5 text-left">
+                <p className="text-slate-500 font-bold uppercase text-[9px]">Staff</p>
+                <p className="font-bold">{order.server}</p>
+              </div>
+              <div className="space-y-0.5 text-left">
+                <p className="text-slate-500 font-bold uppercase text-[9px]">Table</p>
+                <p className="font-bold">{order.table}</p>
+              </div>
+              <div className="col-span-2 pt-1 text-left">
+                <p className="text-slate-500 font-bold uppercase text-[9px]">Items Ordered</p>
+                <p className="font-bold">{order.itemsCount} Items</p>
+              </div>
+            </div>
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

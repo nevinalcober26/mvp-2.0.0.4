@@ -106,9 +106,9 @@ const statusConfig: Record<HubStatus, { label: string; subLabel: string; icon: a
     icon: Play,
     color: 'text-teal-600',
     dot: 'bg-teal-500',
-    bg: 'bg-[#f4fbf9]',
-    accent: 'bg-teal-500',
-    badge: 'bg-teal-500 text-white',
+    bg: 'bg-[#f0fdfa]',
+    accent: 'bg-[#149d94]',
+    badge: 'bg-[#149d94] text-white',
     text: 'PREPARING'
   },
   exiting: {
@@ -159,8 +159,12 @@ const generateMockOrders = (count: number): HubOrder[] => {
   });
 };
 
-const OrderCard = ({ order, now }: { order: HubOrder; now: number }) => {
+const OrderCard = ({ order, now }: { order: HubOrder; now: number | null }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Guard for hydration
+  if (now === null) return <div className="w-full h-32 bg-slate-50 animate-pulse rounded-2xl" />;
+
   const isExiting = order.status === 'exiting';
   const durationMs = now - order.timestamp;
   const isCritical = durationMs >= 1200000; // 20 minutes
@@ -308,17 +312,18 @@ export default function OrderHubPage() {
   const [orders, setOrders] = useState<HubOrder[]>([]);
   const [recentExits, setRecentExits] = useState<EventLog[]>([]);
   const [search, setSearch] = useState('');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState<number | null>(null); // Hydration safe initialization
   const [view, setView] = useState<'grid' | 'board'>('grid');
   const [zoom, setZoom] = useState(100);
   const [gridStatusFilter, setGridStatusFilter] = useState<HubStatus | 'all'>('all');
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({ from: new Date(), to: new Date() });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined); // Hydration safe initialization
 
+  // Post-mount initialization to fix ChunkLoadError / Hydration mismatch
   useEffect(() => {
+    setNow(Date.now());
+    setDateRange({ from: new Date(), to: new Date() });
     setOrders(generateMockOrders(20));
-  }, []);
-
-  useEffect(() => {
+    
     const timer = setInterval(() => {
       setNow(Date.now());
     }, 1000);
@@ -444,10 +449,9 @@ export default function OrderHubPage() {
     }).sort((a, b) => a.timestamp - b.timestamp);
   };
 
-  const activeOrders = useMemo(() => orders.filter(o => {
-    if (o.status === 'exiting') return false;
-    return isOrderInRange(o.timestamp);
-  }), [orders, dateRange]);
+  const activeOrdersCount = useMemo(() => {
+    return orders.filter(o => o.status !== 'exiting' && isOrderInRange(o.timestamp)).length;
+  }, [orders, dateRange]);
   
   const gridSlots = useMemo(() => {
     const sorted = [...orders].filter(o => {
@@ -463,7 +467,7 @@ export default function OrderHubPage() {
   }, [orders, gridStatusFilter, dateRange]);
 
   const rangeLabel = useMemo(() => {
-    if (!dateRange?.from) return 'Select Range';
+    if (!dateRange?.from) return 'Select Period';
     if (dateRange.from && isSameDay(dateRange.from, new Date()) && (!dateRange.to || isSameDay(dateRange.to, new Date()))) {
       return 'Today';
     }
@@ -476,15 +480,15 @@ export default function OrderHubPage() {
   const columns: { id: HubStatus; label: string; subLabel: string; dot: string; bg: string }[] = [
     { id: 'pending', label: 'PENDING', subLabel: 'New orders to review', dot: 'bg-yellow-400', bg: 'bg-[#fffbeb]' },
     { id: 'accepted', label: 'ACCEPTED', subLabel: 'Confirmed & in queue', dot: 'bg-indigo-500', bg: 'bg-[#f5f5ff]' },
-    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-[#f4fbf9]' },
+    { id: 'in_progress', label: 'PREPARING', subLabel: 'Kitchen is cooking now', dot: 'bg-teal-500', bg: 'bg-[#f0fdfa]' },
   ];
 
   return (
     <div className={cn("min-h-screen bg-[#fafbfc]", inter.className)}>
       <DashboardHeader />
       
-      {/* Tactical Header */}
-      <div className="bg-white border-b px-8 py-4 shrink-0 text-left">
+      {/* Tactical Strategic Header */}
+      <div className="bg-white border-b px-8 py-4 shrink-0 text-left sticky top-16 z-40 shadow-sm">
         <div className="max-w-[1800px] mx-auto flex items-center justify-between">
           
           <div className="flex items-center gap-6">
@@ -495,12 +499,12 @@ export default function OrderHubPage() {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3 px-4 py-2 bg-[#f0fdf4] border border-[#bbf7d0] rounded-2xl shadow-sm">
                 <div className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
-                <span className="text-[11px] font-black text-[#166534] uppercase">Real-time Sync</span>
+                <span className="text-[11px] font-black text-[#166534] uppercase tracking-wide">Real-time Sync</span>
               </div>
               
               <div className="flex items-baseline gap-2.5">
                 <span className="text-3xl font-black text-slate-900 tabular-nums leading-none">
-                  {activeOrders.length}
+                  {activeOrdersCount}
                 </span>
                 <div className="flex flex-col text-left">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
@@ -514,6 +518,7 @@ export default function OrderHubPage() {
             </div>
           </div>
 
+          {/* Operational Control Right */}
           <div className="flex items-center gap-4">
             <Popover>
               <PopoverTrigger asChild>
@@ -535,7 +540,7 @@ export default function OrderHubPage() {
               <button 
                 onClick={() => setView('grid')}
                 className={cn(
-                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
+                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                   view === 'grid' 
                     ? "bg-white text-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-slate-100" 
                     : "text-slate-400 hover:text-slate-600"
@@ -547,7 +552,7 @@ export default function OrderHubPage() {
               <button 
                 onClick={() => setView('board')}
                 className={cn(
-                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
+                  "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
                   view === 'board' 
                     ? "bg-white text-slate-900 shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-slate-100" 
                     : "text-slate-400 hover:text-slate-600"
@@ -569,7 +574,7 @@ export default function OrderHubPage() {
             {view === 'grid' ? (
               <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
                 
-                {/* Tactical Grid Controls */}
+                {/* Tactical Grid Filter Pill & Zoom */}
                 <div className="flex items-center justify-between">
                   <div className="bg-white border border-slate-100 rounded-full p-1.5 flex items-center shadow-sm">
                     <button 
@@ -577,7 +582,7 @@ export default function OrderHubPage() {
                       className={cn(
                         "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
                         gridStatusFilter === 'all' 
-                          ? "bg-[#f0fdf4]/50 border border-[#bbf7d0] text-[#166534]" 
+                          ? "bg-[#f0fdf4] border border-[#bbf7d0] text-[#166534]" 
                           : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -595,7 +600,7 @@ export default function OrderHubPage() {
                       className={cn(
                         "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
                         gridStatusFilter === 'pending' 
-                          ? "bg-yellow-50/50 border border-yellow-200 text-yellow-700" 
+                          ? "bg-yellow-50 border border-yellow-200 text-yellow-700" 
                           : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -611,7 +616,7 @@ export default function OrderHubPage() {
                       className={cn(
                         "flex items-center gap-2.5 px-4 py-2 rounded-full transition-all duration-200",
                         gridStatusFilter === 'accepted' 
-                          ? "bg-indigo-50/50 border border-indigo-200 text-indigo-700" 
+                          ? "bg-indigo-50 border border-indigo-200 text-indigo-700" 
                           : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -730,7 +735,7 @@ export default function OrderHubPage() {
                     <div className="space-y-1.5 text-left">
                       <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
                       <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                        Real-time feed of all finalized transactions across the RAK branch network.
+                        Real-time feed of all finalized transactions across the branch network.
                       </p>
                     </div>
                 </div>

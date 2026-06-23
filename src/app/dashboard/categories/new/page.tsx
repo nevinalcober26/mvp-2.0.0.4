@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useMemo } from 'react';
@@ -178,7 +179,16 @@ export default function AddNewOutletPage() {
     }
   };
 
-  const handleFinalConfirm = () => {
+  const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
+    // Persistent identification for prototype
+    const outletId = formData.slug || `outlet_${Date.now()}`;
+    
+    // Save the activated services to localStorage so Quick Settings can read them
+    localStorage.setItem(`outletServices_${outletId}`, JSON.stringify({
+        selectedOptions,
+        includeFees
+    }));
+
     setIsOptionsDrawerOpen(false);
     setIsCreated(true);
     toast({
@@ -920,7 +930,7 @@ export default function AddNewOutletPage() {
 
                     <div className="space-y-6">
                         <Card className="border shadow-none overflow-hidden bg-muted/10">
-                            <CardHeader className="bg-white border-b py-4 px-8">
+                            <CardHeader className="bg-white border-b py-4 px-8 text-left">
                                 <CardTitle className="text-sm font-bold text-foreground">Standard Hours</CardTitle>
                                 <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                             </CardHeader>
@@ -1003,7 +1013,7 @@ export default function AddNewOutletPage() {
                                 <CardDescription>Control the options and limits your customers see during checkout.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6 pt-2 text-left">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
                                     <div className="space-y-2">
                                         <Label>Max Tip Amount Allowed (%)</Label>
                                         <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="bg-background h-11"/>
@@ -1048,3 +1058,4 @@ export default function AddNewOutletPage() {
     </>
   );
 }
+

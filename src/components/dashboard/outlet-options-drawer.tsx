@@ -40,7 +40,7 @@ import { Badge } from '@/components/ui/badge';
 interface OutletOptionsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: (selectedOptions: string[], includeFees: boolean) => void;
 }
 
 export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOptionsDrawerProps) {
@@ -179,7 +179,7 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
                       {includeFees && (
                         <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                           <Info className="h-3 w-3 text-primary shrink-0"/>
-                          <p className="text-[9px] font-bold text-primary uppercase tracking-widest">
+                          <p className="text-[9px] font-bold text-primary uppercase tracking-widest text-left leading-none">
                             FEES WILL BE CALCULATED AT CHECKOUT
                           </p>
                         </div>
@@ -193,7 +193,7 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
 
           <SheetFooter className="p-6 border-t bg-slate-50 shrink-0">
             <Button 
-              onClick={onConfirm}
+              onClick={() => onConfirm(selectedOptions, includeFees)}
               disabled={!isButtonEnabled}
               className="w-full h-12 rounded-xl text-sm font-bold bg-primary hover:bg-primary/90 text-white shadow-md transition-all active:scale-[0.98] group disabled:opacity-50 disabled:grayscale"
             >
@@ -228,3 +228,4 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
     </>
   );
 }
+

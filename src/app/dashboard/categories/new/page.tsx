@@ -27,6 +27,7 @@ import {
   Edit,
   Globe,
   MoreHorizontal,
+  X,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -64,9 +65,11 @@ export default function AddNewOutletPage() {
   const router = useRouter();
   const { toast } = useToast();
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // States for branding
+  // States for media
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
 
   const handleInputChange = (field: string, value: any) => {
@@ -98,9 +101,10 @@ export default function AddNewOutletPage() {
       formData.city.trim() !== '' ||
       formData.phoneNumber.trim() !== '' ||
       formData.email.trim() !== '' ||
-      featuredImage !== null
+      featuredImage !== null ||
+      logoImage !== null
     );
-  }, [formData, featuredImage]);
+  }, [formData, featuredImage, logoImage]);
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -114,23 +118,35 @@ export default function AddNewOutletPage() {
     }
   };
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoImage(reader.result as string);
+        toast({ title: "Logo Uploaded", description: "Your outlet logo has been set." });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     toast({
       title: "Outlet Created",
       description: "Outlet details have been saved successfully.",
     });
-    router.push('/dashboard/categories');
+    router.push('/dashboard/settings/outlets');
   };
 
   const breadcrumbItems = [
-    { label: 'Manage Outlets', href: '/dashboard/categories' },
+    { label: 'Manage Outlets', href: '/dashboard/settings/outlets' },
     { label: 'Add New Outlet' }
   ];
 
   return (
     <>
       <DashboardHeader />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-muted/30 min-h-[calc(100vh-4rem)]">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-muted/30 min-h-[calc(100vh-4rem)]">
         <div className="max-w-5xl mx-auto text-left">
           <Breadcrumbs items={breadcrumbItems} />
           
@@ -167,13 +183,39 @@ export default function AddNewOutletPage() {
               <div className="flex flex-col md:flex-row gap-8">
                 <div className="flex flex-col items-center gap-3 shrink-0">
                   <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
-                    <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                    {logoImage ? (
+                      <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
+                    ) : (
+                      <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                    )}
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
-                    <Button variant="outline" className="gap-2 h-9 px-4 text-xs font-bold" size="sm">
+                    <input 
+                      type="file" 
+                      ref={logoInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleLogoUpload} 
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="gap-2 h-9 px-4 text-xs font-bold" 
+                      size="sm"
+                      onClick={() => logoInputRef.current?.click()}
+                    >
                       <Upload className="h-3.5 w-3.5" />
-                      Upload Logo
+                      {logoImage ? 'Change Logo' : 'Upload Logo'}
                     </Button>
+                    {logoImage && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
+                        onClick={() => setLogoImage(null)}
+                      >
+                        <X className="h-3 w-3 mr-1" /> Remove
+                      </Button>
+                    )}
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
                   </div>
                 </div>

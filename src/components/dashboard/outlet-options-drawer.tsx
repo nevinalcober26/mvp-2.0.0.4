@@ -46,32 +46,32 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
     {
       id: 'app-to-app',
       title: 'App to App',
-      description: 'Order through the official mobile app.',
+      description: 'Order through the mobile app.',
       icon: Smartphone,
     },
     {
       id: 'qr-web',
       title: 'Qr Web',
-      description: 'Scan and order directly from a browser.',
+      description: 'Scan and order from browser.',
       icon: QrCode,
     },
     {
       id: 'reservations',
       title: 'Reservations',
-      description: 'Book tables and manage guest visits.',
+      description: 'Manage table bookings.',
       icon: CalendarCheck,
     },
     {
       id: 'loyalty',
       title: 'Emenu Loyalty',
-      description: 'Rewards program for regular guests.',
+      description: 'Rewards program for guests.',
       icon: Sparkles,
       comingSoon: true,
     },
     {
       id: 'hotels',
       title: 'Hotels',
-      description: 'Room service and guest stay integration.',
+      description: 'Room service integration.',
       icon: Hotel,
       comingSoon: true,
     },
@@ -79,79 +79,79 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md w-full p-0 flex flex-col h-full border-l-0 shadow-2xl bg-white">
-        <SheetHeader className="p-8 bg-slate-50 border-b text-left">
-          <SheetTitle className="text-3xl font-black text-slate-900 leading-tight">
+      <SheetContent side="right" className="sm:max-w-md w-full p-0 flex flex-col h-full border-l shadow-2xl bg-white">
+        <SheetHeader className="p-6 bg-slate-50/50 border-b text-left">
+          <SheetTitle className="text-xl font-bold text-slate-900">
             How will you serve?
           </SheetTitle>
-          <SheetDescription className="text-base font-bold text-slate-500 mt-2">
+          <SheetDescription className="text-sm font-medium text-slate-500 mt-1">
             Select the options to activate for this outlet.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
+        <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-white">
           {options.map((option) => {
             const isSelected = selectedOptions.includes(option.id);
             const Icon = option.icon;
             
             return (
-              <div key={option.id} className="space-y-3">
+              <div key={option.id} className="space-y-2">
                 <button
                   onClick={() => toggleOption(option.id)}
                   disabled={option.comingSoon}
                   className={cn(
-                    "w-full flex items-center gap-5 p-5 rounded-[24px] border-2 transition-all text-left group relative",
+                    "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group relative",
                     isSelected 
-                      ? "border-teal-500 bg-teal-50 shadow-md" 
-                      : "border-slate-100 hover:border-teal-200 bg-white",
+                      ? "border-primary bg-primary/5 shadow-sm" 
+                      : "border-slate-100 hover:border-primary/20 bg-white",
                     option.comingSoon && "opacity-50 grayscale bg-slate-50 cursor-not-allowed border-transparent shadow-none"
                   )}
                 >
                   <div className={cn(
-                    "h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-sm",
-                    isSelected ? "bg-teal-500 text-white" : "bg-slate-100 text-slate-400"
+                    "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105",
+                    isSelected ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
                   )}>
-                    <Icon className="h-7 w-7" strokeWidth={2.5} />
+                    <Icon className="h-5 w-5" strokeWidth={2} />
                   </div>
-                  <div className="flex-1 min-w-0 pr-2">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-black text-lg text-slate-900 tracking-tight">{option.title}</h4>
+                      <h4 className="font-semibold text-sm text-slate-900 tracking-tight">{option.title}</h4>
                       {option.comingSoon && (
-                        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.1em] px-2 py-0 h-5 bg-white border-slate-200 text-slate-400">Coming Soon</Badge>
+                        <Badge variant="outline" className="text-[8px] font-bold uppercase tracking-wider px-1.5 h-4 bg-white border-slate-200 text-slate-400">Soon</Badge>
                       )}
                     </div>
-                    <p className="text-[13px] font-bold text-slate-400 leading-snug mt-0.5">{option.description}</p>
+                    <p className="text-[12px] font-medium text-slate-500 leading-snug truncate">{option.description}</p>
                   </div>
                   {isSelected && (
-                    <div className="h-7 w-7 rounded-full bg-teal-500 flex items-center justify-center shadow-lg animate-in zoom-in duration-300 shrink-0">
-                      <Check className="h-4 w-4 text-white" strokeWidth={4} />
+                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shadow-sm animate-in zoom-in duration-300 shrink-0">
+                      <Check className="h-3 w-3 text-white" strokeWidth={3} />
                     </div>
                   )}
                 </button>
 
                 {/* Sub-option for App to App */}
                 {option.id === 'app-to-app' && isSelected && (
-                  <div className="mx-4 p-5 rounded-[20px] bg-white border-2 border-teal-100 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                  <div className="mx-2 p-4 rounded-xl bg-white border border-primary/10 space-y-3 animate-in slide-in-from-top-2 duration-300">
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1 text-left pr-4">
-                        <Label htmlFor="fees-toggle" className="text-sm font-black text-slate-700">Include Convenience Fees?</Label>
-                        <p className="text-[11px] font-bold text-slate-400">Apply fees to mobile app orders.</p>
+                      <div className="space-y-0.5 text-left">
+                        <Label htmlFor="fees-toggle" className="text-xs font-bold text-slate-700">Include Convenience Fees?</Label>
+                        <p className="text-[10px] font-medium text-slate-400">Apply fees to app orders.</p>
                       </div>
                       <Switch 
                         id="fees-toggle" 
                         checked={includeFees} 
                         onCheckedChange={setIncludeFees}
-                        className="data-[state=checked]:bg-teal-500"
+                        className="data-[state=checked]:bg-primary"
                       />
                     </div>
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-teal-50/50 border border-teal-100">
-                      <div className="h-7 w-7 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 shrink-0">
-                        <Info className="h-4 w-4" strokeWidth={3}/>
+                    {includeFees && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
+                        <Info className="h-3 w-3 text-primary shrink-0"/>
+                        <p className="text-[9px] font-bold text-primary uppercase tracking-widest">
+                          FEES WILL BE CALCULATED AT CHECKOUT
+                        </p>
                       </div>
-                      <p className="text-[10px] font-black text-teal-600 uppercase tracking-widest">
-                        {includeFees ? "FEES WILL BE APPLIED" : "NO FEES FOR THIS OUTLET"}
-                      </p>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -159,13 +159,13 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
           })}
         </div>
 
-        <SheetFooter className="p-8 border-t bg-slate-50 shrink-0">
+        <SheetFooter className="p-6 border-t bg-slate-50 shrink-0">
           <Button 
             onClick={onConfirm}
-            className="w-full h-16 rounded-[24px] text-lg font-black uppercase tracking-widest bg-[#142424] hover:bg-slate-900 text-white shadow-2xl shadow-black/20 transition-all active:scale-[0.95] group"
+            className="w-full h-12 rounded-xl text-sm font-bold bg-primary hover:bg-primary/90 text-white shadow-md transition-all active:scale-[0.98] group"
           >
-            Launch Outlet
-            <ChevronRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+            Activate Services
+            <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Button>
         </SheetFooter>
       </SheetContent>

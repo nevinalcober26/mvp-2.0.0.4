@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Product, ProductVariationGroup } from '@/app/dashboard/products/types';
@@ -11,6 +10,48 @@ import type { VariationGroup } from '@/app/dashboard/catalog/variations/types';
 import type { ComboGroup } from '@/app/dashboard/catalog/combo-groups/types';
 
 export const mockComboGroupNames = ['Lunch Special', 'Family Deal', 'Dinner for Two', 'Breakfast Combo'];
+
+const categories = ['Bestsellers', 'Pizza', 'Sides', 'Desserts', 'Drinks', 'Main Courses'];
+const productNames = [
+  'Classic Cheeseburger', 'Truffle Fries', 'Seasonal Berry Crumble', 'Artisanal Pizza',
+  'Fresh Garden Salad', 'Spicy Chicken Wings', 'Avocado Toast', 'Margherita Pizza',
+  'Ribeye Steak', 'Lava Cake', 'Classic Pancakes', 'Orange Juice', 'Espresso',
+  'Latte', 'Cheesecake', 'Mushroom Swiss Burger', 'Onion Rings', 'Calamari Fritti',
+  'Chicken Caesar Salad', 'Pepperoni Pizza', 'Four Cheese Pizza', 'Fettuccine Alfredo',
+  'Lobster Ravioli', 'Grilled Salmon', 'Filet Mignon', 'Apple Pie', 'Brownie Sundae',
+  'Iced Tea', 'Mojito (Non-alcoholic)', 'Strawberry Smoothie'
+];
+const productStatuses: Product['status'][] = ['Active', 'Draft', 'Archived', 'Out of Stock'];
+
+const firstNames = ['James', 'Mary', 'Robert', 'Patricia', 'John', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth'];
+const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+const staffNames = ['Alex', 'Maria', 'John', 'Sarah', 'Emma', 'Lisa', 'David', 'James', 'Sophie', 'Michael'];
+const comments = [
+  'Extra napkins please.', 'No onions on the burger.', 'Easy on the ice in the drink.',
+  'Well done steak.', 'Birthday celebration!', 'Allergies: peanuts.', 'Please serve dessert later.',
+  'Window seat requested.', 'Dressing on the side.', ''
+];
+
+const createSeededRandom = (seed: number) => {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+};
+
+const mapGroupToProductVariation = (group: VariationGroup): ProductVariationGroup => {
+  return {
+    ...group,
+    options: group.options.map(opt => ({
+        id: opt.id,
+        value: opt.value,
+        priceMode: 'add',
+        priceValue: opt.regularPrice || 0,
+        hidden: false,
+    }))
+  };
+};
 
 export const mockVariationGroups: VariationGroup[] = [
   {
@@ -251,66 +292,6 @@ const productDescriptions: Record<string, { description: string; smallDescriptio
     'Cheesecake': {
         description: 'A rich and creamy New York-style cheesecake with a graham cracker crust, served plain or with a berry coulis.',
         smallDescription: 'Rich, creamy, and decadent.'
-    },
-    'Mushroom Swiss Burger': {
-        description: 'Our signature beef patty topped with sautéed mushrooms, melted Swiss cheese, and a creamy garlic aioli on a brioche bun.',
-        smallDescription: 'Earthy mushrooms & melted Swiss.'
-    },
-    'Onion Rings': {
-        description: 'Thick-cut onion rings, beer-battered and fried to a perfect golden brown. Served with a tangy dipping sauce.',
-        smallDescription: 'Crispy, golden, and delicious.'
-    },
-    'Calamari Fritti': {
-        description: 'Tender calabari, lightly breaded and fried until crisp. Served with marinara and a lemon wedge.',
-        smallDescription: 'Crispy calamari with marinara.'
-    },
-    'Chicken Caesar Salad': {
-        description: 'Crisp romaine lettuce, grilled chicken breast, house-made croutons, and Parmesan cheese, all tossed in our classic Caesar dressing.',
-        smallDescription: 'A classic salad with grilled chicken.'
-    },
-    'Pepperoni Pizza': {
-        description: 'A crowd-pleaser featuring a generous layer of spicy pepperoni and mozzarella cheese over our signature tomato sauce.',
-        smallDescription: 'Spicy pepperoni & mozzarella.'
-    },
-    'Four Cheese Pizza': {
-        description: 'A cheese lover\'s dream with a blend of mozzarella, Parmesan, ricotta, and gorgonzola cheeses.',
-        smallDescription: 'A decadent blend of four cheeses.'
-    },
-    'Fettuccine Alfredo': {
-        description: 'Rich and creamy Parmesan sauce tossed with fettuccine pasta. A timeless classic.',
-        smallDescription: 'Creamy, cheesy pasta perfection.'
-    },
-    'Lobster Ravioli': {
-        description: 'Delicate pasta pillows filled with succulent lobster meat, served in a light, creamy tomato sauce.',
-        smallDescription: 'Luxurious lobster-filled pasta.'
-    },
-    'Grilled Salmon': {
-        description: 'A perfectly grilled salmon fillet seasoned with herbs and lemon, served with asparagus and quinoa.',
-        smallDescription: 'Healthy and delicious grilled salmon.'
-    },
-    'Filet Mignon': {
-        description: 'An 8oz center-cut filet mignon, exceptionally tender and cooked to your preference. Served with a red wine reduction.',
-        smallDescription: 'The most tender cut of beef.'
-    },
-    'Apple Pie': {
-        description: 'A classic American dessert. Flaky crust filled with warm, spiced apples, served a la mode.',
-        smallDescription: 'Warm, spiced apples in a flaky crust.'
-    },
-    'Brownie Sundae': {
-        description: 'A warm, fudgy brownie topped with vanilla ice cream, hot fudge, whipped cream, and a cherry.',
-        smallDescription: 'A warm brownie with all the fixings.'
-    },
-    'Iced Tea': {
-        description: 'Freshly brewed black tea, sweetened and served over ice. A refreshing classic.',
-        smallDescription: 'Cool and refreshing iced tea.'
-    },
-    'Mojito (Non-alcoholic)': {
-        description: 'A refreshing mix of muddled mint, fresh lime juice, and a hint of sweetness, topped with soda water.',
-        smallDescription: 'A minty and refreshing mocktail.'
-    },
-    'Strawberry Smoothie': {
-        description: 'A creamy and delicious smoothie made with fresh strawberries, yogurt, and a touch of honey.',
-        smallDescription: 'Creamy, fruity, and delicious.'
     }
 };
 
@@ -326,16 +307,16 @@ const generateMockProducts = (count: number): Product[] => {
         let variationGroups: ProductVariationGroup[] | undefined = undefined;
 
         if (name === 'Classic Cheeseburger' || name === 'Mushroom Swiss Burger' || name === 'Ribeye Steak' || name === 'Filet Mignon') {
-            variationGroups = [mapGroupToProductVariation(mockVariationGroups.find(g => g.id === 'group_3')!)]; // Doneness
-            if (name.includes('Burger')) {
-                 variationGroups.push(mapGroupToProductVariation(mockVariationGroups.find(g => g.id === 'group_5')!)); // Toppings
-            }
+            const group = mockVariationGroups.find(g => g.id === 'group_3');
+            if (group) variationGroups = [mapGroupToProductVariation(group)];
         }
         if (name.includes('Pizza')) {
-            variationGroups = [mapGroupToProductVariation(mockVariationGroups.find(g => g.id === 'group_1')!)]; // Size
+            const group = mockVariationGroups.find(g => g.id === 'group_1');
+            if (group) variationGroups = [mapGroupToProductVariation(group)];
         }
          if (name.includes('Salad')) {
-            variationGroups = [mapGroupToProductVariation(mockVariationGroups.find(g => g.id === 'group_6')!)]; // Dressing
+            const group = mockVariationGroups.find(g => g.id === 'group_6');
+            if (group) variationGroups = [mapGroupToProductVariation(group)];
         }
 
         const imageId = name.toLowerCase().replace(/ /g, '-');
@@ -373,9 +354,8 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
     
     const seed = 12345;
     const random = createSeededRandom(seed);
-    const baseDate = new Date(); // Use current date as base
+    const baseDate = new Date();
 
-    // Generate Customers
     for (let i = 0; i < customerCount; i++) {
         const name = `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`;
         customers.push({
@@ -383,7 +363,7 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
             name,
             email: `${name.replace(' ', '.').toLowerCase()}@example.com`,
             phone: `555-01${String(i).padStart(2, '0')}`,
-            lastVisit: '', // Will be calculated later
+            lastVisit: '',
             totalVisits: 0,
             totalSpent: 0,
             avgBillValue: 0,
@@ -391,12 +371,11 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
         });
     }
 
-    // Generate Orders and associate with Customers
     for (let i = 0; i < orderCount; i++) {
         const hasCustomer = i % 4 !== 0;
         const customer = hasCustomer ? customers[i % customers.length] : undefined;
 
-        const orderItemsCount = Math.floor(random() * 4) + 2; // 2-5 items
+        const orderItemsCount = Math.floor(random() * 4) + 2;
         const currentItems: OrderItem[] = Array.from({ length: orderItemsCount }, (_, k) => {
             const item = products[Math.floor(random() * products.length)];
             return {
@@ -418,24 +397,20 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
         let isSplit = false;
         let hasTip = false;
 
-        // Force recent, relevant data for the first ~100 items
         if (i < 150) {
-            branch = outletNames[i % outletNames.length]; // Cycle through outlets for recent data too
-            orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 28)).getTime(); // definitely within last 30 days
+            branch = outletNames[i % outletNames.length];
+            orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 28)).getTime();
             
-            // Focus RAK outlet for default filter
             if (i % 3 === 0) {
                 branch = "Bloomsbury's - Ras Al Khaimah";
             }
             
-            // Ensure variety in recent data
-            isSplit = i % 4 === 0; // More frequent split bills
-            hasTip = random() > 0.3; // 70% chance of tip
+            isSplit = i % 4 === 0;
+            hasTip = random() > 0.3;
             paymentState = 'Fully Paid';
             orderStatus = 'Completed';
             paidAmount = totalAmount;
 
-            // Add some recent outstanding orders
             if (i % 7 === 0) {
                 orderStatus = 'Open';
                 if (random() > 0.4) {
@@ -450,9 +425,8 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
             }
 
         } else {
-            // Original more random logic for older data
             branch = outletNames[i % outletNames.length];
-            orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 365) + 30).getTime(); // Older than 30 days
+            orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 365) + 30).getTime();
             
             const finalStatuses: Order['orderStatus'][] = ['Completed', 'Cancelled', 'Refunded'];
             orderStatus = finalStatuses[Math.floor(random() * finalStatuses.length)];
@@ -468,24 +442,23 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
                 paidAmount = totalAmount;
             }
 
-            isSplit = paidAmount > 0.01 && i % 10 === 0; // Less frequent splits for older data
-            hasTip = random() > 0.6; // 40% chance of tip
+            isSplit = paidAmount > 0.01 && i % 10 === 0;
+            hasTip = random() > 0.6;
         }
 
         const randomDate = new Date(orderTimestamp);
-        
         const customerPayments: CustomerPayment[] = [];
         let splitType: 'byItem' | 'equally' | undefined = undefined;
         
         if (isSplit && paymentState === 'Fully Paid') {
             splitType = i % 8 === 0 ? 'byItem' : 'equally';
-            paidAmount = totalAmount; // Ensure it's fully paid if split
+            paidAmount = totalAmount;
             orderStatus = 'Completed';
 
             if (splitType === 'byItem') {
                 let itemsToPay = [...currentItems];
                 let guestIndex = 0;
-                let payersCount = Math.min(itemsToPay.length, Math.floor(random() * 4) + 2); // 2-5 payers, but not more than items
+                let payersCount = Math.min(itemsToPay.length, Math.floor(random() * 4) + 2);
                 if (payersCount < 2 && itemsToPay.length > 1) payersCount = 2;
 
                 while(itemsToPay.length > 0 && guestIndex < payersCount) {
@@ -506,7 +479,6 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
                     }
 
                     if(itemsForThisPayer.length === 0) continue;
-
                     const paymentAmount = itemsForThisPayer.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                     const tip = parseFloat((paymentAmount * (random() * 0.1 + 0.05)).toFixed(2));
 
@@ -521,9 +493,8 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
                     });
                     guestIndex++;
                 }
-
-            } else { // 'equally'
-                const numPayers = Math.floor(random() * 4) + 2; // 2-5 payers
+            } else {
+                const numPayers = Math.floor(random() * 4) + 2;
                 const totalTip = parseFloat((totalAmount * (random() * 0.1 + 0.1)).toFixed(2));
                 let remainingAmount = totalAmount;
                 let remainingTip = totalTip;
@@ -532,7 +503,6 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
                     const isLastPayer = j === numPayers - 1;
                     let paymentAmount = isLastPayer ? remainingAmount : parseFloat((totalAmount / numPayers).toFixed(2));
                     let tipAmount = isLastPayer ? remainingTip : parseFloat((totalTip / numPayers).toFixed(2));
-                    
                     remainingAmount -= paymentAmount;
                     remainingTip -= tipAmount;
 
@@ -616,16 +586,11 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
         }
     }
     
-    // Final pass on customers to calculate derived fields
     for (const customer of customers) {
         if (customer.totalVisits > 0) {
             customer.avgBillValue = customer.totalSpent / customer.totalVisits;
             customer.visits.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-            if (customer.visits.length > 0) {
-                customer.lastVisit = customer.visits[0].date;
-            } else {
-                 customer.lastVisit = 'N/A';
-            }
+            customer.lastVisit = customer.visits.length > 0 ? customer.visits[0].date : 'N/A';
         }
     }
 

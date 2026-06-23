@@ -72,7 +72,7 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
     {
       id: 'app-to-app',
       title: 'App to App',
-      description: 'Order through the mobile app.',
+      description: 'Order via Mobile Terminal device',
       icon: Smartphone,
     },
     {

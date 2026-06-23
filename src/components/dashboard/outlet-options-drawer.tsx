@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -78,7 +79,7 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
     {
       id: 'qr-web',
       title: 'Qr Web',
-      description: 'Scan and order from browser.',
+      description: 'Scan, Order and Pay directly from mobile',
       icon: QrCode,
     },
     {
@@ -149,7 +150,9 @@ export function OutletOptionsDrawer({ open, onOpenChange, onConfirm }: OutletOpt
                           <Badge variant="outline" className="text-[8px] font-bold uppercase tracking-wider px-1.5 h-4 bg-white border-slate-200 text-slate-400">Soon</Badge>
                         )}
                       </div>
-                      <p className="text-[12px] font-medium text-slate-500 leading-snug truncate">{option.description}</p>
+                      <p className="text-[12px] font-medium text-slate-500 leading-snug truncate">
+                        {option.description}
+                      </p>
                     </div>
                     {isSelected && (
                       <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center shadow-sm animate-in zoom-in duration-300 shrink-0">

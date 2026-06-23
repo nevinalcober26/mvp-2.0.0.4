@@ -16,7 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import {
   Upload,
   Save,
@@ -28,6 +34,11 @@ import {
   Globe,
   MoreHorizontal,
   X,
+  Info,
+  Clock,
+  HandCoins,
+  Copy,
+  RotateCcw,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -39,8 +50,16 @@ import {
 } from '@/components/ui/tooltip';
 import Image from 'next/image';
 import { OutletOptionsDrawer } from '@/components/dashboard/outlet-options-drawer';
+import { cn } from '@/lib/utils';
 
 const cuisines = ['Italian', 'Boutique Café', 'Signature Store', 'Japanese', 'Mexican', 'Indian', 'French', 'Middle Eastern', 'American'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+const TIME_OPTIONS = [
+  '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+  '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM',
+  '08:00 PM', '09:00 PM', '10:00 PM', '11:00 PM', '12:00 AM'
+];
 
 const initialFormData = {
   name: '',
@@ -68,10 +87,28 @@ export default function AddNewOutletPage() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // States for media
+  // Core Flow States
+  const [isCreated, setIsCreated] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
+
+  // Media States
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
+  
+  // Hours State
+  const [regularHours, setRegularHours] = useState(
+    DAYS.map(day => ({
+      day,
+      open: '09:00 AM',
+      close: '11:00 PM',
+      closed: false
+    }))
+  );
+
+  // Tip Fee State
+  const [maxRate, setMaxRate] = useState('100');
+  const [customEntryEnabled, setCustomEntryEnabled] = useState(true);
   
   const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
 
@@ -79,15 +116,14 @@ export default function AddNewOutletPage() {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
       
-      // If updating name, also update slug in parallel
       if (field === 'name') {
         newData.slug = value
           .toLowerCase()
-          .replace(/\s+/g, '-')       // Replace spaces with -
-          .replace(/[^\w-]+/g, '')     // Remove all non-word chars
-          .replace(/--+/g, '-')       // Replace multiple - with single -
-          .replace(/^-+/, '')         // Trim - from start of text
-          .replace(/-+$/, '');        // Trim - from end of text
+          .replace(/\s+/g, '-')
+          .replace(/[^\w-]+/g, '')
+          .replace(/--+/g, '-')
+          .replace(/^-+/, '')
+          .replace(/-+$/, '');
       }
       
       return newData;
@@ -95,7 +131,6 @@ export default function AddNewOutletPage() {
   };
 
   const hasEnteredData = useMemo(() => {
-    // Check if any significant textual or toggle data has been touched from initial state
     return (
       formData.name.trim() !== '' ||
       formData.slug.trim() !== '' ||
@@ -104,10 +139,9 @@ export default function AddNewOutletPage() {
       formData.city.trim() !== '' ||
       formData.phoneNumber.trim() !== '' ||
       formData.email.trim() !== '' ||
-      featuredImage !== null ||
       logoImage !== null
     );
-  }, [formData, featuredImage, logoImage]);
+  }, [formData, logoImage]);
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -134,22 +168,368 @@ export default function AddNewOutletPage() {
   };
 
   const handleSave = () => {
-    setIsOptionsDrawerOpen(true);
+    if (!isCreated) {
+        setIsOptionsDrawerOpen(true);
+    } else {
+        toast({
+            title: "Changes Saved",
+            description: "Outlet configuration has been updated successfully.",
+        });
+    }
   };
 
   const handleFinalConfirm = () => {
     setIsOptionsDrawerOpen(false);
+    setIsCreated(true);
     toast({
       title: "Outlet Created",
       description: "Outlet details and services have been activated.",
     });
-    router.push('/dashboard/categories');
+  };
+
+  const handleUpdateRegularHour = (index: number, field: string, value: any) => {
+    const updated = [...regularHours];
+    updated[index] = { ...updated[index], [field]: value };
+    setRegularHours(updated);
+  };
+
+  const handleCopyToAllDays = () => {
+    const firstDay = regularHours[0];
+    const synced = regularHours.map(h => ({
+      ...h,
+      open: firstDay.open,
+      close: firstDay.close,
+      closed: firstDay.closed
+    }));
+    setRegularHours(synced);
+    toast({ title: "Schedule Synced", description: "Monday's schedule has been applied to all days." });
   };
 
   const breadcrumbItems = [
     { label: 'Manage Outlets', href: '/dashboard/categories' },
-    { label: 'Add New Outlet' }
+    { label: isCreated ? `Configure ${formData.name || 'Outlet'}` : 'Add New Outlet' }
   ];
+
+  const BasicInfoContent = () => (
+    <div className="space-y-12">
+        {/* Outlet Details Section */}
+        <section className="space-y-6 text-left">
+          <h3 className="text-lg font-bold">Outlet Details</h3>
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col items-center gap-3 shrink-0">
+              <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                {logoImage ? (
+                  <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
+                ) : (
+                  <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                )}
+              </div>
+              <div className="flex flex-col items-center gap-1.5">
+                <input 
+                  type="file" 
+                  ref={logoInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleLogoUpload} 
+                />
+                <Button 
+                  variant="outline" 
+                  className="gap-2 h-9 px-4 text-xs font-bold" 
+                  size="sm"
+                  onClick={() => logoInputRef.current?.click()}
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  {logoImage ? 'Change Logo' : 'Upload Logo'}
+                </Button>
+                {logoImage && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
+                    onClick={() => setLogoImage(null)}
+                  >
+                    <X className="h-3 w-3 mr-1" /> Remove
+                  </Button>
+                )}
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
+              </div>
+            </div>
+            
+            <div className="flex-1 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
+                  <Input 
+                    placeholder="Enter outlet name" 
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="bg-background h-11" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
+                  <div className="relative">
+                    <Input 
+                      placeholder="outlet-slug" 
+                      value={formData.slug}
+                      onChange={(e) => handleInputChange('slug', e.target.value)}
+                      className="bg-background h-11 pr-10" 
+                    />
+                    <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2 text-left">
+                <Label className="text-sm font-semibold">Description</Label>
+                <Textarea 
+                  placeholder="Enter outlet description..." 
+                  className="min-h-[120px] resize-none bg-background"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Branding & Identity Section */}
+        <section className="space-y-6 pt-8 border-t text-left">
+          <div className="space-y-1">
+            <h3 className="text-lg font-bold">Branding & Identity</h3>
+            <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+            <div className="md:col-span-7 space-y-4">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                <TooltipProvider>
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
+                      <p>This header appears as the header background on your mobile menu home page.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              <div 
+                className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
+                onClick={() => bannerInputRef.current?.click()}
+              >
+                {featuredImage ? (
+                  <Image src={featuredImage} alt="Banner" fill className="object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-center p-4">
+                    <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
+                    <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
+                    <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                  </div>
+                )}
+                <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+              </div>
+            </div>
+
+            <div className="md:col-span-5 space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-teal-500" />
+                  <Label className="text-sm font-semibold">Primary Brand Color</Label>
+                </div>
+                
+                <Card className="shadow-none border-gray-100 bg-white">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-14 w-14 shrink-0">
+                        <input 
+                          type="color" 
+                          value={formData.primaryColor} 
+                          onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                          className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1.5">
+                        <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
+                        <div className="relative">
+                          <Input 
+                            value={formData.primaryColor} 
+                            onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                            className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
+                          />
+                          <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-bold text-gray-900">Display Logo</p>
+                    <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
+                  </div>
+                  <Switch checked={formData.showLogo} onCheckedChange={(val) => handleInputChange('showLogo', val)} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Address & Location Section */}
+        <section className="space-y-6 pt-8 border-t text-left">
+          <h3 className="text-lg font-bold">Address & Location</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
+              <Input 
+                placeholder="Street name and number" 
+                className="bg-background h-11" 
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
+              <Input 
+                placeholder="e.g. Dubai" 
+                className="bg-background h-11" 
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2 text-left">
+            <Label className="text-sm font-semibold">Menu url</Label>
+            <div className="relative">
+              <Input 
+                placeholder="Enter URL for your online menu (optional)" 
+                className="bg-background h-11 pr-10" 
+                value={formData.menuUrl}
+                onChange={(e) => handleInputChange('menuUrl', e.target.value)}
+              />
+              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
+              <div className="flex gap-2">
+                <Select value={formData.phonePrefix} onValueChange={(val) => handleInputChange('phonePrefix', val)}>
+                  <SelectTrigger className="w-24 h-11 bg-background font-medium">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="+971">+971</SelectItem>
+                    <SelectItem value="+1">+1</SelectItem>
+                    <SelectItem value="+44">+44</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input 
+                  placeholder="581111111" 
+                  className="flex-1 bg-background h-11" 
+                  value={formData.phoneNumber}
+                  onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Email address</Label>
+              <Input 
+                placeholder="raffi.uae7@gmail.com" 
+                type="email" 
+                className="bg-background h-11" 
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Additional Settings Section */}
+        <section className="space-y-6 pt-8 border-t text-left">
+          <h3 className="text-lg font-bold">Additional Settings</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Cuisine type</Label>
+              <Select value={formData.cuisine} onValueChange={(val) => handleInputChange('cuisine', val)}>
+                <SelectTrigger className="bg-background h-11">
+                  <SelectValue placeholder="Select cuisine type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
+              <Select value={formData.country} onValueChange={(val) => handleInputChange('country', val)}>
+                <SelectTrigger className="bg-background h-11">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                  <SelectItem value="United States">United States</SelectItem>
+                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
+              <Input 
+                placeholder="e.g. Dubai" 
+                className="bg-background h-11" 
+                value={formData.state}
+                onChange={(e) => handleInputChange('state', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
+              <Select value={formData.timezone} onValueChange={(val) => handleInputChange('timezone', val)}>
+                <SelectTrigger className="bg-background h-11">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
+                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
+                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
+              <Input 
+                placeholder="e.g. 99999" 
+                className="bg-background h-11" 
+                value={formData.zip}
+                onChange={(e) => handleInputChange('zip', e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3 pt-4 text-left">
+            <Checkbox 
+              id="show-maps-new" 
+              checked={formData.showMap}
+              onCheckedChange={(val) => handleInputChange('showMap', !!val)}
+            />
+            <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
+              Show map on outlet page
+            </label>
+          </div>
+        </section>
+    </div>
+  );
 
   return (
     <>
@@ -164,8 +544,12 @@ export default function AddNewOutletPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="text-left">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">Add New Outlet</h1>
-                <p className="text-muted-foreground mt-1">Configure your new outlet details and basic settings</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    {isCreated ? "Configure Outlet" : "Add New Outlet"}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    {isCreated ? `Managing configuration for ${formData.name}` : "Configure your new outlet details and basic settings"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -183,324 +567,156 @@ export default function AddNewOutletPage() {
             </div>
           </div>
 
-          <Card className="shadow-smooth border-0 overflow-hidden text-left bg-background p-8 space-y-12">
-            
-            {/* Outlet Details Section */}
-            <section className="space-y-6">
-              <h3 className="text-lg font-bold">Outlet Details</h3>
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="flex flex-col items-center gap-3 shrink-0">
-                  <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
-                    {logoImage ? (
-                      <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
-                    ) : (
-                      <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
-                    )}
-                  </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <input 
-                      type="file" 
-                      ref={logoInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleLogoUpload} 
-                    />
-                    <Button 
-                      variant="outline" 
-                      className="gap-2 h-9 px-4 text-xs font-bold" 
-                      size="sm"
-                      onClick={() => logoInputRef.current?.click()}
+          <Card className="shadow-smooth border-0 overflow-hidden text-left bg-background p-0">
+            {!isCreated ? (
+                <div className="p-8">
+                    <BasicInfoContent />
+                </div>
+            ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-background p-0 h-14 sticky top-0 z-20">
+                    <TabsTrigger 
+                      value="basic" 
+                      className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold"
                     >
-                      <Upload className="h-3.5 w-3.5" />
-                      {logoImage ? 'Change Logo' : 'Upload Logo'}
-                    </Button>
-                    {logoImage && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
-                        onClick={() => setLogoImage(null)}
-                      >
-                        <X className="h-3 w-3 mr-1" /> Remove
-                      </Button>
-                    )}
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
-                  </div>
-                </div>
-                
-                <div className="flex-1 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
-                      <Input 
-                        placeholder="Enter outlet name" 
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        className="bg-background h-11" 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
-                      <div className="relative">
-                        <Input 
-                          placeholder="outlet-slug" 
-                          value={formData.slug}
-                          onChange={(e) => handleInputChange('slug', e.target.value)}
-                          className="bg-background h-11 pr-10" 
-                        />
-                        <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-left">
-                    <Label className="text-sm font-semibold">Description</Label>
-                    <Textarea 
-                      placeholder="Enter outlet description..." 
-                      className="min-h-[120px] resize-none bg-background"
-                      value={formData.description}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
+                      <Info className="h-4 w-4" /> Basic Information
+                    </TabsTrigger>
+                    <TabsTrigger value="hours" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold">
+                      <Clock className="h-4 w-4" /> Opening Hours
+                    </TabsTrigger>
+                    <TabsTrigger value="tip-fee" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold">
+                      <HandCoins className="h-4 w-4" /> Tip Fee
+                    </TabsTrigger>
+                  </TabsList>
 
-            {/* Branding & Identity Section */}
-            <section className="space-y-6 pt-8 border-t">
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold">Branding & Identity</h3>
-                <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                <div className="md:col-span-7 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={100}>
-                        <TooltipTrigger asChild>
-                          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
-                          <p>This header appears as the header background on your mobile menu home page.</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  
-                  <div 
-                    className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
-                    onClick={() => bannerInputRef.current?.click()}
-                  >
-                    {featuredImage ? (
-                      <Image src={featuredImage} alt="Banner" fill className="object-cover" />
-                    ) : (
-                      <div className="flex flex-col items-center gap-2 text-center p-4">
-                        <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                        <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
-                        <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
-                      </div>
-                    )}
-                    <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-                  </div>
-                </div>
+                  <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background text-left">
+                     <BasicInfoContent />
+                  </TabsContent>
 
-                <div className="md:col-span-5 space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Palette className="h-4 w-4 text-teal-500" />
-                      <Label className="text-sm font-semibold">Primary Brand Color</Label>
-                    </div>
-                    
-                    <Card className="shadow-none border-gray-100 bg-white">
-                      <CardContent className="p-5 space-y-4">
-                        <div className="flex items-center gap-4">
-                          <div className="relative h-14 w-14 shrink-0">
-                            <input 
-                              type="color" 
-                              value={formData.primaryColor} 
-                              onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                              className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
-                            />
-                          </div>
-                          <div className="flex-1 space-y-1.5">
-                            <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
-                            <div className="relative">
-                              <Input 
-                                value={formData.primaryColor} 
-                                onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                                className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
-                              />
-                              <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                            </div>
-                          </div>
+                  <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
+                        <div className="space-y-1.5 text-left max-w-2xl">
+                            <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
+                                Operating Schedule <HelpCircle className="h-4 w-4 text-muted-foreground/40" />
+                            </h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Define when your outlet is open. These hours dictate when customers can view and place orders from your Digital eMenu.
+                            </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                        <div className="flex flex-wrap items-center gap-3 shrink-0">
+                            <Button variant="outline" size="sm" className="gap-2 font-semibold text-xs h-10 px-4" onClick={handleCopyToAllDays}>
+                                <Copy className="h-3.5 w-3.5" /> Apply Monday to All Days
+                            </Button>
+                            <Button variant="ghost" size="sm" className="gap-2 font-semibold text-xs h-10 px-4 text-muted-foreground" onClick={() => setRegularHours(DAYS.map(day => ({ day, open: '09:00 AM', close: '11:00 PM', closed: false })))}>
+                                <RotateCcw className="h-3.5 w-3.5" /> Reset Schedule
+                            </Button>
+                        </div>
+                    </div>
 
-                  <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
-                    <CardContent className="p-5 flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-bold text-gray-900">Display Logo</p>
-                        <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
-                      </div>
-                      <Switch checked={formData.showLogo} onCheckedChange={(val) => handleInputChange('showLogo', val)} />
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </section>
+                    <div className="space-y-6">
+                        <Card className="border shadow-none overflow-hidden bg-muted/10">
+                            <CardHeader className="bg-white border-b py-4 px-8">
+                                <CardTitle className="text-sm font-bold text-foreground">Standard Hours</CardTitle>
+                                <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
+                            </CardHeader>
+                            <CardContent className="p-0 divide-y bg-white text-left">
+                                {regularHours.map((hour, index) => (
+                                    <div key={hour.day} className={cn(
+                                        "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
+                                        hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
+                                    )}>
+                                        <div className="w-32 shrink-0 text-left">
+                                            <span className="font-bold text-base text-foreground">{hour.day}</span>
+                                        </div>
+                                        
+                                        <div className="flex-1 flex flex-wrap items-center gap-4">
+                                            <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
+                                                <div className="space-y-1.5 text-left">
+                                                    <Label className="text-xs font-semibold text-muted-foreground ml-1">Open At</Label>
+                                                    <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
+                                                        <SelectTrigger className="w-36 h-10 bg-background font-medium">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <span className="text-xs font-medium text-muted-foreground mt-6">until</span>
+                                                <div className="space-y-1.5 text-left">
+                                                    <Label className="text-xs font-semibold text-muted-foreground ml-1">Close At</Label>
+                                                    <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
+                                                        <SelectTrigger className="w-36 h-10 bg-background font-medium">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                        </div>
 
-            {/* Address & Location Section */}
-            <section className="space-y-6 pt-8 border-t text-left">
-              <h3 className="text-lg font-bold">Address & Location</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="Street name and number" 
-                    className="bg-background h-11" 
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="e.g. Dubai" 
-                    className="bg-background h-11" 
-                    value={formData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2 text-left">
-                <Label className="text-sm font-semibold">Menu url</Label>
-                <div className="relative">
-                  <Input 
-                    placeholder="Enter URL for your online menu (optional)" 
-                    className="bg-background h-11 pr-10" 
-                    value={formData.menuUrl}
-                    onChange={(e) => handleInputChange('menuUrl', e.target.value)}
-                  />
-                  <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                </div>
-              </div>
+                                        <div className="flex items-center gap-3 self-end sm:self-center pt-2 sm:pt-0">
+                                            <div className={cn(
+                                                "flex items-center gap-3 px-4 py-2 rounded-xl border transition-all",
+                                                hour.closed ? "bg-destructive/5 border-destructive/20" : "bg-green-50/50 border-green-100"
+                                            )}>
+                                                <Checkbox 
+                                                    id={`closed-${hour.day}`} 
+                                                    checked={hour.closed} 
+                                                    onCheckedChange={(checked) => handleUpdateRegularHour(index, 'closed', !!checked)} 
+                                                    className="h-5 w-5 rounded-md"
+                                                />
+                                                <label htmlFor={`closed-${hour.day}`} className={cn(
+                                                    "text-xs font-bold cursor-pointer",
+                                                    hour.closed ? "text-destructive" : "text-green-700"
+                                                )}>
+                                                    {hour.closed ? 'Closed Today' : 'Outlet Open'}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </div>
+                  </TabsContent>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
-                  <div className="flex gap-2">
-                    <Select value={formData.phonePrefix} onValueChange={(val) => handleInputChange('phonePrefix', val)}>
-                      <SelectTrigger className="w-24 h-11 bg-background font-medium">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="+971">+971</SelectItem>
-                        <SelectItem value="+1">+1</SelectItem>
-                        <SelectItem value="+44">+44</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input 
-                      placeholder="581111111" 
-                      className="flex-1 bg-background h-11" 
-                      value={formData.phoneNumber}
-                      onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Email address</Label>
-                  <Input 
-                    placeholder="raffi.uae7@gmail.com" 
-                    type="email" 
-                    className="bg-background h-11" 
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                  />
-                </div>
-              </div>
-            </section>
+                  <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background text-left">
+                    <section className="space-y-8">
+                        <div className="flex items-center justify-between border-b pb-6 text-left">
+                            <div>
+                                <h3 className="text-xl font-bold">Gratuity Settings</h3>
+                                <p className="text-sm text-muted-foreground">Configure how customers can add tips to their orders.</p>
+                            </div>
+                        </div>
 
-            {/* Additional Settings Section */}
-            <section className="space-y-6 pt-8 border-t text-left">
-              <h3 className="text-lg font-bold">Additional Settings</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Cuisine type</Label>
-                  <Select value={formData.cuisine} onValueChange={(val) => handleInputChange('cuisine', val)}>
-                    <SelectTrigger className="bg-background h-11">
-                      <SelectValue placeholder="Select cuisine type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
-                  <Select value={formData.country} onValueChange={(val) => handleInputChange('country', val)}>
-                    <SelectTrigger className="bg-background h-11">
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                      <SelectItem value="United States">United States</SelectItem>
-                      <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="e.g. Dubai" 
-                    className="bg-background h-11" 
-                    value={formData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
-                  <Select value={formData.timezone} onValueChange={(val) => handleInputChange('timezone', val)}>
-                    <SelectTrigger className="bg-background h-11">
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
-                      <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
-                      <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="e.g. 99999" 
-                    className="bg-background h-11" 
-                    value={formData.zip}
-                    onChange={(e) => handleInputChange('zip', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3 pt-4 text-left">
-                <Checkbox 
-                  id="show-maps-new" 
-                  checked={formData.showMap}
-                  onCheckedChange={(val) => handleInputChange('showMap', !!val)}
-                />
-                <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
-                  Show map on outlet page
-                </label>
-              </div>
-            </section>
+                        <Card>
+                            <CardHeader className="text-left">
+                                <CardTitle>Customer Tipping Options</CardTitle>
+                                <CardDescription>Control the options and limits your customers see during checkout.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6 pt-2 text-left">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                    <div className="space-y-2">
+                                        <Label>Max Tip Amount Allowed (%)</Label>
+                                        <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="bg-background h-11"/>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Allow Custom Tip</Label>
+                                        <div className="flex items-center justify-between rounded-lg border p-3 h-[60px] bg-background">
+                                            <p className="text-sm text-muted-foreground">Let customers enter their own amount.</p>
+                                            <Switch id="custom-tip-enabled" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                  </TabsContent>
+                </Tabs>
+            )}
           </Card>
 
           <div className="mt-8 flex justify-end gap-3 text-right pb-12">

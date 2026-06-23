@@ -22,7 +22,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/components/tabs';
 import {
   Upload,
   Save,
@@ -210,7 +210,7 @@ export default function AddNewOutletPage() {
     { label: isCreated ? `Configure ${formData.name || 'Outlet'}` : 'Add New Outlet' }
   ];
 
-  const BasicInfoContent = () => (
+  const basicInfoContentJsx = (
     <div className="space-y-12">
         {/* Outlet Details Section */}
         <section className="space-y-6 text-left">
@@ -570,7 +570,7 @@ export default function AddNewOutletPage() {
           <Card className="shadow-smooth border-0 overflow-hidden text-left bg-background p-0">
             {!isCreated ? (
                 <div className="p-8">
-                    <BasicInfoContent />
+                    {basicInfoContentJsx}
                 </div>
             ) : (
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -590,7 +590,7 @@ export default function AddNewOutletPage() {
                   </TabsList>
 
                   <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background text-left">
-                     <BasicInfoContent />
+                     {basicInfoContentJsx}
                   </TabsContent>
 
                   <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">

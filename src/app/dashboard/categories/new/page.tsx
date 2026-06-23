@@ -70,7 +70,22 @@ export default function AddNewOutletPage() {
   const [formData, setFormData] = useState(initialFormData);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // If updating name, also update slug in parallel
+      if (field === 'name') {
+        newData.slug = value
+          .toLowerCase()
+          .replace(/\s+/g, '-')       // Replace spaces with -
+          .replace(/[^\w-]+/g, '')     // Remove all non-word chars
+          .replace(/--+/g, '-')       // Replace multiple - with single -
+          .replace(/^-+/, '')         // Trim - from start of text
+          .replace(/-+$/, '');        // Trim - from end of text
+      }
+      
+      return newData;
+    });
   };
 
   const hasEnteredData = useMemo(() => {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -44,13 +45,15 @@ const OutletCard = ({
   onQuickSettings,
   onEdit,
   isActive,
-  onSelect
+  onSelect,
+  onDelete
 }: { 
   outlet: Outlet;
   onQuickSettings: (r: Outlet) => void;
   onEdit: (r: Outlet) => void;
   isActive: boolean;
   onSelect: (r: Outlet) => void;
+  onDelete: (id: string) => void;
 }) => (
   <Card 
     className={cn(
@@ -59,7 +62,7 @@ const OutletCard = ({
     )}
     onClick={() => onSelect(outlet)}
   >
-    <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden">
+    <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden text-left">
       {outlet.image && outlet.image !== "" ? (
         <Image
           src={outlet.image}
@@ -103,6 +106,7 @@ const OutletCard = ({
                 className="text-destructive cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
+                  onDelete(outlet.id);
                 }}
               >
                 <Trash className="mr-2 h-4 w-4" />
@@ -180,44 +184,35 @@ const OutletCard = ({
 export default function ManageOutletsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
   const [isQuickSettingsOpen, setIsQuickSettingsOpen] = useState(false);
   const [activeOutletId, setActiveOutletId] = useState<string>('1');
+  const [allOutlets, setAllOutlets] = useState<Outlet[]>([]);
 
   useEffect(() => {
-    const savedOutlet = localStorage.getItem('activeBranch');
-    if (savedOutlet) {
-      try {
-        const outletData = JSON.parse(savedOutlet);
-        setActiveOutletId(outletData.id);
-      } catch (e) {
-        setActiveOutletId('1');
-      }
-    }
-    
-    setIsLoading(false);
+    // Initial load from local storage + mock data
+    const syncOutlets = () => {
+      const custom = JSON.parse(localStorage.getItem('customOutlets') || '[]');
+      setAllOutlets([...mockOutlets, ...custom]);
 
-    const handleOutletChange = () => {
-      // Sync local ID state
-      const updatedOutlet = localStorage.getItem('activeBranch');
-      if (updatedOutlet) {
+      const savedActive = localStorage.getItem('activeBranch');
+      if (savedActive) {
         try {
-          const outletData = JSON.parse(updatedOutlet);
-          setActiveOutletId(outletData.id);
-        } catch (e) {}
+          const activeData = JSON.parse(savedActive);
+          setActiveOutletId(activeData.id);
+        } catch (e) {
+          setActiveOutletId('1');
+        }
       }
-      
-      setIsLoading(true);
       setIsLoading(false);
     };
 
-    window.addEventListener('branch-changed', handleOutletChange);
+    syncOutlets();
 
-    return () => {
-      window.removeEventListener('branch-changed', handleOutletChange);
-    };
+    window.addEventListener('branch-changed', syncOutlets);
+    return () => window.removeEventListener('branch-changed', syncOutlets);
   }, []);
 
   useEffect(() => {
@@ -255,6 +250,20 @@ export default function ManageOutletsPage() {
     router.push('/dashboard/categories/new');
   };
 
+  const handleDeleteOutlet = (id: string) => {
+    const custom = JSON.parse(localStorage.getItem('customOutlets') || '[]');
+    const updated = custom.filter((o: Outlet) => o.id !== id);
+    localStorage.setItem('customOutlets', JSON.stringify(updated));
+    
+    setAllOutlets(prev => prev.filter(o => o.id !== id));
+
+    toast({
+      variant: 'destructive',
+      title: "Outlet Deleted",
+      description: "The outlet has been removed from your list."
+    });
+  };
+
   const handleSelectOutlet = (outlet: Outlet) => {
     if (activeOutletId === outlet.id) return;
     
@@ -273,21 +282,21 @@ export default function ManageOutletsPage() {
   };
 
   const filteredOutlets = useMemo(() => {
-    return mockOutlets.filter(r => 
+    return allOutlets.filter(r => 
       r.name.toLowerCase().includes(search.toLowerCase()) || 
       r.location.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [allOutlets, search]);
 
   const kpiCards: StatCardData[] = useMemo(() => [
     {
-      title: "Bloomsbury's Outlets",
-      value: '18',
-      change: '+2',
-      changeDescription: 'new outlets',
+      title: "Active Outlets",
+      value: allOutlets.length.toString(),
+      change: '+1',
+      changeDescription: 'this week',
       icon: Store,
       color: 'orange',
-      tooltipText: 'Total number of Bloomsbury\'s outlets managed across the network.',
+      tooltipText: 'Total number of outlets managed across the network.',
     },
     {
       title: 'Digital Orders',
@@ -316,7 +325,7 @@ export default function ManageOutletsPage() {
       color: 'purple',
       tooltipText: 'Average customer rating across all managed outlets.',
     },
-  ], []);
+  ], [allOutlets.length]);
 
   if (isLoading) {
     return <CategoriesPageSkeleton view="gallery" />;
@@ -331,7 +340,7 @@ export default function ManageOutletsPage() {
             <div className="text-left">
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Manage Outlets</h1>
               <p className="text-muted-foreground mt-1">
-                Overview and configuration for all Bloomsbury&apos;s outlets
+                Overview and configuration for all outlet locations
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -372,21 +381,27 @@ export default function ManageOutletsPage() {
                 onSelect={handleSelectOutlet}
                 onQuickSettings={handleOpenQuickSettings}
                 onEdit={handleEditOutlet}
+                onDelete={handleDeleteOutlet}
               />
             ))}
           </div>
 
+          {filteredOutlets.length === 0 && (
+            <div className="py-20 text-center space-y-4 bg-background rounded-3xl border border-dashed border-muted">
+               <Store className="h-12 w-12 text-muted-foreground mx-auto opacity-20" />
+               <p className="text-muted-foreground font-medium">No outlets found matching your search.</p>
+            </div>
+          )}
+
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t">
             <p className="text-sm text-muted-foreground">
-              Showing <strong>1 to {filteredOutlets.length}</strong> of <strong>{mockOutlets.length}</strong> outlets
+              Showing <strong>1 to {filteredOutlets.length}</strong> of <strong>{allOutlets.length}</strong> outlets
             </p>
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button size="sm" className="h-9 w-9 bg-primary text-primary-foreground font-bold">1</Button>
-              <Button variant="ghost" size="sm" className="h-9 w-9 font-medium">2</Button>
-              <Button variant="ghost" size="sm" className="h-9 w-9 font-medium">3</Button>
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <ChevronRight className="h-4 w-4" />
               </Button>

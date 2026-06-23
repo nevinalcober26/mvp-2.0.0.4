@@ -52,6 +52,7 @@ import {
 import Image from 'next/image';
 import { OutletOptionsDrawer } from '@/components/dashboard/outlet-options-drawer';
 import { cn } from '@/lib/utils';
+import type { Outlet } from '@/lib/mock-data-store';
 
 const cuisines = ['Italian', 'Boutique Café', 'Signature Store', 'Japanese', 'Mexican', 'Indian', 'French', 'Middle Eastern', 'American'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -172,6 +173,31 @@ export default function AddNewOutletPage() {
     if (!isCreated) {
         setIsOptionsDrawerOpen(true);
     } else {
+        // Update the persisted custom outlet record
+        const outletId = formData.slug || `outlet_${Date.now()}`;
+        const updatedOutlet: Outlet = {
+            id: outletId,
+            name: formData.name,
+            image: logoImage || "",
+            status: 'Open',
+            rating: 0,
+            type: formData.cuisine || "Boutique Café",
+            location: formData.city,
+            address: formData.address,
+            menuItems: 0,
+            scansToday: 0
+        };
+
+        const existing = JSON.parse(localStorage.getItem('customOutlets') || '[]');
+        const updatedList = existing.map((o: Outlet) => o.id === outletId ? updatedOutlet : o);
+        
+        // If not found in custom list (unlikely if isCreated is true), it was probably mock data or newly created but filtered
+        if (!existing.find((o: Outlet) => o.id === outletId)) {
+            updatedList.push(updatedOutlet);
+        }
+
+        localStorage.setItem('customOutlets', JSON.stringify(updatedList));
+
         toast({
             title: "Changes Saved",
             description: "Outlet configuration has been updated successfully.",
@@ -180,14 +206,33 @@ export default function AddNewOutletPage() {
   };
 
   const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
-    // Persistent identification for prototype
     const outletId = formData.slug || `outlet_${Date.now()}`;
     
-    // Save the activated services to localStorage so Quick Settings can read them
+    // 1. Persist services activation
     localStorage.setItem(`outletServices_${outletId}`, JSON.stringify({
         selectedOptions,
         includeFees
     }));
+
+    // 2. Persist the outlet itself to the list
+    const newOutlet: Outlet = {
+        id: outletId,
+        name: formData.name,
+        image: logoImage || "",
+        status: 'Open',
+        rating: 0,
+        type: formData.cuisine || "Boutique Café",
+        location: formData.city,
+        address: formData.address,
+        menuItems: 0,
+        scansToday: 0
+    };
+
+    const existing = JSON.parse(localStorage.getItem('customOutlets') || '[]');
+    // Simple deduplication based on ID
+    if (!existing.find((o: Outlet) => o.id === outletId)) {
+        localStorage.setItem('customOutlets', JSON.stringify([...existing, newOutlet]));
+    }
 
     setIsOptionsDrawerOpen(false);
     setIsCreated(true);
@@ -1058,4 +1103,3 @@ export default function AddNewOutletPage() {
     </>
   );
 }
-

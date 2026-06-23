@@ -38,6 +38,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Image from 'next/image';
+import { OutletOptionsDrawer } from '@/components/dashboard/outlet-options-drawer';
 
 const cuisines = ['Italian', 'Boutique Café', 'Signature Store', 'Japanese', 'Mexican', 'Indian', 'French', 'Middle Eastern', 'American'];
 
@@ -71,6 +72,8 @@ export default function AddNewOutletPage() {
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [formData, setFormData] = useState(initialFormData);
+  
+  const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => {
@@ -131,15 +134,20 @@ export default function AddNewOutletPage() {
   };
 
   const handleSave = () => {
+    setIsOptionsDrawerOpen(true);
+  };
+
+  const handleFinalConfirm = () => {
+    setIsOptionsDrawerOpen(false);
     toast({
       title: "Outlet Created",
-      description: "Outlet details have been saved successfully.",
+      description: "Outlet details and services have been activated.",
     });
-    router.push('/dashboard/settings/outlets');
+    router.push('/dashboard/categories');
   };
 
   const breadcrumbItems = [
-    { label: 'Manage Outlets', href: '/dashboard/settings/outlets' },
+    { label: 'Manage Outlets', href: '/dashboard/categories' },
     { label: 'Add New Outlet' }
   ];
 
@@ -510,6 +518,12 @@ export default function AddNewOutletPage() {
           </div>
         </div>
       </main>
+
+      <OutletOptionsDrawer 
+        open={isOptionsDrawerOpen}
+        onOpenChange={setIsOptionsDrawerOpen}
+        onConfirm={handleFinalConfirm}
+      />
     </>
   );
 }

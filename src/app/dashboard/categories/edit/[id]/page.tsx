@@ -556,7 +556,7 @@ export default function EditOutletPage() {
                                 "text-xs font-bold cursor-pointer",
                                 hour.closed ? "text-destructive" : "text-green-700"
                               )}>
-                                {hour.closed ? 'Closed Today' : 'Store Open'}
+                                {hour.closed ? 'Closed Today' : 'Outlet Open'}
                               </label>
                             </div>
                           </div>

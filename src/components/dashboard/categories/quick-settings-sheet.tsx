@@ -126,8 +126,8 @@ export function QuickSettingsSheet({
                       <div className="flex items-center gap-3">
                         <Store className="h-5 w-5 text-muted-foreground" />
                         <div className="grid gap-0.5">
-                          <Label htmlFor="status" className="font-bold">Branch Open</Label>
-                          <p className="text-xs text-muted-foreground">Set if this branch is currently taking orders.</p>
+                          <Label htmlFor="status" className="font-bold">Outlet Open</Label>
+                          <p className="text-xs text-muted-foreground">Set if this outlet is currently taking orders.</p>
                         </div>
                       </div>
                       <Switch id="status" checked={isBranchOpen} onCheckedChange={setIsBranchOpen} />
@@ -162,7 +162,7 @@ export function QuickSettingsSheet({
                 <div>
                   <p className="text-sm font-bold text-orange-900">Auto-Close Warning</p>
                   <p className="text-xs text-orange-800">
-                    This branch is set to automatically close orders at 11:30 PM. You can change this in full settings.
+                    This outlet is set to automatically close orders at 11:30 PM. You can change this in full settings.
                   </p>
                 </div>
               </div>
@@ -188,8 +188,8 @@ export function QuickSettingsSheet({
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                       {pendingOnlineState 
-                        ? "This will enable online ordering for this branch. Customers will be able to place orders from the mobile menu."
-                        : "This will disable online ordering for this branch. Customers will only be able to view the menu, not purchase items."}
+                        ? "This will enable online ordering for this outlet. Customers will be able to place orders from the mobile menu."
+                        : "This will disable online ordering for this outlet. Customers will only be able to view the menu, not purchase items."}
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

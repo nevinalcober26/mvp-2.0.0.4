@@ -22,7 +22,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/tabs';
+} from '@/components/ui/tabs';
 import {
   Upload,
   Save,
@@ -210,327 +210,6 @@ export default function AddNewOutletPage() {
     { label: isCreated ? `Configure ${formData.name || 'Outlet'}` : 'Add New Outlet' }
   ];
 
-  const basicInfoContentJsx = (
-    <div className="space-y-12">
-        {/* Outlet Details Section */}
-        <section className="space-y-6 text-left">
-          <h3 className="text-lg font-bold">Outlet Details</h3>
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex flex-col items-center gap-3 shrink-0">
-              <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
-                {logoImage ? (
-                  <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
-                ) : (
-                  <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
-                )}
-              </div>
-              <div className="flex flex-col items-center gap-1.5">
-                <input 
-                  type="file" 
-                  ref={logoInputRef} 
-                  className="hidden" 
-                  accept="image/*" 
-                  onChange={handleLogoUpload} 
-                />
-                <Button 
-                  variant="outline" 
-                  className="gap-2 h-9 px-4 text-xs font-bold" 
-                  size="sm"
-                  onClick={() => logoInputRef.current?.click()}
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  {logoImage ? 'Change Logo' : 'Upload Logo'}
-                </Button>
-                {logoImage && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
-                    onClick={() => setLogoImage(null)}
-                  >
-                    <X className="h-3 w-3 mr-1" /> Remove
-                  </Button>
-                )}
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
-              </div>
-            </div>
-            
-            <div className="flex-1 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="Enter outlet name" 
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="bg-background h-11" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
-                  <div className="relative">
-                    <Input 
-                      placeholder="outlet-slug" 
-                      value={formData.slug}
-                      onChange={(e) => handleInputChange('slug', e.target.value)}
-                      className="bg-background h-11 pr-10" 
-                    />
-                    <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2 text-left">
-                <Label className="text-sm font-semibold">Description</Label>
-                <Textarea 
-                  placeholder="Enter outlet description..." 
-                  className="min-h-[120px] resize-none bg-background"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Branding & Identity Section */}
-        <section className="space-y-6 pt-8 border-t text-left">
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold">Branding & Identity</h3>
-            <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-7 space-y-4">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
-                <TooltipProvider>
-                  <Tooltip delayDuration={100}>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
-                      <p>This header appears as the header background on your mobile menu home page.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              
-              <div 
-                className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
-                onClick={() => bannerInputRef.current?.click()}
-              >
-                {featuredImage ? (
-                  <Image src={featuredImage} alt="Banner" fill className="object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-center p-4">
-                    <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
-                    <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
-                  </div>
-                )}
-                <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-              </div>
-            </div>
-
-            <div className="md:col-span-5 space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Palette className="h-4 w-4 text-teal-500" />
-                  <Label className="text-sm font-semibold">Primary Brand Color</Label>
-                </div>
-                
-                <Card className="shadow-none border-gray-100 bg-white">
-                  <CardContent className="p-5 space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-14 w-14 shrink-0">
-                        <input 
-                          type="color" 
-                          value={formData.primaryColor} 
-                          onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                          className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
-                        />
-                      </div>
-                      <div className="flex-1 space-y-1.5">
-                        <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
-                        <div className="relative">
-                          <Input 
-                            value={formData.primaryColor} 
-                            onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                            className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
-                          />
-                          <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
-                <CardContent className="p-5 flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-bold text-gray-900">Display Logo</p>
-                    <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
-                  </div>
-                  <Switch checked={formData.showLogo} onCheckedChange={(val) => handleInputChange('showLogo', val)} />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Address & Location Section */}
-        <section className="space-y-6 pt-8 border-t text-left">
-          <h3 className="text-lg font-bold">Address & Location</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
-              <Input 
-                placeholder="Street name and number" 
-                className="bg-background h-11" 
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
-              <Input 
-                placeholder="e.g. Dubai" 
-                className="bg-background h-11" 
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2 text-left">
-            <Label className="text-sm font-semibold">Menu url</Label>
-            <div className="relative">
-              <Input 
-                placeholder="Enter URL for your online menu (optional)" 
-                className="bg-background h-11 pr-10" 
-                value={formData.menuUrl}
-                onChange={(e) => handleInputChange('menuUrl', e.target.value)}
-              />
-              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
-              <div className="flex gap-2">
-                <Select value={formData.phonePrefix} onValueChange={(val) => handleInputChange('phonePrefix', val)}>
-                  <SelectTrigger className="w-24 h-11 bg-background font-medium">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="+971">+971</SelectItem>
-                    <SelectItem value="+1">+1</SelectItem>
-                    <SelectItem value="+44">+44</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input 
-                  placeholder="581111111" 
-                  className="flex-1 bg-background h-11" 
-                  value={formData.phoneNumber}
-                  onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Email address</Label>
-              <Input 
-                placeholder="raffi.uae7@gmail.com" 
-                type="email" 
-                className="bg-background h-11" 
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Additional Settings Section */}
-        <section className="space-y-6 pt-8 border-t text-left">
-          <h3 className="text-lg font-bold">Additional Settings</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Cuisine type</Label>
-              <Select value={formData.cuisine} onValueChange={(val) => handleInputChange('cuisine', val)}>
-                <SelectTrigger className="bg-background h-11">
-                  <SelectValue placeholder="Select cuisine type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
-              <Select value={formData.country} onValueChange={(val) => handleInputChange('country', val)}>
-                <SelectTrigger className="bg-background h-11">
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                  <SelectItem value="United States">United States</SelectItem>
-                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
-              <Input 
-                placeholder="e.g. Dubai" 
-                className="bg-background h-11" 
-                value={formData.state}
-                onChange={(e) => handleInputChange('state', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
-              <Select value={formData.timezone} onValueChange={(val) => handleInputChange('timezone', val)}>
-                <SelectTrigger className="bg-background h-11">
-                  <SelectValue placeholder="Select timezone" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
-                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
-                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
-              <Input 
-                placeholder="e.g. 99999" 
-                className="bg-background h-11" 
-                value={formData.zip}
-                onChange={(e) => handleInputChange('zip', e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3 pt-4 text-left">
-            <Checkbox 
-              id="show-maps-new" 
-              checked={formData.showMap}
-              onCheckedChange={(val) => handleInputChange('showMap', !!val)}
-            />
-            <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
-              Show map on outlet page
-            </label>
-          </div>
-        </section>
-    </div>
-  );
-
   return (
     <>
       <DashboardHeader />
@@ -570,7 +249,320 @@ export default function AddNewOutletPage() {
           <Card className="shadow-smooth border-0 overflow-hidden text-left bg-background p-0">
             {!isCreated ? (
                 <div className="p-8">
-                    {basicInfoContentJsx}
+                    <div className="space-y-12">
+                      <section className="space-y-6 text-left">
+                        <h3 className="text-lg font-bold">Outlet Details</h3>
+                        <div className="flex flex-col md:flex-row gap-8">
+                          <div className="flex flex-col items-center gap-3 shrink-0">
+                            <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                              {logoImage ? (
+                                <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
+                              ) : (
+                                <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                              )}
+                            </div>
+                            <div className="flex flex-col items-center gap-1.5">
+                              <input 
+                                type="file" 
+                                ref={logoInputRef} 
+                                className="hidden" 
+                                accept="image/*" 
+                                onChange={handleLogoUpload} 
+                              />
+                              <Button 
+                                variant="outline" 
+                                className="gap-2 h-9 px-4 text-xs font-bold" 
+                                size="sm"
+                                onClick={() => logoInputRef.current?.click()}
+                              >
+                                <Upload className="h-3.5 w-3.5" />
+                                {logoImage ? 'Change Logo' : 'Upload Logo'}
+                              </Button>
+                              {logoImage && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
+                                  onClick={() => setLogoImage(null)}
+                                >
+                                  <X className="h-3 w-3 mr-1" /> Remove
+                                </Button>
+                              )}
+                              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
+                                <Input 
+                                  placeholder="Enter outlet name" 
+                                  value={formData.name}
+                                  onChange={(e) => handleInputChange('name', e.target.value)}
+                                  className="bg-background h-11" 
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                  <Input 
+                                    placeholder="outlet-slug" 
+                                    value={formData.slug}
+                                    onChange={(e) => handleInputChange('slug', e.target.value)}
+                                    className="bg-background h-11 pr-10" 
+                                  />
+                                  <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2 text-left">
+                              <Label className="text-sm font-semibold">Description</Label>
+                              <Textarea 
+                                placeholder="Enter outlet description..." 
+                                className="min-h-[120px] resize-none bg-background"
+                                value={formData.description}
+                                onChange={(e) => handleInputChange('description', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="space-y-6 pt-8 border-t text-left">
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-bold">Branding & Identity</h3>
+                          <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                          <div className="md:col-span-7 space-y-4">
+                            <div className="flex items-center gap-2">
+                              <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                              <TooltipProvider>
+                                <Tooltip delayDuration={100}>
+                                  <TooltipTrigger asChild>
+                                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
+                                    <p>This header appears as the header background on your mobile menu home page.</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                            
+                            <div 
+                              className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
+                              onClick={() => bannerInputRef.current?.click()}
+                            >
+                              {featuredImage ? (
+                                <Image src={featuredImage} alt="Banner" fill className="object-cover" />
+                              ) : (
+                                <div className="flex flex-col items-center gap-2 text-center p-4">
+                                  <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
+                                  <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
+                                  <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                                </div>
+                              )}
+                              <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-5 space-y-6">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Palette className="h-4 w-4 text-teal-500" />
+                                <Label className="text-sm font-semibold">Primary Brand Color</Label>
+                              </div>
+                              
+                              <Card className="shadow-none border-gray-100 bg-white">
+                                <CardContent className="p-5 space-y-4">
+                                  <div className="flex items-center gap-4">
+                                    <div className="relative h-14 w-14 shrink-0">
+                                      <input 
+                                        type="color" 
+                                        value={formData.primaryColor} 
+                                        onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                                        className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
+                                      />
+                                    </div>
+                                    <div className="flex-1 space-y-1.5">
+                                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
+                                      <div className="relative">
+                                        <Input 
+                                          value={formData.primaryColor} 
+                                          onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                                          className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
+                                        />
+                                        <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
+                              <CardContent className="p-5 flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                  <p className="text-sm font-bold text-gray-900">Display Logo</p>
+                                  <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
+                                </div>
+                                <Switch checked={formData.showLogo} onCheckedChange={(val) => handleInputChange('showLogo', val)} />
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="space-y-6 pt-8 border-t text-left">
+                        <h3 className="text-lg font-bold">Address & Location</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
+                            <Input 
+                              placeholder="Street name and number" 
+                              className="bg-background h-11" 
+                              value={formData.address}
+                              onChange={(e) => handleInputChange('address', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
+                            <Input 
+                              placeholder="e.g. Dubai" 
+                              className="bg-background h-11" 
+                              value={formData.city}
+                              onChange={(e) => handleInputChange('city', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 text-left">
+                          <Label className="text-sm font-semibold">Menu url</Label>
+                          <div className="relative">
+                            <Input 
+                              placeholder="Enter URL for your online menu (optional)" 
+                              className="bg-background h-11 pr-10" 
+                              value={formData.menuUrl}
+                              onChange={(e) => handleInputChange('menuUrl', e.target.value)}
+                            />
+                            <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
+                            <div className="flex gap-2">
+                              <Select value={formData.phonePrefix} onValueChange={(val) => handleInputChange('phonePrefix', val)}>
+                                <SelectTrigger className="w-24 h-11 bg-background font-medium">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="+971">+971</SelectItem>
+                                  <SelectItem value="+1">+1</SelectItem>
+                                  <SelectItem value="+44">+44</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Input 
+                                placeholder="581111111" 
+                                className="flex-1 bg-background h-11" 
+                                value={formData.phoneNumber}
+                                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Email address</Label>
+                            <Input 
+                              placeholder="raffi.uae7@gmail.com" 
+                              type="email" 
+                              className="bg-background h-11" 
+                              value={formData.email}
+                              onChange={(e) => handleInputChange('email', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="space-y-6 pt-8 border-t text-left">
+                        <h3 className="text-lg font-bold">Additional Settings</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Cuisine type</Label>
+                            <Select value={formData.cuisine} onValueChange={(val) => handleInputChange('cuisine', val)}>
+                              <SelectTrigger className="bg-background h-11">
+                                <SelectValue placeholder="Select cuisine type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
+                            <Select value={formData.country} onValueChange={(val) => handleInputChange('country', val)}>
+                              <SelectTrigger className="bg-background h-11">
+                                <SelectValue placeholder="Select country" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                                <SelectItem value="United States">United States</SelectItem>
+                                <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
+                            <Input 
+                              placeholder="e.g. Dubai" 
+                              className="bg-background h-11" 
+                              value={formData.state}
+                              onChange={(e) => handleInputChange('state', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
+                            <Select value={formData.timezone} onValueChange={(val) => handleInputChange('timezone', val)}>
+                              <SelectTrigger className="bg-background h-11">
+                                <SelectValue placeholder="Select timezone" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
+                                <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
+                                <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
+                            <Input 
+                              placeholder="e.g. 99999" 
+                              className="bg-background h-11" 
+                              value={formData.zip}
+                              onChange={(e) => handleInputChange('zip', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3 pt-4 text-left">
+                          <Checkbox 
+                            id="show-maps-new" 
+                            checked={formData.showMap}
+                            onCheckedChange={(val) => handleInputChange('showMap', !!val)}
+                          />
+                          <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
+                            Show map on outlet page
+                          </label>
+                        </div>
+                      </section>
+                    </div>
                 </div>
             ) : (
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -590,7 +582,320 @@ export default function AddNewOutletPage() {
                   </TabsList>
 
                   <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background text-left">
-                     {basicInfoContentJsx}
+                     <div className="space-y-12">
+                        <section className="space-y-6 text-left">
+                          <h3 className="text-lg font-bold">Outlet Details</h3>
+                          <div className="flex flex-col md:flex-row gap-8">
+                            <div className="flex flex-col items-center gap-3 shrink-0">
+                              <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                                {logoImage ? (
+                                  <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
+                                ) : (
+                                  <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                                )}
+                              </div>
+                              <div className="flex flex-col items-center gap-1.5">
+                                <input 
+                                  type="file" 
+                                  ref={logoInputRef} 
+                                  className="hidden" 
+                                  accept="image/*" 
+                                  onChange={handleLogoUpload} 
+                                />
+                                <Button 
+                                  variant="outline" 
+                                  className="gap-2 h-9 px-4 text-xs font-bold" 
+                                  size="sm"
+                                  onClick={() => logoInputRef.current?.click()}
+                                >
+                                  <Upload className="h-3.5 w-3.5" />
+                                  {logoImage ? 'Change Logo' : 'Upload Logo'}
+                                </Button>
+                                {logoImage && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
+                                    onClick={() => setLogoImage(null)}
+                                  >
+                                    <X className="h-3 w-3 mr-1" /> Remove
+                                  </Button>
+                                )}
+                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex-1 space-y-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></Label>
+                                  <Input 
+                                    placeholder="Enter outlet name" 
+                                    value={formData.name}
+                                    onChange={(e) => handleInputChange('name', e.target.value)}
+                                    className="bg-background h-11" 
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></Label>
+                                  <div className="relative">
+                                    <Input 
+                                      placeholder="outlet-slug" 
+                                      value={formData.slug}
+                                      onChange={(e) => handleInputChange('slug', e.target.value)}
+                                      className="bg-background h-11 pr-10" 
+                                    />
+                                    <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2 text-left">
+                                <Label className="text-sm font-semibold">Description</Label>
+                                <Textarea 
+                                  placeholder="Enter outlet description..." 
+                                  className="min-h-[120px] resize-none bg-background"
+                                  value={formData.description}
+                                  onChange={(e) => handleInputChange('description', e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </section>
+
+                        <section className="space-y-6 pt-8 border-t text-left">
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-bold">Branding & Identity</h3>
+                            <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                            <div className="md:col-span-7 space-y-4">
+                              <div className="flex items-center gap-2">
+                                <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                                <TooltipProvider>
+                                  <Tooltip delayDuration={100}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
+                                      <p>This header appears as the header background on your mobile menu home page.</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                              
+                              <div 
+                                className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
+                                onClick={() => bannerInputRef.current?.click()}
+                              >
+                                {featuredImage ? (
+                                  <Image src={featuredImage} alt="Banner" fill className="object-cover" />
+                                ) : (
+                                  <div className="flex flex-col items-center gap-2 text-center p-4">
+                                    <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
+                                    <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
+                                    <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                                  </div>
+                                )}
+                                <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                              </div>
+                            </div>
+
+                            <div className="md:col-span-5 space-y-6">
+                              <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                  <Palette className="h-4 w-4 text-teal-500" />
+                                  <Label className="text-sm font-semibold">Primary Brand Color</Label>
+                                </div>
+                                
+                                <Card className="shadow-none border-gray-100 bg-white">
+                                  <CardContent className="p-5 space-y-4">
+                                    <div className="flex items-center gap-4">
+                                      <div className="relative h-14 w-14 shrink-0">
+                                        <input 
+                                          type="color" 
+                                          value={formData.primaryColor} 
+                                          onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                                          className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
+                                        />
+                                      </div>
+                                      <div className="flex-1 space-y-1.5">
+                                        <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
+                                        <div className="relative">
+                                          <Input 
+                                            value={formData.primaryColor} 
+                                            onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                                            className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
+                                          />
+                                          <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
+                                <CardContent className="p-5 flex items-center justify-between">
+                                  <div className="space-y-0.5">
+                                    <p className="text-sm font-bold text-gray-900">Display Logo</p>
+                                    <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
+                                  </div>
+                                  <Switch checked={formData.showLogo} onCheckedChange={(val) => handleInputChange('showLogo', val)} />
+                                </CardContent>
+                              </Card>
+                            </div>
+                          </div>
+                        </section>
+
+                        <section className="space-y-6 pt-8 border-t text-left">
+                          <h3 className="text-lg font-bold">Address & Location</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Street address <span className="text-red-500">*</span></Label>
+                              <Input 
+                                placeholder="Street name and number" 
+                                className="bg-background h-11" 
+                                value={formData.address}
+                                onChange={(e) => handleInputChange('address', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">City <span className="text-red-500">*</span></Label>
+                              <Input 
+                                placeholder="e.g. Dubai" 
+                                className="bg-background h-11" 
+                                value={formData.city}
+                                onChange={(e) => handleInputChange('city', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 text-left">
+                            <Label className="text-sm font-semibold">Menu url</Label>
+                            <div className="relative">
+                              <Input 
+                                placeholder="Enter URL for your online menu (optional)" 
+                                className="bg-background h-11 pr-10" 
+                                value={formData.menuUrl}
+                                onChange={(e) => handleInputChange('menuUrl', e.target.value)}
+                              />
+                              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
+                              <div className="flex gap-2">
+                                <Select value={formData.phonePrefix} onValueChange={(val) => handleInputChange('phonePrefix', val)}>
+                                  <SelectTrigger className="w-24 h-11 bg-background font-medium">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="+971">+971</SelectItem>
+                                    <SelectItem value="+1">+1</SelectItem>
+                                    <SelectItem value="+44">+44</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input 
+                                  placeholder="581111111" 
+                                  className="flex-1 bg-background h-11" 
+                                  value={formData.phoneNumber}
+                                  onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Email address</Label>
+                              <Input 
+                                placeholder="raffi.uae7@gmail.com" 
+                                type="email" 
+                                className="bg-background h-11" 
+                                value={formData.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </section>
+
+                        <section className="space-y-6 pt-8 border-t text-left">
+                          <h3 className="text-lg font-bold">Additional Settings</h3>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Cuisine type</Label>
+                              <Select value={formData.cuisine} onValueChange={(val) => handleInputChange('cuisine', val)}>
+                                <SelectTrigger className="bg-background h-11">
+                                  <SelectValue placeholder="Select cuisine type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
+                              <Select value={formData.country} onValueChange={(val) => handleInputChange('country', val)}>
+                                <SelectTrigger className="bg-background h-11">
+                                  <SelectValue placeholder="Select country" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                                  <SelectItem value="United States">United States</SelectItem>
+                                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
+                              <Input 
+                                placeholder="e.g. Dubai" 
+                                className="bg-background h-11" 
+                                value={formData.state}
+                                onChange={(e) => handleInputChange('state', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
+                              <Select value={formData.timezone} onValueChange={(val) => handleInputChange('timezone', val)}>
+                                <SelectTrigger className="bg-background h-11">
+                                  <SelectValue placeholder="Select timezone" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
+                                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
+                                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
+                              <Input 
+                                placeholder="e.g. 99999" 
+                                className="bg-background h-11" 
+                                value={formData.zip}
+                                onChange={(e) => handleInputChange('zip', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-3 pt-4 text-left">
+                            <Checkbox 
+                              id="show-maps-new" 
+                              checked={formData.showMap}
+                              onCheckedChange={(val) => handleInputChange('showMap', !!val)}
+                            />
+                            <label htmlFor="show-maps-new" className="text-sm font-medium leading-none cursor-pointer">
+                              Show map on outlet page
+                            </label>
+                          </div>
+                        </section>
+                      </div>
                   </TabsContent>
 
                   <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
@@ -629,7 +934,7 @@ export default function AddNewOutletPage() {
                                             <span className="font-bold text-base text-foreground">{hour.day}</span>
                                         </div>
                                         
-                                        <div className="flex-1 flex flex-wrap items-center gap-4">
+                                        <div className="flex-1 flex wrap items-center gap-4">
                                             <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                                                 <div className="space-y-1.5 text-left">
                                                     <Label className="text-xs font-semibold text-muted-foreground ml-1">Open At</Label>
@@ -683,7 +988,7 @@ export default function AddNewOutletPage() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background text-left">
+                  <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                     <section className="space-y-8">
                         <div className="flex items-center justify-between border-b pb-6 text-left">
                             <div>

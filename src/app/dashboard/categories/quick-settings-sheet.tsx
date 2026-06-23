@@ -75,8 +75,8 @@ export function QuickSettingsSheet({
                     <div className="flex items-center gap-3">
                       <Store className="h-5 w-5 text-muted-foreground" />
                       <div className="grid gap-0.5">
-                        <Label htmlFor="status" className="font-bold">Branch Open</Label>
-                        <p className="text-xs text-muted-foreground">Set if this branch is currently taking orders.</p>
+                        <Label htmlFor="status" className="font-bold">Outlet Open</Label>
+                        <p className="text-xs text-muted-foreground">Set if this outlet is currently taking orders.</p>
                       </div>
                     </div>
                     <Switch id="status" defaultChecked={restaurant.status === 'Open'} />
@@ -107,7 +107,7 @@ export function QuickSettingsSheet({
               <div>
                 <p className="text-sm font-bold text-orange-900">Auto-Close Warning</p>
                 <p className="text-xs text-orange-800">
-                  This branch is set to automatically close orders at 11:30 PM. You can change this in full settings.
+                  This outlet is set to automatically close orders at 11:30 PM. You can change this in full settings.
                 </p>
               </div>
             </div>

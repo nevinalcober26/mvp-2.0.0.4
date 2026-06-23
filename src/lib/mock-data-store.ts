@@ -98,8 +98,8 @@ export const mockVariationGroups: VariationGroup[] = [
   }
 ];
 
-// --- Branch/Restaurant Source of Truth ---
-export interface Branch {
+// --- Outlet Source of Truth ---
+export interface Outlet {
   id: string;
   name: string;
   image: string;
@@ -112,13 +112,13 @@ export interface Branch {
   scansToday: number;
 }
 
-const DEFAULT_RESTAURANT_IMAGE = 'https://picsum.photos/seed/bloomsbury/600/400';
+const DEFAULT_OUTLET_IMAGE = 'https://picsum.photos/seed/bloomsbury/600/400';
 
-export const mockBranches: Branch[] = [
+export const mockOutlets: Outlet[] = [
   {
     id: '1',
     name: "Bloomsbury's - Ras Al Khaimah",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-1')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-1')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Open',
     rating: 4.9,
     type: 'Boutique Café',
@@ -130,7 +130,7 @@ export const mockBranches: Branch[] = [
   {
     id: '2',
     name: "Bloomsbury's - Dubai Mall",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-2')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-2')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Open',
     rating: 4.8,
     type: 'Signature Store',
@@ -142,7 +142,7 @@ export const mockBranches: Branch[] = [
   {
     id: '3',
     name: "Bloomsbury's - Al Ain",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-3')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-3')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Open',
     rating: 4.7,
     type: 'Boutique Café',
@@ -154,7 +154,7 @@ export const mockBranches: Branch[] = [
   {
     id: '4',
     name: "Bloomsbury's - Abu Dhabi",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-4')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-4')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Open',
     rating: 4.8,
     type: 'Boutique Café',
@@ -166,7 +166,7 @@ export const mockBranches: Branch[] = [
   {
     id: '5',
     name: "Bloomsbury's - Sharjah",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-5')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-5')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Open',
     rating: 4.6,
     type: 'Boutique Café',
@@ -178,7 +178,7 @@ export const mockBranches: Branch[] = [
   {
     id: '6',
     name: "Bloomsbury's - Ajman",
-    image: PlaceHolderImages.find(img => img.id === 'restaurant-6')?.imageUrl || DEFAULT_RESTAURANT_IMAGE,
+    image: PlaceHolderImages.find(img => img.id === 'restaurant-6')?.imageUrl || DEFAULT_OUTLET_IMAGE,
     status: 'Closed',
     rating: 4.5,
     type: 'Boutique Café',
@@ -188,6 +188,8 @@ export const mockBranches: Branch[] = [
     scansToday: 180,
   },
 ];
+
+export const mockBranches = mockOutlets; // Backward compatibility for renaming
 
 const productDescriptions: Record<string, { description: string; smallDescription: string }> = {
     'Classic Cheeseburger': {
@@ -259,7 +261,7 @@ const productDescriptions: Record<string, { description: string; smallDescriptio
         smallDescription: 'Crispy, golden, and delicious.'
     },
     'Calamari Fritti': {
-        description: 'Tender calamari, lightly breaded and fried until crisp. Served with marinara and a lemon wedge.',
+        description: 'Tender calabari, lightly breaded and fried until crisp. Served with marinara and a lemon wedge.',
         smallDescription: 'Crispy calamari with marinara.'
     },
     'Chicken Caesar Salad': {
@@ -312,36 +314,9 @@ const productDescriptions: Record<string, { description: string; smallDescriptio
     }
 };
 
-const mapGroupToProductVariation = (group: VariationGroup): ProductVariationGroup => {
-  return {
-    ...group,
-    options: group.options.map(opt => ({
-        id: opt.id,
-        value: opt.value,
-        priceMode: 'add',
-        priceValue: opt.regularPrice || 0,
-        hidden: false,
-    }))
-  };
-};
-
-// --- Product Generation ---
-const productNames = [
-    'Classic Cheeseburger', 'Truffle Fries', 'Seasonal Berry Crumble', 'Artisanal Pizza',
-    'Fresh Garden Salad', 'Spicy Chicken Wings', 'Avocado Toast', 'Margherita Pizza',
-    'Ribeye Steak', 'Lava Cake', 'Classic Pancakes', 'Orange Juice',
-    'Espresso', 'Latte', 'Cheesecake',
-    'Mushroom Swiss Burger', 'Onion Rings', 'Calamari Fritti', 'Chicken Caesar Salad',
-    'Pepperoni Pizza', 'Four Cheese Pizza', 'Fettuccine Alfredo', 'Lobster Ravioli',
-    'Grilled Salmon', 'Filet Mignon', 'Apple Pie', 'Brownie Sundae',
-    'Iced Tea', 'Mojito (Non-alcoholic)', 'Strawberry Smoothie'
-];
-const categories = ['Burgers', 'Sides', 'Desserts', 'Mains', 'Salads', 'Breakfast', 'Beverages', 'Pizza', 'Pasta', 'Steaks'];
-const productStatuses: Product['status'][] = ['Active', 'Draft', 'Archived', 'Out of Stock'];
-
 const generateMockProducts = (count: number): Product[] => {
     const products: Product[] = [];
-    const branchNames = mockBranches.map(b => b.name);
+    const outletNames = mockOutlets.map(b => b.name);
     for (let i = 0; i < count; i++) {
         const name = productNames[i % productNames.length];
         const status = productStatuses[i % productStatuses.length];
@@ -375,7 +350,7 @@ const generateMockProducts = (count: number): Product[] => {
             id: `prod_${i}`,
             name: `${name} ${i < productNames.length ? '' : `#${Math.floor(i / productNames.length)}`}`.trim(),
             category: categories[i % categories.length],
-            branch: branchNames[i % branchNames.length],
+            branch: outletNames[i % outletNames.length],
             price,
             stock,
             status,
@@ -391,24 +366,10 @@ const generateMockProducts = (count: number): Product[] => {
 
 export const mockProducts: Product[] = generateMockProducts(100);
 
-// A simple pseudo-random generator for deterministic "randomness"
-const createSeededRandom = (seed: number) => () => {
-    let t = seed += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-};
-
-// --- Customer and Order Generation (interlinked) ---
-const firstNames = ['John', 'Jane', 'Alex', 'Emily', 'Chris', 'Katie', 'Michael', 'Sarah', 'David', 'Laura'];
-const lastNames = ['Smith', 'Doe', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez'];
-const staffNames = ['Alex', 'Maria', 'John', 'Sarah', 'David', 'Frank M.', 'Emily', 'Jessica', 'Michael', 'Chris', 'Olivia', 'James', 'Sophia', 'Liam', 'Isabella'];
-const comments = ['Customer requested extra napkins.', 'Allergy alert: No nuts.', 'Birthday celebration at the table.', null, 'Guest is in a hurry.'];
-
 const generateRelatedMockData = (customerCount: number, orderCount: number, products: Product[]) => {
     const customers: Customer[] = [];
     const orders: Order[] = [];
-    const branchNames = mockBranches.map(b => b.name);
+    const outletNames = mockOutlets.map(b => b.name);
     
     const seed = 12345;
     const random = createSeededRandom(seed);
@@ -459,10 +420,10 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
 
         // Force recent, relevant data for the first ~100 items
         if (i < 150) {
-            branch = branchNames[i % branchNames.length]; // Cycle through branches for recent data too
+            branch = outletNames[i % outletNames.length]; // Cycle through outlets for recent data too
             orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 28)).getTime(); // definitely within last 30 days
             
-            // Focus RAK branch for default filter
+            // Focus RAK outlet for default filter
             if (i % 3 === 0) {
                 branch = "Bloomsbury's - Ras Al Khaimah";
             }
@@ -490,7 +451,7 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
 
         } else {
             // Original more random logic for older data
-            branch = branchNames[i % branchNames.length];
+            branch = outletNames[i % outletNames.length];
             orderTimestamp = subDays(endOfDay(baseDate), Math.floor(random() * 365) + 30).getTime(); // Older than 30 days
             
             const finalStatuses: Order['orderStatus'][] = ['Completed', 'Cancelled', 'Refunded'];
@@ -674,132 +635,3 @@ const generateRelatedMockData = (customerCount: number, orderCount: number, prod
 const relatedData = generateRelatedMockData(200, 800, mockProducts);
 export const mockCustomers: Customer[] = relatedData.customers;
 export const mockOrders: Order[] = relatedData.orders;
-
-export const mockCategories: Column[] = [
-  {
-    id: 'food',
-    name: 'Food',
-    description: 'All of our delicious food items.',
-    status: 'Published',
-    items: [
-      {
-        id: 'appetizers',
-        name: 'Appetizers',
-        description: 'Start your meal with a tasty bite.',
-        cardShadow: false,
-        status: 'Published',
-        children: [
-          { id: 'soups', name: 'Soups', children: [], description: 'Warm and comforting soups.', status: 'Published' },
-          { id: 'salads', name: 'Salads', children: [], description: 'Fresh and healthy salads.', status: 'Published' },
-        ],
-      },
-      {
-        id: 'main-courses',
-        name: 'Main Courses',
-        description: 'The star of the show.',
-        displayFullwidth: true,
-        status: 'Published',
-        children: [
-          { id: 'pizza', name: 'Pizza', children: [], status: 'Published' },
-          { id: 'pasta', name: 'Pasta', children: [], status: 'Published' },
-          { id: 'burgers', name: 'Burgers', children: [], status: 'Published' },
-        ],
-      },
-      {
-        id: 'desserts',
-        name: 'Desserts',
-        description: 'Sweet treats to end your meal.',
-        status: 'Published',
-        children: [
-            { id: 'cakes', name: 'Cakes', children: [], status: 'Published' },
-            { id: 'ice-cream', name: 'Ice Cream', children: [], status: 'Published' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'beverages',
-    name: 'Beverages',
-    description: 'Quench your thirst.',
-    status: 'Published',
-    items: [
-      {
-        id: 'hot-drinks',
-        name: 'Hot Drinks',
-        status: 'Published',
-        children: [
-          { id: 'coffee', name: 'Coffee', children: [], status: 'Published' },
-          { id: 'tea', name: 'Tea', children: [], status: 'Published' },
-        ],
-      },
-      {
-        id: 'cold-drinks',
-        name: 'Cold Drinks',
-        status: 'Published',
-        children: [
-          { id: 'juices', name: 'Juices', children: [], status: 'Published' },
-          { id: 'soft-drinks', name: 'Soft Drinks', children: [], status: 'Published' },
-        ],
-      },
-      { id: 'mocktails', name: 'Mocktails', children: [], status: 'Published' },
-    ],
-  },
-  {
-    id: 'specials',
-    name: 'Special Offers',
-    description: 'Great deals for you.',
-    status: 'Published',
-    items: [
-        { id: 'daily-specials', name: 'Daily Specials', children: [], status: 'Published' },
-        { id: 'combo-meals', name: 'Combo Meals', children: [], status: 'Published' },
-    ],
-  },
-  {
-    id: 'breakfast',
-    name: 'Breakfast',
-    status: 'Published',
-    items: [
-        { id: 'pancakes-waffles', name: 'Pancakes & Waffles', children: [], status: 'Published' },
-        { id: 'omelettes', name: 'Omelettes', children: [], status: 'Published' },
-        { id: 'healthy-bowls', name: 'Healthy Bowls', children: [], status: 'Published' },
-    ]
-  }
-];
-
-export const mockComboGroups: ComboGroup[] = [
-     {
-        id: 'combo_1',
-        name: 'Lunch Special',
-        description: 'A perfect combo for a quick and satisfying lunch.',
-        price: 25.99,
-        productIds: ['prod_0', 'prod_1', 'prod_11'],
-    },
-    {
-        id: 'combo_2',
-        name: 'Dinner for Two',
-        description: 'Share a romantic dinner with our special selection.',
-        price: 55.00,
-        productIds: ['prod_8', 'prod_4', 'prod_9'],
-    },
-    {
-        id: 'combo_3',
-        name: 'Breakfast Power-Up',
-        description: 'Start your day with energy.',
-        price: 18.00,
-        productIds: ['prod_6', 'prod_10', 'prod_12'],
-    },
-    {
-        id: 'combo_4',
-        name: 'Pizza & Wings Deal',
-        description: 'The perfect pair for game night.',
-        price: 45.00,
-        productIds: ['prod_7', 'prod_5'],
-    },
-    {
-        id: 'combo_5',
-        name: 'Healthy Choice',
-        description: 'A light and refreshing meal.',
-        price: 22.50,
-        productIds: ['prod_4', 'prod_11'],
-    },
-];

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -762,7 +763,7 @@ export default function OrderHubPage() {
                     <div className="space-y-1.5 text-left">
                       <p className="text-sm font-bold text-slate-900 leading-none">Live Order Tracking</p>
                       <p className="text-[11px] leading-relaxed text-slate-500 font-semibold">
-                        Real-time feed of all finalized transactions across the branch network.
+                        Real-time feed of all finalized transactions across the outlet network.
                       </p>
                     </div>
                 </div>

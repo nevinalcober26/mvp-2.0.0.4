@@ -71,7 +71,7 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import type { Order } from './types';
-import { mockOrders, mockBranches } from '@/lib/mock-data-store';
+import { mockOrders, mockOutlets } from '@/lib/mock-data-store';
 import { getStatusBadgeVariant } from './utils';
 import { OrderDetailsSheet } from './order-details-sheet';
 import { OrdersPageSkeleton } from '@/components/dashboard/skeletons';
@@ -403,7 +403,7 @@ export default function OrdersPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">All Orders</h1>
-            <p className="text-muted-foreground">View and manage all recent orders from this branch.</p>
+            <p className="text-muted-foreground">View and manage all recent orders from this outlet.</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleNotificationClick} disabled={permission === 'denied'}>
@@ -431,12 +431,12 @@ export default function OrdersPage() {
                 <div className="flex flex-wrap items-center gap-2">
                     <Select value={filters.branch} onValueChange={(value) => handleFilterChange('branch', value)}>
                     <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Filter by Branch" />
+                        <SelectValue placeholder="Filter by Outlet" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Branches</SelectItem>
-                        {mockBranches.map(branch => (
-                          <SelectItem key={branch.id} value={branch.name}>{branch.name}</SelectItem>
+                        <SelectItem value="all">All Outlets</SelectItem>
+                        {mockOutlets.map(outlet => (
+                          <SelectItem key={outlet.id} value={outlet.name}>{outlet.name}</SelectItem>
                         ))}
                     </SelectContent>
                     </Select>
@@ -480,7 +480,7 @@ export default function OrdersPage() {
                             setVisibleColumns((prev) => ({ ...prev, branch: !!value }))
                           }
                         >
-                          Branch
+                          Outlet
                         </DropdownMenuCheckboxItem>
                         <DropdownMenuCheckboxItem
                           checked={visibleColumns.table}
@@ -528,7 +528,7 @@ export default function OrdersPage() {
                         <TableRow>
                             <TableHead><SortableHeader tKey="orderId" label="ORDER ID" /></TableHead>
                             <TableHead><SortableHeader tKey="customer" label="CUSTOMER" /></TableHead>
-                            {visibleColumns.branch && <TableHead><SortableHeader tKey="branch" label="BRANCH" /></TableHead>}
+                            {visibleColumns.branch && <TableHead><SortableHeader tKey="branch" label="OUTLET" /></TableHead>}
                             {visibleColumns.table && <TableHead>TABLE</TableHead>}
                             <TableHead>ORDER STATUS</TableHead>
                             <TableHead>PAYMENT STATUS</TableHead>

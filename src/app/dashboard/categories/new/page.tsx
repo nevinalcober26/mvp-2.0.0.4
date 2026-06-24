@@ -40,7 +40,6 @@ import {
   Image as ImageIcon,
   Palette,
   Edit,
-  Globe,
   MoreHorizontal,
   X,
   Info,
@@ -142,7 +141,7 @@ export default function AddNewOutletPage() {
     }
   });
 
-  const { isDirty, isValid } = form.formState;
+  const { isDirty } = form.formState;
   const watchName = form.watch('name');
 
   useEffect(() => {
@@ -256,7 +255,7 @@ export default function AddNewOutletPage() {
     { label: isCreated ? `Configure ${form.watch('name') || 'Outlet'}` : 'Add New Outlet' }
   ], [isCreated, form.watch('name')]);
 
-  const isSaveDisabled = !isDirty || !isValid;
+  const isSaveDisabled = !isDirty && !logoImage;
 
   return (
     <>

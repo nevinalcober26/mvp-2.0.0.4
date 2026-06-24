@@ -25,7 +25,8 @@ import {
   Sparkles,
   Hotel,
   Check,
-  Info
+  Info,
+  AlertTriangle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -177,11 +178,11 @@ export function QuickSettingsSheet({
               </div>
 
               {/* License Warning Notification */}
-              <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-100 flex items-start gap-3">
-                <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+              <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 shrink-0" />
                 <div className="text-left space-y-1">
-                  <p className="text-xs font-bold text-blue-900 leading-none">Subscription Context</p>
-                  <p className="text-[11px] text-blue-800/80 leading-relaxed font-medium">
+                  <p className="text-xs font-bold text-orange-900 leading-none">Subscription Warning</p>
+                  <p className="text-[11px] text-orange-800/80 leading-relaxed font-medium">
                     These channels are provisioned via your Digital eMenu license. Changing these settings reflects in your monthly operational quota.
                   </p>
                 </div>

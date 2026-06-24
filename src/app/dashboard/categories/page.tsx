@@ -1,56 +1,38 @@
-
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragStartEvent,
-  DragOverEvent,
-  DragEndEvent,
-  closestCorners,
-  UniqueIdentifier,
-} from '@dnd-kit/core';
-import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { PlusCircle, Edit, Trash2, Plus, SlidersHorizontal, Search, Store, Star, MapPin, Package, QrCode, MoreHorizontal, Settings, ChevronLeft, ChevronRight, TrendingUp, Trash } from 'lucide-react';
-import { Container } from '@/app/dashboard/categories/dnd/Container';
-import { SortableItem } from '@/app/dashboard/categories/dnd/SortableItem';
-import { Item as ItemComponent } from '@/components/dashboard/dnd/Item';
-import { AddCategorySheet, type CategoryFormValues } from '@/app/dashboard/categories/add-category-sheet';
-import { CategorySheet } from '@/app/dashboard/categories/category-sheet';
-import { CategoryScheduleSheet } from '@/app/dashboard/categories/schedule-sheet';
-import type { Column, Item, ScheduleRule } from '@/app/dashboard/categories/types';
-import { mockCategories, mockOutlets, type Outlet } from '@/lib/mock-data-store';
+import { 
+  Plus, 
+  Search, 
+  Store, 
+  Star, 
+  MapPin, 
+  Package, 
+  QrCode, 
+  MoreHorizontal, 
+  Settings, 
+  ChevronLeft, 
+  ChevronRight, 
+  TrendingUp, 
+  Trash,
+  Edit,
+  SlidersHorizontal
+} from 'lucide-react';
+import { mockOutlets, type Outlet } from '@/lib/mock-data-store';
 import { useToast } from '@/hooks/use-toast';
-import { produce } from 'immer';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { CategoryDetailsDialog, type CategoryColumnFormValues } from './category-details-dialog';
-import { QuickSettingsSheet } from './quick-settings-sheet';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { CategoriesPageSkeleton } from '@/components/dashboard/skeletons';
 import { StatCards, type StatCardData } from '@/components/dashboard/stat-cards';
+import { QuickSettingsSheet } from './quick-settings-sheet';
 import gsap from 'gsap';
+import Image from 'next/image';
 
 const OutletCard = ({ 
   outlet, 

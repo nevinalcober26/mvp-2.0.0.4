@@ -302,7 +302,7 @@ export default function AddNewOutletPage() {
                     </TabsList>
 
                     <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background space-y-12">
-                        <section className="space-y-6">
+                        <section className="space-y-6 text-left">
                           <h3 className="text-lg font-bold">Outlet Identity</h3>
                           <div className="flex flex-col md:flex-row gap-8">
                             <div className="flex flex-col items-center gap-3 shrink-0">
@@ -322,7 +322,7 @@ export default function AddNewOutletPage() {
                               </div>
                             </div>
                             
-                            <div className="flex-1 space-y-6 text-left">
+                            <div className="flex-1 space-y-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField 
                                   control={form.control} 
@@ -371,7 +371,7 @@ export default function AddNewOutletPage() {
                         <section className="space-y-6 pt-8 border-t text-left">
                             <h3 className="text-lg font-bold">Branding & Identity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                                <div className="md:col-span-7 space-y-4 text-left">
+                                <div className="md:col-span-7 space-y-4">
                                     <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
                                     <div className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => bannerInputRef.current?.click()}>
                                         {featuredImage ? (
@@ -385,7 +385,7 @@ export default function AddNewOutletPage() {
                                         <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
                                     </div>
                                 </div>
-                                <div className="md:col-span-5 space-y-6 text-left">
+                                <div className="md:col-span-5 space-y-6">
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2">
                                             <Palette className="h-4 w-4 text-teal-500" />
@@ -393,11 +393,11 @@ export default function AddNewOutletPage() {
                                         </div>
                                         <Card className="shadow-none border-gray-100 bg-white">
                                             <CardContent className="p-5 space-y-4">
-                                                <div className="flex items-center gap-4 text-left">
+                                                <div className="flex items-center gap-4">
                                                   <div className="relative h-14 w-14 shrink-0">
                                                       <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden" />
                                                   </div>
-                                                  <div className="flex-1 space-y-1.5">
+                                                  <div className="flex-1 space-y-1.5 text-left">
                                                       <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
                                                       <Input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="h-11 bg-background font-mono font-bold uppercase rounded-lg text-sm border-gray-100" />
                                                   </div>
@@ -448,9 +448,53 @@ export default function AddNewOutletPage() {
                               )}
                             />
                           </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <FormField 
+                              control={form.control} 
+                              name="state" 
+                              render={({ field }) => (
+                                <FormItem className="text-left">
+                                  <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField 
+                              control={form.control} 
+                              name="zip" 
+                              render={({ field }) => (
+                                <FormItem className="text-left">
+                                  <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField 
+                              control={form.control} 
+                              name="country" 
+                              render={({ field }) => (
+                                <FormItem className="text-left">
+                                  <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                            <div className="space-y-2 text-left">
-                              <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-semibold text-left block">Phone number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
                                 <Select value={form.watch('phonePrefix')} onValueChange={(val) => form.setValue('phonePrefix', val)}>
                                   <SelectTrigger className="w-24 h-11 bg-background font-medium">
@@ -458,7 +502,6 @@ export default function AddNewOutletPage() {
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="+971">+971</SelectItem>
-                                    <SelectItem value="+1">+1</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormField 
@@ -515,16 +558,16 @@ export default function AddNewOutletPage() {
                                 </div>
                                 <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
-                                    <div className="space-y-1.5 text-left">
-                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Open</Label>
+                                    <div className="space-y-1.5">
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase text-left block">Open</Label>
                                       <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
                                         <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                                       </Select>
                                     </div>
                                     <span className="text-xs font-bold text-muted-foreground mt-6">to</span>
-                                    <div className="space-y-1.5 text-left">
-                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Close</Label>
+                                    <div className="space-y-1.5">
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase text-left block">Close</Label>
                                       <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
                                         <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
@@ -545,8 +588,8 @@ export default function AddNewOutletPage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
-                      <section className="space-y-8 text-left">
+                    <TabsContent value="tip-fee" className="p-8 space-y-10 focus-visible:ring-0 mt-0 bg-background text-left">
+                      <section className="space-y-8">
                         <div className="text-left border-b pb-6">
                             <h3 className="text-xl font-bold text-slate-900">Gratuity Settings</h3>
                             <p className="text-sm text-muted-foreground font-medium mt-1">Configure customer tipping options.</p>
@@ -555,7 +598,7 @@ export default function AddNewOutletPage() {
                           <CardHeader className="text-left">
                             <CardTitle className="text-lg font-bold">Options</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-6 pt-2 text-left">
+                          <CardContent className="space-y-6 pt-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                               <div className="space-y-2 text-left">
                                 <Label className="text-sm font-bold text-slate-700">Max Tip Amount (%)</Label>
@@ -576,9 +619,9 @@ export default function AddNewOutletPage() {
                   </Tabs>
                 ) : (
                   <div className="p-8 space-y-12 text-left">
-                    <section className="space-y-6 text-left">
+                    <section className="space-y-6">
                       <h3 className="text-lg font-bold">Outlet Identity</h3>
-                      <div className="flex flex-col md:flex-row gap-8 text-left">
+                      <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex flex-col items-center gap-3 shrink-0">
                           <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
                             {logoImage ? (
@@ -597,8 +640,8 @@ export default function AddNewOutletPage() {
                           </div>
                         </div>
                         
-                        <div className="flex-1 space-y-6 text-left">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                        <div className="flex-1 space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField 
                               control={form.control} 
                               name="name" 
@@ -637,9 +680,9 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t text-left">
+                    <section className="space-y-6 pt-8 border-t">
                       <h3 className="text-lg font-bold">Address & Location</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField 
                           control={form.control} 
                           name="address" 
@@ -663,7 +706,7 @@ export default function AddNewOutletPage() {
                           )}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <FormField 
                           control={form.control} 
                           name="state" 
@@ -703,9 +746,9 @@ export default function AddNewOutletPage() {
                           )}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                        <div className="space-y-2 text-left">
-                          <Label className="text-sm font-semibold">Phone <span className="text-red-500">*</span></Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold text-left block">Phone <span className="text-red-500">*</span></Label>
                           <div className="flex gap-2">
                             <Select value={form.watch('phonePrefix')} onValueChange={(val) => form.setValue('phonePrefix', val)}>
                               <SelectTrigger className="w-24 h-11 bg-background font-medium"><SelectValue /></SelectTrigger>
@@ -731,16 +774,16 @@ export default function AddNewOutletPage() {
                           render={({ field }) => (
                             <FormItem className="text-left">
                               <FormLabel className="text-sm font-semibold">Email address</FormLabel>
-                              <FormControl><Input placeholder="email@example.com" type="email" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormControl><Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} /></FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
                     </section>
-                    <section className="space-y-6 pt-8 border-t text-left">
+                    <section className="space-y-6 pt-8 border-t">
                       <h3 className="text-lg font-bold">Operational Settings</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField 
                           control={form.control} 
                           name="cuisine" 
@@ -760,7 +803,7 @@ export default function AddNewOutletPage() {
                           name="timezone" 
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
+                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent><SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem></SelectContent>
@@ -777,7 +820,7 @@ export default function AddNewOutletPage() {
             </form>
           </Form>
 
-          <div className="mt-8 flex justify-end gap-3 pb-12 text-right">
+          <div className="mt-8 flex justify-end gap-3 pb-12">
             <Button variant="outline" className="px-8 h-12 font-bold rounded-xl" type="button" onClick={() => router.back()}>Cancel</Button>
             <Button className="px-10 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl shadow-lg" onClick={form.handleSubmit(onSubmit)} disabled={isSaveDisabled}>
               <Save className="h-4 w-4" /> Save Changes
@@ -793,9 +836,9 @@ export default function AddNewOutletPage() {
           <div className="absolute -top-10 -right-10 p-8 opacity-10 rotate-12"><CheckCircle2 className="h-48 w-48 text-primary" /></div>
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20"><CheckCircle2 className="h-10 w-10 text-primary" /></div>
-            <div className="space-y-3">
+            <div className="space-y-3 text-center">
               <DialogTitle className="text-3xl font-bold tracking-tight text-foreground leading-tight">Activation Successful</DialogTitle>
-              <DialogDescription className="text-muted-foreground text-base font-medium max-w-[340px] mx-auto text-center leading-relaxed">
+              <DialogDescription className="text-muted-foreground text-base font-medium max-w-[340px] mx-auto leading-relaxed">
                 Your digital services are now active. You can now proceed to configure the remaining details, including operating hours and tip settings.
               </DialogDescription>
             </div>

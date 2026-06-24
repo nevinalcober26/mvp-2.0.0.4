@@ -279,15 +279,18 @@ export default function ManageOutletsPage() {
     );
 
     return [...filtered].sort((a, b) => {
+      // 1. Always prioritize Active Outlet
       if (a.id === activeOutletId) return -1;
       if (b.id === activeOutletId) return 1;
 
+      // 2. Prioritize Newly Added (Custom) Outlets next
       const isACustom = !mockOutlets.some(m => m.id === a.id);
       const isBCustom = !mockOutlets.some(m => m.id === b.id);
 
       if (isACustom && !isBCustom) return -1;
       if (!isACustom && isBCustom) return 1;
 
+      // 3. Keep stable order for the rest
       if (isACustom && isBCustom) {
         return b.id.localeCompare(a.id);
       }

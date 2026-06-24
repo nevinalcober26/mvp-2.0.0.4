@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
@@ -42,27 +42,20 @@ import {
   Upload,
   Save,
   ArrowLeft,
-  HelpCircle,
   Image as ImageIcon,
   MoreHorizontal,
   Info,
   Clock,
   HandCoins,
-  RotateCcw,
   CheckCircle2,
   ChevronRight,
   Palette,
+  RotateCcw,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import Image from 'next/image';
-import { OutletOptionsDrawer } from '@/components/dashboard/outlet-options-drawer';
+import { OutletOptionsModal } from '@/components/dashboard/outlet-options-modal';
 import { cn } from '@/lib/utils';
 import type { Outlet } from '@/lib/mock-data-store';
 import { useForm } from 'react-hook-form';
@@ -93,7 +86,6 @@ const outletFormSchema = z.object({
   state: z.string().min(1, 'State is required'),
   timezone: z.string().min(1, 'Timezone is required'),
   zip: z.string().min(1, 'Zip code is required'),
-  showMap: z.boolean().default(false),
 });
 
 type OutletFormValues = z.infer<typeof outletFormSchema>;
@@ -102,11 +94,16 @@ export default function AddNewOutletPage() {
   const router = useRouter();
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [isCreated, setIsCreated] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [logoImage, setLogoImage] = useState<string | null>(null);
-  const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
+  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
+  const [primaryColor, setPrimaryColor] = useState('#18B4A6');
+  const [showLogo, setShowLogo] = useState(true);
+  
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   const [regularHours, setRegularHours] = useState(
@@ -138,7 +135,6 @@ export default function AddNewOutletPage() {
       state: '',
       timezone: 'Asia/Dubai (GMT+04:00)',
       zip: '',
-      showMap: false,
     }
   });
 
@@ -164,7 +160,18 @@ export default function AddNewOutletPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoImage(reader.result as string);
-        toast({ title: "Logo Uploaded", description: "Your outlet logo has been set." });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFeaturedImage(reader.result as string);
+        toast({ title: "Banner Uploaded", description: "Your featured image has been updated." });
       };
       reader.readAsDataURL(file);
     }
@@ -194,7 +201,7 @@ export default function AddNewOutletPage() {
 
   const onSubmit = (data: OutletFormValues) => {
     if (!isCreated) {
-      setIsOptionsDrawerOpen(true);
+      setIsOptionsModalOpen(true);
     } else {
       saveOutletData(data);
       toast({
@@ -213,7 +220,7 @@ export default function AddNewOutletPage() {
       includeFees
     }));
 
-    setIsOptionsDrawerOpen(false);
+    setIsOptionsModalOpen(false);
     setIsSuccessDialogOpen(true);
   };
 
@@ -235,10 +242,10 @@ export default function AddNewOutletPage() {
     toast({ title: "Schedule Synced", description: "Monday's schedule has been applied to all days." });
   };
 
-  const breadcrumbItems = useMemo(() => [
+  const breadcrumbItems = [
     { label: 'Manage Outlets', href: '/dashboard/categories' },
     { label: isCreated ? `Configure ${form.watch('name') || 'Outlet'}` : 'Add New Outlet' }
-  ], [isCreated, form.watch('name')]);
+  ];
 
   const isSaveDisabled = !isDirty && !logoImage;
 
@@ -407,7 +414,7 @@ export default function AddNewOutletPage() {
                           name="state"
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
                               <FormControl>
                                 <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
                               </FormControl>
@@ -433,7 +440,7 @@ export default function AddNewOutletPage() {
                           name="country"
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
                               <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-11 bg-background">
@@ -487,7 +494,7 @@ export default function AddNewOutletPage() {
                             <FormItem className="text-left">
                               <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                               <FormControl>
-                                <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background font-medium" {...field} />
+                                <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -628,7 +635,7 @@ export default function AddNewOutletPage() {
                                 name="description"
                                 render={({ field }) => (
                                   <FormItem className="text-left">
-                                    <FormLabel className="text-sm font-semibold">Description</Label>
+                                    <FormLabel className="text-sm font-semibold">Description</FormLabel>
                                     <FormControl>
                                       <Textarea 
                                         placeholder="Enter outlet description..." 
@@ -642,6 +649,70 @@ export default function AddNewOutletPage() {
                               />
                             </div>
                           </div>
+                        </section>
+
+                        <section className="space-y-6 pt-8 border-t">
+                            <h3 className="text-lg font-bold">Branding & Identity</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                                <div className="md:col-span-7 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                                    </div>
+                                    <div 
+                                        className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
+                                        onClick={() => bannerInputRef.current?.click()}
+                                    >
+                                        {featuredImage ? (
+                                        <Image src={featuredImage} alt="Banner" fill className="object-cover" />
+                                        ) : (
+                                        <div className="flex flex-col items-center gap-2 text-center p-4">
+                                            <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
+                                            <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                                        </div>
+                                        )}
+                                        <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
+                                    </div>
+                                </div>
+                                <div className="md:col-span-5 space-y-6">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <Palette className="h-4 w-4 text-teal-500" />
+                                            <Label className="text-sm font-semibold">Primary Brand Color</Label>
+                                        </div>
+                                        <Card className="shadow-none border-gray-100 bg-white">
+                                            <CardContent className="p-5 space-y-4">
+                                                <div className="flex items-center gap-4">
+                                                <div className="relative h-14 w-14 shrink-0">
+                                                    <input 
+                                                    type="color" 
+                                                    value={primaryColor} 
+                                                    onChange={(e) => setPrimaryColor(e.target.value)}
+                                                    className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 space-y-1.5">
+                                                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
+                                                    <Input 
+                                                        value={primaryColor} 
+                                                        onChange={(e) => setPrimaryColor(e.target.value)}
+                                                        className="h-11 bg-background font-mono font-bold uppercase rounded-lg text-sm border-gray-100"
+                                                    />
+                                                </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                    <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
+                                        <CardContent className="p-5 flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <p className="text-sm font-bold text-gray-900">Display Logo</p>
+                                                <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
+                                            </div>
+                                            <Switch checked={showLogo} onCheckedChange={setShowLogo} />
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </div>
                         </section>
 
                         <section className="space-y-6 pt-8 border-t">
@@ -724,7 +795,7 @@ export default function AddNewOutletPage() {
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
                         <div className="space-y-1.5 max-w-2xl text-left">
                           <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
-                            Operating Schedule <HelpCircle className="h-4 w-4 text-muted-foreground/40" />
+                            Operating Schedule
                           </h3>
                           <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                             Define when your outlet is open. These hours dictate when customers can view and place orders from your Digital eMenu.
@@ -737,7 +808,7 @@ export default function AddNewOutletPage() {
                         </div>
                       </div>
 
-                      <div className="space-y-6">
+                      <div className="space-y-6 text-left">
                         <Card className="border shadow-none overflow-hidden bg-muted/10 rounded-2xl">
                           <CardHeader className="bg-white border-b py-4 px-8 text-left">
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wider">Standard Hours</CardTitle>
@@ -861,9 +932,9 @@ export default function AddNewOutletPage() {
         </div>
       </main>
 
-      <OutletOptionsDrawer 
-        open={isOptionsDrawerOpen}
-        onOpenChange={setIsOptionsDrawerOpen}
+      <OutletOptionsModal 
+        open={isOptionsModalOpen}
+        onOpenChange={setIsOptionsModalOpen}
         onConfirm={handleFinalConfirm}
       />
 

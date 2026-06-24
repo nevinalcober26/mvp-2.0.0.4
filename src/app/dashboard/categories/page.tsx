@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -359,7 +358,7 @@ export default function ManageOutletsPage() {
     <>
       <DashboardHeader />
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-[1800px] mx-auto space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="text-left">
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Manage Outlets</h1>

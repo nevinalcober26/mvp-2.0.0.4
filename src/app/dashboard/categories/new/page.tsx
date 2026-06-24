@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Breadcrumbs } from '@/components/dashboard/breadcrumbs';
@@ -142,6 +142,7 @@ export default function AddNewOutletPage() {
     }
   });
 
+  const { isDirty, isValid } = form.formState;
   const watchName = form.watch('name');
 
   useEffect(() => {
@@ -153,7 +154,7 @@ export default function AddNewOutletPage() {
         .replace(/--+/g, '-')
         .replace(/^-+/, '')
         .replace(/-+$/, '');
-      form.setValue('slug', generatedSlug, { shouldValidate: false });
+      form.setValue('slug', generatedSlug, { shouldValidate: true });
     }
   }, [watchName, isCreated, form]);
 
@@ -185,27 +186,7 @@ export default function AddNewOutletPage() {
     if (!isCreated) {
       setIsOptionsDrawerOpen(true);
     } else {
-      const outletId = data.slug || `outlet_${Date.now()}`;
-      const updatedOutlet: Outlet = {
-        id: outletId,
-        name: data.name,
-        image: logoImage || "",
-        status: 'Open',
-        rating: 0,
-        type: data.cuisine || "Boutique Café",
-        location: data.city,
-        address: data.address,
-        menuItems: 0,
-        scansToday: 0
-      };
-
-      const existing = JSON.parse(localStorage.getItem('customOutlets') || '[]');
-      const updatedList = existing.map((o: Outlet) => o.id === outletId ? updatedOutlet : o);
-      if (!existing.find((o: Outlet) => o.id === outletId)) {
-        updatedList.push(updatedOutlet);
-      }
-      localStorage.setItem('customOutlets', JSON.stringify(updatedList));
-
+      saveOutletData(data);
       toast({
         title: "Changes Saved",
         description: "Outlet configuration has been updated successfully.",
@@ -213,15 +194,8 @@ export default function AddNewOutletPage() {
     }
   };
 
-  const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
-    const data = form.getValues();
+  const saveOutletData = (data: OutletFormValues) => {
     const outletId = data.slug || `outlet_${Date.now()}`;
-    
-    localStorage.setItem(`outletServices_${outletId}`, JSON.stringify({
-      selectedOptions,
-      includeFees
-    }));
-
     const newOutlet: Outlet = {
       id: outletId,
       name: data.name,
@@ -236,9 +210,20 @@ export default function AddNewOutletPage() {
     };
 
     const existing = JSON.parse(localStorage.getItem('customOutlets') || '[]');
-    if (!existing.find((o: Outlet) => o.id === outletId)) {
-      localStorage.setItem('customOutlets', JSON.stringify([...existing, newOutlet]));
-    }
+    const updatedList = existing.filter((o: Outlet) => o.id !== outletId);
+    updatedList.push(newOutlet);
+    localStorage.setItem('customOutlets', JSON.stringify(updatedList));
+    return outletId;
+  };
+
+  const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
+    const data = form.getValues();
+    const outletId = saveOutletData(data);
+    
+    localStorage.setItem(`outletServices_${outletId}`, JSON.stringify({
+      selectedOptions,
+      includeFees
+    }));
 
     setIsOptionsDrawerOpen(false);
     setIsCreated(true);
@@ -266,10 +251,12 @@ export default function AddNewOutletPage() {
     toast({ title: "Schedule Synced", description: "Monday's schedule has been applied to all days." });
   };
 
-  const breadcrumbItems = [
+  const breadcrumbItems = useMemo(() => [
     { label: 'Manage Outlets', href: '/dashboard/categories' },
     { label: isCreated ? `Configure ${form.watch('name') || 'Outlet'}` : 'Add New Outlet' }
-  ];
+  ], [isCreated, form.watch('name')]);
+
+  const isSaveDisabled = !isDirty || !isValid;
 
   return (
     <>
@@ -289,7 +276,7 @@ export default function AddNewOutletPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-foreground">
                         {isCreated ? "Configure Outlet" : "Add New Outlet"}
                     </h1>
-                    <p className="text-muted-foreground mt-1">
+                    <p className="text-muted-foreground mt-1 text-sm font-medium">
                         {isCreated ? `Managing configuration for ${form.watch('name')}` : "Configure your new outlet details and basic settings"}
                     </p>
                   </div>
@@ -299,8 +286,9 @@ export default function AddNewOutletPage() {
                     Cancel
                   </Button>
                   <Button 
-                    className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold" 
+                    className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg" 
                     type="submit"
+                    disabled={isSaveDisabled}
                   >
                     <Save className="h-4 w-4" />
                     Save Changes
@@ -397,7 +385,7 @@ export default function AddNewOutletPage() {
                                 <FormControl>
                                   <Textarea 
                                     placeholder="Enter outlet description..." 
-                                    className="min-h-[120px] resize-none bg-background"
+                                    className="min-h-[100px] resize-none bg-background"
                                     {...field}
                                   />
                                 </FormControl>
@@ -405,91 +393,6 @@ export default function AddNewOutletPage() {
                               </FormItem>
                             )}
                           />
-                        </div>
-                      </div>
-                    </section>
-
-                    <section className="space-y-6 pt-8 border-t">
-                      <div className="space-y-1">
-                        <h3 className="text-lg font-bold">Branding & Identity</h3>
-                        <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                        <div className="md:col-span-7 space-y-4">
-                          <div className="flex items-center gap-2">
-                            <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
-                            <TooltipProvider>
-                              <Tooltip delayDuration={100}>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-[200px] bg-gray-900 text-white text-xs p-2 rounded-lg">
-                                  <p>This header appears as the header background on your mobile menu home page.</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                          
-                          <div 
-                            className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
-                            onClick={() => bannerInputRef.current?.click()}
-                          >
-                            {featuredImage ? (
-                              <Image src={featuredImage} alt="Banner" fill className="object-cover" />
-                            ) : (
-                              <div className="flex flex-col items-center gap-2 text-center p-4">
-                                <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                                <p className="text-sm font-bold text-gray-400 uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
-                                <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
-                              </div>
-                            )}
-                            <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
-                          </div>
-                        </div>
-
-                        <div className="md:col-span-5 space-y-6">
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Palette className="h-4 w-4 text-teal-500" />
-                              <Label className="text-sm font-semibold">Primary Brand Color</Label>
-                            </div>
-                            
-                            <Card className="shadow-none border-gray-100 bg-white">
-                              <CardContent className="p-5 space-y-4">
-                                <div className="flex items-center gap-4">
-                                  <div className="relative h-14 w-14 shrink-0">
-                                    <input 
-                                      type="color" 
-                                      value={form.watch('primaryColor')} 
-                                      onChange={(e) => form.setValue('primaryColor', e.target.value)}
-                                      className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
-                                    />
-                                  </div>
-                                  <div className="flex-1 space-y-1.5">
-                                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
-                                    <div className="relative">
-                                      <Input 
-                                        {...form.register('primaryColor')}
-                                        className="h-11 bg-background font-mono font-bold uppercase pr-10 rounded-lg text-sm border-gray-100"
-                                      />
-                                      <Edit className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-
-                          <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
-                            <CardContent className="p-5 flex items-center justify-between">
-                              <div className="space-y-0.5 text-left">
-                                <p className="text-sm font-bold text-gray-900">Display Logo</p>
-                                <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
-                              </div>
-                              <Switch checked={form.watch('showLogo')} onCheckedChange={(val) => form.setValue('showLogo', val)} />
-                            </CardContent>
-                          </Card>
                         </div>
                       </div>
                     </section>
@@ -596,7 +499,7 @@ export default function AddNewOutletPage() {
                               render={({ field }) => (
                                 <FormItem className="flex-1 space-y-0">
                                   <FormControl>
-                                    <Input placeholder="581111111" className="h-11 bg-background" {...field} />
+                                    <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
                                   <FormMessage className="mt-1" />
                                 </FormItem>
@@ -611,30 +514,13 @@ export default function AddNewOutletPage() {
                             <FormItem>
                               <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                               <FormControl>
-                                <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background" {...field} />
+                                <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background font-medium" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-
-                      <FormField
-                        control={form.control}
-                        name="menuUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
-                            <div className="relative">
-                              <FormControl>
-                                <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
-                              </FormControl>
-                              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </section>
 
                     <section className="space-y-6 pt-8 border-t">
@@ -690,14 +576,14 @@ export default function AddNewOutletPage() {
                     <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-background p-0 h-14 sticky top-0 z-20">
                       <TabsTrigger 
                         value="basic" 
-                        className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold"
+                        className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider"
                       >
                         <Info className="h-4 w-4" /> Basic Information
                       </TabsTrigger>
-                      <TabsTrigger value="hours" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold">
+                      <TabsTrigger value="hours" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider">
                         <Clock className="h-4 w-4" /> Opening Hours
                       </TabsTrigger>
-                      <TabsTrigger value="tip-fee" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-semibold">
+                      <TabsTrigger value="tip-fee" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider">
                         <HandCoins className="h-4 w-4" /> Tip Fee
                       </TabsTrigger>
                     </TabsList>
@@ -737,7 +623,7 @@ export default function AddNewOutletPage() {
                               </div>
                             </div>
                             
-                            <div className="flex-1 space-y-6">
+                            <div className="flex-1 space-y-6 text-left">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                   control={form.control}
@@ -778,7 +664,7 @@ export default function AddNewOutletPage() {
                                     <FormControl>
                                       <Textarea 
                                         placeholder="Enter outlet description..." 
-                                        className="min-h-[120px] resize-none bg-background"
+                                        className="min-h-[100px] resize-none bg-background"
                                         {...field}
                                       />
                                     </FormControl>
@@ -792,7 +678,7 @@ export default function AddNewOutletPage() {
 
                         <section className="space-y-6 pt-8 border-t">
                           <h3 className="text-lg font-bold">Address & Location</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                             <FormField
                               control={form.control}
                               name="address"
@@ -821,7 +707,7 @@ export default function AddNewOutletPage() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
                             <div className="space-y-2">
                               <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
@@ -841,7 +727,7 @@ export default function AddNewOutletPage() {
                                   render={({ field }) => (
                                     <FormItem className="flex-1 space-y-0">
                                       <FormControl>
-                                        <Input placeholder="581111111" className="h-11 bg-background" {...field} />
+                                        <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
                                       </FormControl>
                                       <FormMessage className="mt-1" />
                                     </FormItem>
@@ -856,30 +742,13 @@ export default function AddNewOutletPage() {
                                 <FormItem>
                                   <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background" {...field} />
+                                    <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </div>
-
-                          <FormField
-                            control={form.control}
-                            name="menuUrl"
-                            render={({ field }) => (
-                              <FormItem className="mt-6">
-                                <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
-                                <div className="relative">
-                                  <FormControl>
-                                    <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
-                                  </FormControl>
-                                  <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
                         </section>
                       </div>
                     </TabsContent>
@@ -890,21 +759,21 @@ export default function AddNewOutletPage() {
                           <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
                             Operating Schedule <HelpCircle className="h-4 w-4 text-muted-foreground/40" />
                           </h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                             Define when your outlet is open. These hours dictate when customers can view and place orders from your Digital eMenu.
                           </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-3 shrink-0">
-                          <Button variant="outline" type="button" size="sm" className="gap-2 font-semibold text-xs h-10 px-4" onClick={handleCopyToAllDays}>
+                          <Button variant="outline" type="button" size="sm" className="gap-2 font-bold text-xs h-10 px-4 rounded-xl shadow-sm" onClick={handleCopyToAllDays}>
                             <RotateCcw className="h-3.5 w-3.5" /> Apply Monday to All Days
                           </Button>
                         </div>
                       </div>
 
                       <div className="space-y-6">
-                        <Card className="border shadow-none overflow-hidden bg-muted/10">
+                        <Card className="border shadow-none overflow-hidden bg-muted/10 rounded-2xl">
                           <CardHeader className="bg-white border-b py-4 px-8 text-left">
-                            <CardTitle className="text-sm font-bold text-foreground">Standard Hours</CardTitle>
+                            <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wider">Standard Hours</CardTitle>
                             <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                           </CardHeader>
                           <CardContent className="p-0 divide-y bg-white">
@@ -920,9 +789,9 @@ export default function AddNewOutletPage() {
                                 <div className="flex-1 flex flex-wrap items-center gap-4">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                                     <div className="space-y-1.5 text-left">
-                                      <Label className="text-xs font-semibold text-muted-foreground ml-1">Open At</Label>
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Open At</Label>
                                       <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
-                                        <SelectTrigger className="w-36 h-10 bg-background font-medium">
+                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -930,11 +799,11 @@ export default function AddNewOutletPage() {
                                         </SelectContent>
                                       </Select>
                                     </div>
-                                    <span className="text-xs font-medium text-muted-foreground mt-6">until</span>
+                                    <span className="text-xs font-bold text-muted-foreground mt-6 uppercase">to</span>
                                     <div className="space-y-1.5 text-left">
-                                      <Label className="text-xs font-semibold text-muted-foreground ml-1">Close At</Label>
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Close At</Label>
                                       <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
-                                        <SelectTrigger className="w-36 h-10 bg-background font-medium">
+                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -976,25 +845,25 @@ export default function AddNewOutletPage() {
                         <div className="flex items-center justify-between border-b pb-6">
                           <div>
                             <h3 className="text-xl font-bold">Gratuity Settings</h3>
-                            <p className="text-sm text-muted-foreground">Configure how customers can add tips to their orders.</p>
+                            <p className="text-sm text-muted-foreground font-medium mt-1">Configure how customers can add tips to their orders.</p>
                           </div>
                         </div>
 
-                        <Card>
+                        <Card className="rounded-2xl border shadow-sm">
                           <CardHeader className="text-left">
-                            <CardTitle>Customer Tipping Options</CardTitle>
-                            <CardDescription>Control the options and limits your customers see during checkout.</CardDescription>
+                            <CardTitle className="text-lg font-bold uppercase tracking-wider">Customer Tipping Options</CardTitle>
+                            <CardDescription className="text-sm font-medium">Control the options and limits your customers see during checkout.</CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-6 pt-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                               <div className="space-y-2 text-left">
-                                <Label>Max Tip Amount Allowed (%)</Label>
-                                <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-11 bg-background" />
+                                <Label className="text-sm font-bold">Max Tip Amount Allowed (%)</Label>
+                                <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-12 bg-background font-bold text-base rounded-xl" />
                               </div>
                               <div className="space-y-2 text-left">
-                                <Label>Allow Custom Tip</Label>
-                                <div className="flex items-center justify-between rounded-lg border p-3 h-[60px] bg-background">
-                                  <p className="text-sm text-muted-foreground">Let customers enter their own amount.</p>
+                                <Label className="text-sm font-bold">Allow Custom Tip</Label>
+                                <div className="flex items-center justify-between rounded-xl border p-4 h-[64px] bg-background">
+                                  <p className="text-xs text-muted-foreground font-medium">Let customers enter their own amount.</p>
                                   <Switch id="custom-tip-enabled" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} />
                                 </div>
                               </div>
@@ -1016,6 +885,7 @@ export default function AddNewOutletPage() {
             <Button 
               className="px-10 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl shadow-xl shadow-primary/20" 
               onClick={form.handleSubmit(onSubmit)}
+              disabled={isSaveDisabled}
             >
               <Save className="h-4 w-4" />
               Save Changes

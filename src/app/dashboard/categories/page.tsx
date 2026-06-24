@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -222,28 +222,28 @@ export default function ManageOutletsPage() {
     };
   }, [isLoading, activeOutletId]);
 
-  const handleOpenQuickSettings = (outlet: Outlet) => {
+  const handleOpenQuickSettings = useCallback((outlet: Outlet) => {
     setSelectedOutlet(outlet);
     setIsQuickSettingsOpen(true);
-  };
+  }, []);
 
-  const handleEditOutlet = (outlet: Outlet) => {
+  const handleEditOutlet = useCallback((outlet: Outlet) => {
     router.push(`/dashboard/categories/edit/${outlet.id}`);
-  };
+  }, [router]);
 
-  const handleAddNewOutlet = () => {
+  const handleAddNewOutlet = useCallback(() => {
     router.push('/dashboard/categories/new');
-  };
+  }, [router]);
 
-  const handleDeleteOutlet = (id: string) => {
+  const handleDeleteOutlet = useCallback((id: string) => {
     const custom = JSON.parse(localStorage.getItem('customOutlets') || '[]');
     const updated = custom.filter((o: Outlet) => o.id !== id);
     localStorage.setItem('customOutlets', JSON.stringify(updated));
     setAllOutlets(prev => prev.filter(o => o.id !== id));
     toast({ variant: 'destructive', title: "Outlet Deleted", description: "The outlet has been removed from your list." });
-  };
+  }, [toast]);
 
-  const handleSelectOutlet = (outlet: Outlet) => {
+  const handleSelectOutlet = useCallback((outlet: Outlet) => {
     if (activeOutletId === outlet.id) return;
     localStorage.setItem('activeBranch', JSON.stringify({
       id: outlet.id,
@@ -252,7 +252,7 @@ export default function ManageOutletsPage() {
     }));
     window.dispatchEvent(new CustomEvent('branch-changed'));
     toast({ title: "Context Updated", description: `Now managing: ${outlet.name}` });
-  };
+  }, [activeOutletId, toast]);
 
   const filteredOutlets = useMemo(() => {
     const filtered = allOutlets.filter(r => 

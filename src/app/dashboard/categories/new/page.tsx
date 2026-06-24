@@ -454,7 +454,7 @@ export default function AddNewOutletPage() {
                               name="state" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
+                                  <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
                                   <FormControl>
                                     <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
                                   </FormControl>
@@ -467,7 +467,7 @@ export default function AddNewOutletPage() {
                               name="zip" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></Label>
+                                  <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
                                   <FormControl>
                                     <Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} />
                                   </FormControl>
@@ -691,7 +691,7 @@ export default function AddNewOutletPage() {
                     </section>
 
                     <section className="space-y-6 pt-8 border-t text-left">
-                      <h3 className="text-lg font-bold">Address & Location</h3>
+                      <h3 className="text-lg font-bold">Address & Contact</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField 
                           control={form.control} 
@@ -799,7 +799,7 @@ export default function AddNewOutletPage() {
                           name="email" 
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold text-left block">Email address</FormLabel>
+                              <FormLabel className="text-sm font-semibold text-left block">Email address</Label>
                               <FormControl>
                                 <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                               </FormControl>
@@ -873,7 +873,6 @@ export default function AddNewOutletPage() {
 
       <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
         <DialogContent className="sm:max-w-md p-10 border-0 shadow-2xl bg-white text-center rounded-3xl">
-          <div className="absolute -top-10 -right-10 p-8 opacity-10 rotate-12 pointer-events-none"><CheckCircle2 className="h-48 w-48 text-primary" /></div>
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20"><CheckCircle2 className="h-10 w-10 text-primary" /></div>
             <div className="space-y-3 text-center">

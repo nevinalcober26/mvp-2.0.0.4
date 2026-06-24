@@ -134,7 +134,7 @@ export function QuickSettingsSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md w-full p-0 border-l shadow-2xl bg-white">
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full text-left">
           <SheetHeader className="p-6 border-b bg-muted/20 text-left">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-lg bg-primary/10">
@@ -169,11 +169,22 @@ export function QuickSettingsSheet({
               </Card>
             </div>
 
-            {/* Serving Options */}
+            {/* Licensed Channels */}
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Serving Options</h3>
-                <Badge variant="outline" className="text-[9px] font-bold border-primary/20 text-primary uppercase h-5">Configure Set</Badge>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Licensed Channels</h3>
+                <Badge variant="outline" className="text-[9px] font-bold border-primary/20 text-primary uppercase h-5">Active License</Badge>
+              </div>
+
+              {/* License Warning Notification */}
+              <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-100 flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                <div className="text-left space-y-1">
+                  <p className="text-xs font-bold text-blue-900 leading-none">Subscription Context</p>
+                  <p className="text-[11px] text-blue-800/80 leading-relaxed font-medium">
+                    These channels are provisioned via your Digital eMenu license. Changing these settings reflects in your monthly operational quota.
+                  </p>
+                </div>
               </div>
               
               <div className="space-y-2.5">

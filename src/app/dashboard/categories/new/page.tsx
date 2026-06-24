@@ -46,7 +46,6 @@ import {
   Info,
   Clock,
   HandCoins,
-  ChevronRight,
   RotateCcw,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -526,22 +525,56 @@ export default function AddNewOutletPage() {
                         />
                       </div>
                       
-                      <FormField
-                        control={form.control}
-                        name="menuUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-semibold">Menu url</Label>
-                            <div className="relative">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
+                                <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
                               </FormControl>
-                              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="zip"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-11 bg-background">
+                                    <SelectValue placeholder="Select country" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                                  <SelectItem value="United States">United States</SelectItem>
+                                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
@@ -585,6 +618,23 @@ export default function AddNewOutletPage() {
                           )}
                         />
                       </div>
+
+                      <FormField
+                        control={form.control}
+                        name="menuUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
+                            <div className="relative">
+                              <FormControl>
+                                <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
+                              </FormControl>
+                              <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </section>
 
                     <section className="space-y-6 pt-8 border-t">
@@ -612,20 +662,20 @@ export default function AddNewOutletPage() {
                         />
                         <FormField
                           control={form.control}
-                          name="country"
+                          name="timezone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-11 bg-background">
-                                    <SelectValue placeholder="Select country" />
+                                    <SelectValue placeholder="Select timezone" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                                  <SelectItem value="United States">United States</SelectItem>
-                                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
+                                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
+                                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -683,17 +733,6 @@ export default function AddNewOutletPage() {
                                   <Upload className="h-3.5 w-3.5" />
                                   {logoImage ? 'Change Logo' : 'Upload Logo'}
                                 </Button>
-                                {logoImage && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    type="button"
-                                    className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
-                                    onClick={() => setLogoImage(null)}
-                                  >
-                                    <X className="h-3 w-3 mr-1" /> Remove
-                                  </Button>
-                                )}
                                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
                               </div>
                             </div>
@@ -781,23 +820,6 @@ export default function AddNewOutletPage() {
                               )}
                             />
                           </div>
-                          
-                          <FormField
-                            control={form.control}
-                            name="menuUrl"
-                            render={({ field }) => (
-                              <FormItem className="mt-4">
-                                <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
-                                <div className="relative">
-                                  <FormControl>
-                                    <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
-                                  </FormControl>
-                                  <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <div className="space-y-2">
@@ -841,6 +863,23 @@ export default function AddNewOutletPage() {
                               )}
                             />
                           </div>
+
+                          <FormField
+                            control={form.control}
+                            name="menuUrl"
+                            render={({ field }) => (
+                              <FormItem className="mt-6">
+                                <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
+                                <div className="relative">
+                                  <FormControl>
+                                    <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
+                                  </FormControl>
+                                  <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </section>
                       </div>
                     </TabsContent>
@@ -857,10 +896,7 @@ export default function AddNewOutletPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                           <Button variant="outline" type="button" size="sm" className="gap-2 font-semibold text-xs h-10 px-4" onClick={handleCopyToAllDays}>
-                            <CopyIcon className="h-3.5 w-3.5" /> Apply Monday to All Days
-                          </Button>
-                          <Button variant="ghost" type="button" size="sm" className="gap-2 font-semibold text-xs h-10 px-4 text-muted-foreground" onClick={() => setRegularHours(DAYS.map(day => ({ day, open: '09:00 AM', close: '11:00 PM', closed: false })))}>
-                            <RotateCcw className="h-3.5 w-3.5" /> Reset Schedule
+                            <RotateCcw className="h-3.5 w-3.5" /> Apply Monday to All Days
                           </Button>
                         </div>
                       </div>
@@ -936,8 +972,8 @@ export default function AddNewOutletPage() {
                     </TabsContent>
 
                     <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
-                      <section className="space-y-8">
-                        <div className="flex items-center justify-between border-b pb-6 text-left">
+                      <section className="space-y-8 text-left">
+                        <div className="flex items-center justify-between border-b pb-6">
                           <div>
                             <h3 className="text-xl font-bold">Gratuity Settings</h3>
                             <p className="text-sm text-muted-foreground">Configure how customers can add tips to their orders.</p>
@@ -994,25 +1030,5 @@ export default function AddNewOutletPage() {
         onConfirm={handleFinalConfirm}
       />
     </>
-  );
-}
-
-function CopyIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-    </svg>
   );
 }

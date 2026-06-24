@@ -99,7 +99,13 @@ export function QuickSettingsSheet({
 
   // Warning Dialog State
   const [showWarning, setShowWarning] = useState(false);
-  const [warningConfig, setWarningConfig] = useState<{ title: string; desc: string; onConfirm: () => void } | null>(null);
+  const [warningConfig, setWarningConfig] = useState<{ 
+    title: string; 
+    desc: string; 
+    confirmText: string;
+    isDestructive?: boolean;
+    onConfirm: () => void; 
+  } | null>(null);
 
   useEffect(() => {
     if (open && restaurant) {
@@ -136,6 +142,8 @@ export function QuickSettingsSheet({
       setWarningConfig({
         title: `Disable ${option?.title}?`,
         desc: `This will immediately stop service for this channel. Customers will no longer be able to use ${option?.title} for ${restaurant.name}.`,
+        confirmText: "Confirm Deactivation",
+        isDestructive: true,
         onConfirm: () => {
           setSelectedOptions(prev => prev.filter(o => o !== id));
           setShowWarning(false);
@@ -143,8 +151,18 @@ export function QuickSettingsSheet({
       });
       setShowWarning(true);
     } else {
-      // Just enable
-      setSelectedOptions(prev => [...prev, id]);
+      // Show confirmation when enabling
+      setWarningConfig({
+        title: `Enable ${option?.title}?`,
+        desc: `Activating this channel will allow customers to use ${option?.title} for ${restaurant.name}. This action may affect your monthly operational quota.`,
+        confirmText: "Activate Channel",
+        isDestructive: false,
+        onConfirm: () => {
+          setSelectedOptions(prev => [...prev, id]);
+          setShowWarning(false);
+        }
+      });
+      setShowWarning(true);
     }
   };
 
@@ -203,6 +221,8 @@ export function QuickSettingsSheet({
                             setWarningConfig({
                               title: "Close Outlet?",
                               desc: "This will stop all incoming orders immediately across all channels. You can reopen the outlet at any time.",
+                              confirmText: "Confirm Deactivation",
+                              isDestructive: true,
                               onConfirm: () => {
                                 setIsBranchOpen(false);
                                 setShowWarning(false);
@@ -294,6 +314,8 @@ export function QuickSettingsSheet({
                                     setWarningConfig({
                                       title: "Disable Fees?",
                                       desc: "Removing convenience fees may affect your revenue mapping for app-based transactions.",
+                                      confirmText: "Confirm Deactivation",
+                                      isDestructive: true,
                                       onConfirm: () => {
                                         setIncludeFees(false);
                                         setShowWarning(false);
@@ -349,9 +371,14 @@ export function QuickSettingsSheet({
                 <AlertDialogCancel className="rounded-xl font-bold h-11 border-slate-200">Cancel</AlertDialogCancel>
                 <AlertDialogAction 
                   onClick={warningConfig?.onConfirm}
-                  className="bg-destructive hover:bg-destructive/90 text-white font-bold h-11 rounded-xl px-6"
+                  className={cn(
+                    "text-white font-bold h-11 rounded-xl px-6 transition-colors",
+                    warningConfig?.isDestructive 
+                      ? "bg-destructive hover:bg-destructive/90" 
+                      : "bg-primary hover:bg-primary/90"
+                  )}
                 >
-                  Confirm Deactivation
+                  {warningConfig?.confirmText || "Confirm"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

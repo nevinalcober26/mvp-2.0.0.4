@@ -50,6 +50,9 @@ import {
   ChevronRight,
   Palette,
   RotateCcw,
+  Hash,
+  Monitor,
+  User,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -168,13 +171,12 @@ export default function AddNewOutletPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFeaturedImage(reader.result as string);
-        toast({ title: "Banner Uploaded", description: "Your featured image has been updated." });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const saveOutletData = (data: OutletFormValues) => {
+  const saveOutletToStore = (data: OutletFormValues) => {
     const outletId = data.slug || `outlet_${Date.now()}`;
     const newOutlet: Outlet = {
       id: outletId,
@@ -200,10 +202,10 @@ export default function AddNewOutletPage() {
     if (!isCreated) {
       setIsOptionsModalOpen(true);
     } else {
-      saveOutletData(data);
+      saveOutletToStore(data);
       toast({
-        title: "Changes Saved",
-        description: "Outlet configuration has been updated successfully.",
+        title: "Configuration Saved",
+        description: "Outlet details have been successfully updated.",
       });
       router.push('/dashboard/categories');
     }
@@ -211,7 +213,7 @@ export default function AddNewOutletPage() {
 
   const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
     const data = form.getValues();
-    const outletId = saveOutletData(data);
+    const outletId = saveOutletToStore(data);
     
     localStorage.setItem(`outletServices_${outletId}`, JSON.stringify({
       selectedOptions,
@@ -302,7 +304,7 @@ export default function AddNewOutletPage() {
 
                     <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background space-y-12">
                         <section className="space-y-6 text-left">
-                          <h3 className="text-lg font-bold">Outlet Identity</h3>
+                          <h3 className="text-lg font-bold text-left">Outlet Identity</h3>
                           <div className="flex flex-col md:flex-row gap-8">
                             <div className="flex flex-col items-center gap-3 shrink-0">
                               <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
@@ -369,10 +371,10 @@ export default function AddNewOutletPage() {
                         </section>
 
                         <section className="space-y-6 pt-8 border-t text-left">
-                            <h3 className="text-lg font-bold">Branding & Identity</h3>
+                            <h3 className="text-lg font-bold text-left">Branding & Identity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                                 <div className="md:col-span-7 space-y-4">
-                                    <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                                    <Label className="text-sm font-semibold text-left block">Featured Image (Banner)</Label>
                                     <div className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => bannerInputRef.current?.click()}>
                                         {featuredImage ? (
                                         <Image src={featuredImage} alt="Banner" fill className="object-cover" />
@@ -398,7 +400,7 @@ export default function AddNewOutletPage() {
                                                       <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden" />
                                                   </div>
                                                   <div className="flex-1 space-y-1.5 text-left">
-                                                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">BRAND HEX CODE</Label>
+                                                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left block">BRAND HEX CODE</Label>
                                                       <Input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="h-11 bg-background font-mono font-bold uppercase rounded-lg text-sm border-gray-100" />
                                                   </div>
                                                 </div>
@@ -419,7 +421,7 @@ export default function AddNewOutletPage() {
                         </section>
 
                         <section className="space-y-6 pt-8 border-t text-left">
-                          <h3 className="text-lg font-bold">Address & Contact</h3>
+                          <h3 className="text-lg font-bold text-left">Address & Contact</h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField 
                               control={form.control} 
@@ -527,7 +529,7 @@ export default function AddNewOutletPage() {
                               name="email" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Email address</Label>
+                                  <FormLabel className="text-sm font-semibold text-left block">Email address</FormLabel>
                                   <FormControl>
                                     <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
@@ -624,7 +626,7 @@ export default function AddNewOutletPage() {
                 ) : (
                   <div className="p-8 space-y-12 text-left">
                     <section className="space-y-6 text-left">
-                      <h3 className="text-lg font-bold">Outlet Identity</h3>
+                      <h3 className="text-lg font-bold text-left">Outlet Identity</h3>
                       <div className="flex flex-col md:flex-row gap-8 text-left">
                         <div className="flex flex-col items-center gap-3 shrink-0">
                           <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
@@ -691,7 +693,7 @@ export default function AddNewOutletPage() {
                     </section>
 
                     <section className="space-y-6 pt-8 border-t text-left">
-                      <h3 className="text-lg font-bold">Address & Contact</h3>
+                      <h3 className="text-lg font-bold text-left">Address & Contact</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField 
                           control={form.control} 
@@ -799,7 +801,7 @@ export default function AddNewOutletPage() {
                           name="email" 
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold text-left block">Email address</Label>
+                              <FormLabel className="text-sm font-semibold text-left block">Email address</FormLabel>
                               <FormControl>
                                 <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                               </FormControl>
@@ -810,7 +812,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
                     <section className="space-y-6 pt-8 border-t text-left">
-                      <h3 className="text-lg font-bold">Operational Settings</h3>
+                      <h3 className="text-lg font-bold text-left">Operational Settings</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField 
                           control={form.control} 

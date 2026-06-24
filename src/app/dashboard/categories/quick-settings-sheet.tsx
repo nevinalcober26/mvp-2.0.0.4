@@ -258,17 +258,6 @@ export function QuickSettingsSheet({
                 })}
               </div>
             </div>
-
-            {/* Warnings */}
-            <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100 flex items-start gap-3">
-              <Clock className="h-5 w-5 text-orange-600 mt-0.5" />
-              <div className="text-left">
-                <p className="text-sm font-bold text-orange-900">Auto-Close Warning</p>
-                <p className="text-[11px] text-orange-800 leading-relaxed font-medium">
-                  This outlet is set to automatically close orders at 11:30 PM.
-                </p>
-              </div>
-            </div>
           </div>
 
           <SheetFooter className="p-6 border-t bg-slate-50 shrink-0">

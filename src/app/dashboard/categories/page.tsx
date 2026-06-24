@@ -282,11 +282,35 @@ export default function ManageOutletsPage() {
   };
 
   const filteredOutlets = useMemo(() => {
-    return allOutlets.filter(r => 
+    const filtered = allOutlets.filter(r => 
       r.name.toLowerCase().includes(search.toLowerCase()) || 
       r.location.toLowerCase().includes(search.toLowerCase())
     );
-  }, [allOutlets, search]);
+
+    // Apply specific sorting logic:
+    // 1. Active outlet first
+    // 2. Newly added custom outlets second
+    // 3. Followed by standard outlets
+    return [...filtered].sort((a, b) => {
+      // Priority 1: Current active outlet
+      if (a.id === activeOutletId) return -1;
+      if (b.id === activeOutletId) return 1;
+
+      // Priority 2: Custom (newly added) outlets
+      const isACustom = !mockOutlets.some(m => m.id === a.id);
+      const isBCustom = !mockOutlets.some(m => m.id === b.id);
+
+      if (isACustom && !isBCustom) return -1;
+      if (!isACustom && isBCustom) return 1;
+
+      // Maintain order within custom group (newest first based on ID or appending)
+      if (isACustom && isBCustom) {
+        return b.id.localeCompare(a.id);
+      }
+
+      return 0;
+    });
+  }, [allOutlets, search, activeOutletId]);
 
   const kpiCards: StatCardData[] = useMemo(() => [
     {

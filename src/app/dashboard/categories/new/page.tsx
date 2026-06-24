@@ -45,7 +45,6 @@ import {
   HelpCircle,
   Image as ImageIcon,
   MoreHorizontal,
-  X,
   Info,
   Clock,
   HandCoins,
@@ -53,7 +52,6 @@ import {
   CheckCircle2,
   ChevronRight,
   Palette,
-  Edit,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -110,11 +108,6 @@ export default function AddNewOutletPage() {
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-
-  // States for branding (used after activation)
-  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
-  const [primaryColor, setPrimaryColor] = useState('#18B4A6');
-  const [showLogo, setShowLogo] = useState(true);
 
   const [regularHours, setRegularHours] = useState(
     DAYS.map(day => ({
@@ -177,18 +170,6 @@ export default function AddNewOutletPage() {
     }
   };
 
-  const onSubmit = (data: OutletFormValues) => {
-    if (!isCreated) {
-      setIsOptionsDrawerOpen(true);
-    } else {
-      saveOutletData(data);
-      toast({
-        title: "Changes Saved",
-        description: "Outlet configuration has been updated successfully.",
-      });
-    }
-  };
-
   const saveOutletData = (data: OutletFormValues) => {
     const outletId = data.slug || `outlet_${Date.now()}`;
     const newOutlet: Outlet = {
@@ -209,6 +190,18 @@ export default function AddNewOutletPage() {
     updatedList.push(newOutlet);
     localStorage.setItem('customOutlets', JSON.stringify(updatedList));
     return outletId;
+  };
+
+  const onSubmit = (data: OutletFormValues) => {
+    if (!isCreated) {
+      setIsOptionsDrawerOpen(true);
+    } else {
+      saveOutletData(data);
+      toast({
+        title: "Changes Saved",
+        description: "Outlet configuration has been updated successfully.",
+      });
+    }
   };
 
   const handleFinalConfirm = (selectedOptions: string[], includeFees: boolean) => {
@@ -635,7 +628,7 @@ export default function AddNewOutletPage() {
                                 name="description"
                                 render={({ field }) => (
                                   <FormItem className="text-left">
-                                    <FormLabel className="text-sm font-semibold">Description</FormLabel>
+                                    <FormLabel className="text-sm font-semibold">Description</Label>
                                     <FormControl>
                                       <Textarea 
                                         placeholder="Enter outlet description..." 

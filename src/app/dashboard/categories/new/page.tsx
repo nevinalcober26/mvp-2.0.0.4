@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -16,17 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -38,8 +38,6 @@ import {
   ArrowLeft,
   HelpCircle,
   Image as ImageIcon,
-  Palette,
-  Edit,
   MoreHorizontal,
   X,
   Info,
@@ -76,8 +74,6 @@ const outletFormSchema = z.object({
   name: z.string().min(1, 'Outlet name is required'),
   slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must be lowercase and contain only letters, numbers, and hyphens'),
   description: z.string().optional(),
-  primaryColor: z.string().default('#18B4A6'),
-  showLogo: z.boolean().default(true),
   address: z.string().min(1, 'Street address is required'),
   city: z.string().min(1, 'City is required'),
   menuUrl: z.string().url().optional().or(z.literal('')),
@@ -102,7 +98,6 @@ export default function AddNewOutletPage() {
 
   const [isCreated, setIsCreated] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
-  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
 
@@ -124,8 +119,6 @@ export default function AddNewOutletPage() {
       name: '',
       slug: '',
       description: '',
-      primaryColor: '#18B4A6',
-      showLogo: true,
       address: '',
       city: '',
       menuUrl: '',
@@ -156,18 +149,6 @@ export default function AddNewOutletPage() {
       form.setValue('slug', generatedSlug, { shouldValidate: true });
     }
   }, [watchName, isCreated, form]);
-
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFeaturedImage(reader.result as string);
-        toast({ title: "Banner Uploaded", description: "Your featured image has been set." });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -227,8 +208,8 @@ export default function AddNewOutletPage() {
     setIsOptionsDrawerOpen(false);
     setIsCreated(true);
     toast({
-      title: "Outlet Created",
-      description: "Outlet details and services have been activated.",
+      title: "Activation Successful",
+      description: "Outlet license services have been provisioned.",
     });
   };
 
@@ -276,7 +257,7 @@ export default function AddNewOutletPage() {
                         {isCreated ? "Configure Outlet" : "Add New Outlet"}
                     </h1>
                     <p className="text-muted-foreground mt-1 text-sm font-medium">
-                        {isCreated ? `Managing configuration for ${form.watch('name')}` : "Configure your new outlet details and basic settings"}
+                        {isCreated ? `License setup for ${form.watch('name')}` : "Configure your license-based outlet details"}
                     </p>
                   </div>
                 </div>
@@ -299,7 +280,7 @@ export default function AddNewOutletPage() {
                 {!isCreated ? (
                   <div className="p-8 space-y-12">
                     <section className="space-y-6">
-                      <h3 className="text-lg font-bold">Outlet Details</h3>
+                      <h3 className="text-lg font-bold">Outlet Identity</h3>
                       <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex flex-col items-center gap-3 shrink-0">
                           <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
@@ -327,22 +308,11 @@ export default function AddNewOutletPage() {
                               <Upload className="h-3.5 w-3.5" />
                               {logoImage ? 'Change Logo' : 'Upload Logo'}
                             </Button>
-                            {logoImage && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                type="button"
-                                className="h-7 text-[10px] font-bold text-destructive uppercase tracking-wider"
-                                onClick={() => setLogoImage(null)}
-                              >
-                                <X className="h-3 w-3 mr-1" /> Remove
-                              </Button>
-                            )}
                             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
                           </div>
                         </div>
                         
-                        <div className="flex-1 space-y-6">
+                        <div className="flex-1 space-y-6 text-left">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                               control={form.control}
@@ -398,7 +368,7 @@ export default function AddNewOutletPage() {
 
                     <section className="space-y-6 pt-8 border-t">
                       <h3 className="text-lg font-bold">Address & Location</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField
                           control={form.control}
                           name="address"
@@ -427,7 +397,7 @@ export default function AddNewOutletPage() {
                         />
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                         <FormField
                           control={form.control}
                           name="state"
@@ -478,7 +448,7 @@ export default function AddNewOutletPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <div className="space-y-2">
                           <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                           <div className="flex gap-2">
@@ -523,8 +493,8 @@ export default function AddNewOutletPage() {
                     </section>
 
                     <section className="space-y-6 pt-8 border-t">
-                      <h3 className="text-lg font-bold">Additional Settings</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <h3 className="text-lg font-bold">Operational Settings</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField
                           control={form.control}
                           name="cuisine"
@@ -587,8 +557,7 @@ export default function AddNewOutletPage() {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background">
-                      <div className="space-y-12">
+                    <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background text-left space-y-12">
                         <section className="space-y-6">
                           <h3 className="text-lg font-bold">Outlet Details</h3>
                           <div className="flex flex-col md:flex-row gap-8">
@@ -618,11 +587,10 @@ export default function AddNewOutletPage() {
                                   <Upload className="h-3.5 w-3.5" />
                                   {logoImage ? 'Change Logo' : 'Upload Logo'}
                                 </Button>
-                                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
                               </div>
                             </div>
                             
-                            <div className="flex-1 space-y-6 text-left">
+                            <div className="flex-1 space-y-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                   control={form.control}
@@ -643,12 +611,9 @@ export default function AddNewOutletPage() {
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></FormLabel>
-                                      <div className="relative">
-                                        <FormControl>
-                                          <Input placeholder="outlet-slug" {...field} className="h-11 bg-background pr-10" />
-                                        </FormControl>
-                                        <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                                      </div>
+                                      <FormControl>
+                                          <Input placeholder="outlet-slug" {...field} className="h-11 bg-background" />
+                                      </FormControl>
                                       <FormMessage />
                                     </FormItem>
                                   )}
@@ -676,8 +641,8 @@ export default function AddNewOutletPage() {
                         </section>
 
                         <section className="space-y-6 pt-8 border-t">
-                          <h3 className="text-lg font-bold">Address & Location</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                          <h3 className="text-lg font-bold">Address & Contact</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                               control={form.control}
                               name="address"
@@ -706,7 +671,7 @@ export default function AddNewOutletPage() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <div className="space-y-2">
                               <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
@@ -741,7 +706,7 @@ export default function AddNewOutletPage() {
                                 <FormItem>
                                   <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background font-medium" {...field} />
+                                    <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -749,12 +714,11 @@ export default function AddNewOutletPage() {
                             />
                           </div>
                         </section>
-                      </div>
                     </TabsContent>
 
-                    <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
+                    <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
-                        <div className="space-y-1.5 text-left max-w-2xl">
+                        <div className="space-y-1.5 max-w-2xl">
                           <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
                             Operating Schedule <HelpCircle className="h-4 w-4 text-muted-foreground/40" />
                           </h3>
@@ -771,7 +735,7 @@ export default function AddNewOutletPage() {
 
                       <div className="space-y-6">
                         <Card className="border shadow-none overflow-hidden bg-muted/10 rounded-2xl">
-                          <CardHeader className="bg-white border-b py-4 px-8 text-left">
+                          <CardHeader className="bg-white border-b py-4 px-8">
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wider">Standard Hours</CardTitle>
                             <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                           </CardHeader>
@@ -781,13 +745,13 @@ export default function AddNewOutletPage() {
                                 "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
                                 hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
                               )}>
-                                <div className="w-32 shrink-0 text-left">
+                                <div className="w-32 shrink-0">
                                   <span className="font-bold text-base text-foreground">{hour.day}</span>
                                 </div>
                                 
                                 <div className="flex-1 flex flex-wrap items-center gap-4">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
-                                    <div className="space-y-1.5 text-left">
+                                    <div className="space-y-1.5">
                                       <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Open At</Label>
                                       <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
@@ -799,7 +763,7 @@ export default function AddNewOutletPage() {
                                       </Select>
                                     </div>
                                     <span className="text-xs font-bold text-muted-foreground mt-6 uppercase">to</span>
-                                    <div className="space-y-1.5 text-left">
+                                    <div className="space-y-1.5">
                                       <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Close At</Label>
                                       <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
@@ -839,31 +803,31 @@ export default function AddNewOutletPage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
-                      <section className="space-y-8 text-left">
+                    <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
+                      <section className="space-y-8">
                         <div className="flex items-center justify-between border-b pb-6">
                           <div>
-                            <h3 className="text-xl font-bold">Gratuity Settings</h3>
+                            <h3 className="text-xl font-bold text-slate-900">Gratuity Settings</h3>
                             <p className="text-sm text-muted-foreground font-medium mt-1">Configure how customers can add tips to their orders.</p>
                           </div>
                         </div>
 
                         <Card className="rounded-2xl border shadow-sm">
-                          <CardHeader className="text-left">
+                          <CardHeader>
                             <CardTitle className="text-lg font-bold uppercase tracking-wider">Customer Tipping Options</CardTitle>
-                            <CardDescription className="text-sm font-medium">Control the options and limits your customers see during checkout.</CardDescription>
+                            <CardDescription className="text-sm font-medium text-slate-500">Control the options and limits your customers see during checkout.</CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-6 pt-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                              <div className="space-y-2 text-left">
-                                <Label className="text-sm font-bold">Max Tip Amount Allowed (%)</Label>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-bold text-slate-700">Max Tip Amount Allowed (%)</Label>
                                 <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-12 bg-background font-bold text-base rounded-xl" />
                               </div>
-                              <div className="space-y-2 text-left">
-                                <Label className="text-sm font-bold">Allow Custom Tip</Label>
+                              <div className="space-y-2">
+                                <Label className="text-sm font-bold text-slate-700">Allow Custom Tip</Label>
                                 <div className="flex items-center justify-between rounded-xl border p-4 h-[64px] bg-background">
                                   <p className="text-xs text-muted-foreground font-medium">Let customers enter their own amount.</p>
-                                  <Switch id="custom-tip-enabled" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} />
+                                  <Switch id="custom-tip-enabled-new" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} className="data-[state=checked]:bg-primary" />
                                 </div>
                               </div>
                             </div>

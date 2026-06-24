@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
@@ -33,6 +32,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
   Upload,
   Save,
   ArrowLeft,
@@ -44,6 +51,8 @@ import {
   Clock,
   HandCoins,
   RotateCcw,
+  CheckCircle2,
+  ChevronRight,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
@@ -93,13 +102,13 @@ type OutletFormValues = z.infer<typeof outletFormSchema>;
 export default function AddNewOutletPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const bannerInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   const [isCreated, setIsCreated] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [isOptionsDrawerOpen, setIsOptionsDrawerOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
 
   const [regularHours, setRegularHours] = useState(
     DAYS.map(day => ({
@@ -206,11 +215,7 @@ export default function AddNewOutletPage() {
     }));
 
     setIsOptionsDrawerOpen(false);
-    setIsCreated(true);
-    toast({
-      title: "Activation Successful",
-      description: "Outlet license services have been provisioned.",
-    });
+    setIsSuccessDialogOpen(true);
   };
 
   const handleUpdateRegularHour = (index: number, field: string, value: any) => {
@@ -283,7 +288,7 @@ export default function AddNewOutletPage() {
                       <h3 className="text-lg font-bold">Outlet Identity</h3>
                       <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex flex-col items-center gap-3 shrink-0">
-                          <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                          <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative text-left">
                             {logoImage ? (
                               <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
                             ) : (
@@ -313,7 +318,7 @@ export default function AddNewOutletPage() {
                         </div>
                         
                         <div className="flex-1 space-y-6 text-left">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                             <FormField
                               control={form.control}
                               name="name"
@@ -349,7 +354,7 @@ export default function AddNewOutletPage() {
                             control={form.control}
                             name="description"
                             render={({ field }) => (
-                              <FormItem>
+                              <FormItem className="text-left">
                                 <FormLabel className="text-sm font-semibold">Description</FormLabel>
                                 <FormControl>
                                   <Textarea 
@@ -366,7 +371,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t">
+                    <section className="space-y-6 pt-8 border-t text-left">
                       <h3 className="text-lg font-bold">Address & Location</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField
@@ -480,7 +485,7 @@ export default function AddNewOutletPage() {
                           control={form.control}
                           name="email"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="text-left">
                               <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                               <FormControl>
                                 <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background font-medium" {...field} />
@@ -492,7 +497,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t">
+                    <section className="space-y-6 pt-8 border-t text-left">
                       <h3 className="text-lg font-bold">Operational Settings</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField
@@ -590,8 +595,8 @@ export default function AddNewOutletPage() {
                               </div>
                             </div>
                             
-                            <div className="flex-1 space-y-6">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex-1 space-y-6 text-left">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                                 <FormField
                                   control={form.control}
                                   name="name"
@@ -623,7 +628,7 @@ export default function AddNewOutletPage() {
                                 control={form.control}
                                 name="description"
                                 render={({ field }) => (
-                                  <FormItem>
+                                  <FormItem className="text-left">
                                     <FormLabel className="text-sm font-semibold">Description</FormLabel>
                                     <FormControl>
                                       <Textarea 
@@ -640,9 +645,9 @@ export default function AddNewOutletPage() {
                           </div>
                         </section>
 
-                        <section className="space-y-6 pt-8 border-t">
+                        <section className="space-y-6 pt-8 border-t text-left">
                           <h3 className="text-lg font-bold">Address & Contact</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                             <FormField
                               control={form.control}
                               name="address"
@@ -671,7 +676,7 @@ export default function AddNewOutletPage() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 text-left">
                             <div className="space-y-2">
                               <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
@@ -689,7 +694,7 @@ export default function AddNewOutletPage() {
                                   control={form.control}
                                   name="phoneNumber"
                                   render={({ field }) => (
-                                    <FormItem className="flex-1 space-y-0">
+                                    <FormItem className="flex-1 space-y-0 text-left">
                                       <FormControl>
                                         <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
                                       </FormControl>
@@ -703,7 +708,7 @@ export default function AddNewOutletPage() {
                               control={form.control}
                               name="email"
                               render={({ field }) => (
-                                <FormItem>
+                                <FormItem className="text-left">
                                   <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                                   <FormControl>
                                     <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
@@ -718,7 +723,7 @@ export default function AddNewOutletPage() {
 
                     <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
-                        <div className="space-y-1.5 max-w-2xl">
+                        <div className="space-y-1.5 max-w-2xl text-left">
                           <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
                             Operating Schedule <HelpCircle className="h-4 w-4 text-muted-foreground/40" />
                           </h3>
@@ -735,7 +740,7 @@ export default function AddNewOutletPage() {
 
                       <div className="space-y-6">
                         <Card className="border shadow-none overflow-hidden bg-muted/10 rounded-2xl">
-                          <CardHeader className="bg-white border-b py-4 px-8">
+                          <CardHeader className="bg-white border-b py-4 px-8 text-left">
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wider">Standard Hours</CardTitle>
                             <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                           </CardHeader>
@@ -745,11 +750,11 @@ export default function AddNewOutletPage() {
                                 "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
                                 hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
                               )}>
-                                <div className="w-32 shrink-0">
+                                <div className="w-32 shrink-0 text-left">
                                   <span className="font-bold text-base text-foreground">{hour.day}</span>
                                 </div>
                                 
-                                <div className="flex-1 flex flex-wrap items-center gap-4">
+                                <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                                     <div className="space-y-1.5">
                                       <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Open At</Label>
@@ -805,7 +810,7 @@ export default function AddNewOutletPage() {
 
                     <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                       <section className="space-y-8">
-                        <div className="flex items-center justify-between border-b pb-6">
+                        <div className="flex items-center justify-between border-b pb-6 text-left">
                           <div>
                             <h3 className="text-xl font-bold text-slate-900">Gratuity Settings</h3>
                             <p className="text-sm text-muted-foreground font-medium mt-1">Configure how customers can add tips to their orders.</p>
@@ -813,17 +818,17 @@ export default function AddNewOutletPage() {
                         </div>
 
                         <Card className="rounded-2xl border shadow-sm">
-                          <CardHeader>
+                          <CardHeader className="text-left">
                             <CardTitle className="text-lg font-bold uppercase tracking-wider">Customer Tipping Options</CardTitle>
                             <CardDescription className="text-sm font-medium text-slate-500">Control the options and limits your customers see during checkout.</CardDescription>
                           </CardHeader>
-                          <CardContent className="space-y-6 pt-2">
+                          <CardContent className="space-y-6 pt-2 text-left">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                              <div className="space-y-2">
+                              <div className="space-y-2 text-left">
                                 <Label className="text-sm font-bold text-slate-700">Max Tip Amount Allowed (%)</Label>
                                 <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-12 bg-background font-bold text-base rounded-xl" />
                               </div>
-                              <div className="space-y-2">
+                              <div className="space-y-2 text-left">
                                 <Label className="text-sm font-bold text-slate-700">Allow Custom Tip</Label>
                                 <div className="flex items-center justify-between rounded-xl border p-4 h-[64px] bg-background">
                                   <p className="text-xs text-muted-foreground font-medium">Let customers enter their own amount.</p>
@@ -862,6 +867,40 @@ export default function AddNewOutletPage() {
         onOpenChange={setIsOptionsDrawerOpen}
         onConfirm={handleFinalConfirm}
       />
+
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="sm:max-w-md p-10 border-0 shadow-2xl overflow-hidden bg-white text-center rounded-3xl">
+          <div className="absolute -top-10 -right-10 p-8 opacity-10 pointer-events-none rotate-12">
+            <CheckCircle2 className="h-48 w-48 text-primary" />
+          </div>
+          
+          <div className="relative z-10 flex flex-col items-center space-y-6">
+            <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
+              <CheckCircle2 className="h-10 w-10 text-primary animate-in zoom-in duration-500" />
+            </div>
+            
+            <div className="space-y-3">
+              <DialogTitle className="text-3xl font-bold tracking-tight text-foreground leading-tight">
+                Activation Successful
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground text-base font-medium leading-relaxed max-w-[320px] mx-auto text-center">
+                Outlet license services have been provisioned. You can now proceed to configure operating hours and tip settings.
+              </DialogDescription>
+            </div>
+
+            <Button 
+              className="w-full h-12 font-bold uppercase tracking-widest bg-primary text-white hover:bg-primary/90 shadow-lg rounded-xl gap-2"
+              onClick={() => {
+                setIsSuccessDialogOpen(false);
+                setIsCreated(true);
+              }}
+            >
+              Continue to Configuration
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -205,6 +205,7 @@ export default function AddNewOutletPage() {
         title: "Changes Saved",
         description: "Outlet configuration has been updated successfully.",
       });
+      router.push('/dashboard/categories');
     }
   };
 
@@ -453,7 +454,7 @@ export default function AddNewOutletPage() {
                               name="state" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
+                                  <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
                                   <FormControl>
                                     <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
                                   </FormControl>
@@ -466,7 +467,7 @@ export default function AddNewOutletPage() {
                               name="zip" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
+                                  <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></Label>
                                   <FormControl>
                                     <Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} />
                                   </FormControl>
@@ -526,7 +527,7 @@ export default function AddNewOutletPage() {
                               name="email" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Email address</FormLabel>
+                                  <FormLabel className="text-sm font-semibold">Email address</Label>
                                   <FormControl>
                                     <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
@@ -665,7 +666,7 @@ export default function AddNewOutletPage() {
                                 <FormItem className="text-left">
                                   <FormLabel className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></FormLabel>
                                   <FormControl>
-                                    <Input placeholder="outlet-slug" {...field} className="h-11 bg-background pr-10" />
+                                    <Input placeholder="outlet-slug" {...field} className="h-11 bg-background" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -785,7 +786,7 @@ export default function AddNewOutletPage() {
                               render={({ field }) => (
                                 <FormItem className="flex-1 space-y-0 text-left">
                                   <FormControl>
-                                    <Input placeholder="581111111" className="h-11 bg-background" {...field} />
+                                    <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -877,11 +878,11 @@ export default function AddNewOutletPage() {
             <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20"><CheckCircle2 className="h-10 w-10 text-primary" /></div>
             <div className="space-y-3 text-center">
               <DialogTitle className="text-3xl font-bold tracking-tight text-foreground leading-tight">Activation Successful</DialogTitle>
-              <DialogDescription className="text-muted-foreground text-base font-medium max-w-[340px] mx-auto leading-relaxed">
+              <DialogDescription className="text-muted-foreground text-base font-medium max-w-[340px] mx-auto leading-relaxed text-center">
                 Your digital services are now active. You can now proceed to configure the remaining details, including operating hours and tip settings.
               </DialogDescription>
             </div>
-            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary text-white hover:bg-primary/90 rounded-xl gap-2" onClick={() => { setIsSuccessDialogOpen(false); setIsCreated(true); }}>
+            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary text-white hover:bg-primary/90 rounded-xl gap-2 shadow-lg" onClick={() => { setIsSuccessDialogOpen(false); setIsCreated(true); }}>
               Continue to Configuration <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
@@ -16,6 +17,8 @@ import {
 import { arrayMove, SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { PlusCircle, Edit, Trash2, Plus, SlidersHorizontal, Search, Store, Star, MapPin, Package, QrCode, MoreHorizontal, Settings, ChevronLeft, ChevronRight, TrendingUp, Trash } from 'lucide-react';
 import { Container } from '@/app/dashboard/categories/dnd/Container';
 import { SortableItem } from '@/app/dashboard/categories/dnd/SortableItem';
@@ -78,7 +81,6 @@ const OutletCard = ({
           alt={outlet.name}
           fill
           className="object-cover transition-transform group-hover:scale-105"
-          data-ai-hint="boutique cafe"
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -355,4 +357,3 @@ export default function ManageOutletsPage() {
     </>
   );
 }
-

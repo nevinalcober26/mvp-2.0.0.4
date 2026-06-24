@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -321,7 +322,7 @@ export default function AddNewOutletPage() {
                               </div>
                             </div>
                             
-                            <div className="flex-1 space-y-6">
+                            <div className="flex-1 space-y-6 text-left">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField 
                                   control={form.control} 
@@ -367,7 +368,7 @@ export default function AddNewOutletPage() {
                           </div>
                         </section>
 
-                        <section className="space-y-6 pt-8 border-t">
+                        <section className="space-y-6 pt-8 border-t text-left">
                             <h3 className="text-lg font-bold">Branding & Identity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
                                 <div className="md:col-span-7 space-y-4 text-left">
@@ -378,13 +379,13 @@ export default function AddNewOutletPage() {
                                         ) : (
                                         <div className="flex flex-col items-center gap-2 text-center p-4">
                                             <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                                            <p className="text-xs text-gray-400 font-bold uppercase">WIDESCREEN HEADER IMAGE</p>
+                                            <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">WIDESCREEN HEADER IMAGE</p>
                                         </div>
                                         )}
                                         <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
                                     </div>
                                 </div>
-                                <div className="md:col-span-5 space-y-6">
+                                <div className="md:col-span-5 space-y-6 text-left">
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2">
                                             <Palette className="h-4 w-4 text-teal-500" />
@@ -417,7 +418,7 @@ export default function AddNewOutletPage() {
                             </div>
                         </section>
 
-                        <section className="space-y-6 pt-8 border-t">
+                        <section className="space-y-6 pt-8 border-t text-left">
                           <h3 className="text-lg font-bold">Address & Contact</h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField 
@@ -464,7 +465,7 @@ export default function AddNewOutletPage() {
                                   control={form.control} 
                                   name="phoneNumber" 
                                   render={({ field }) => (
-                                    <FormItem className="flex-1 space-y-0">
+                                    <FormItem className="flex-1 space-y-0 text-left">
                                       <FormControl>
                                         <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
                                       </FormControl>
@@ -479,7 +480,7 @@ export default function AddNewOutletPage() {
                               name="email" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Email address</FormLabel>
+                                  <FormLabel className="text-sm font-semibold">Email address</Label>
                                   <FormControl>
                                     <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
                                   </FormControl>
@@ -514,7 +515,7 @@ export default function AddNewOutletPage() {
                                 </div>
                                 <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1.5 text-left">
                                       <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Open</Label>
                                       <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
@@ -522,7 +523,7 @@ export default function AddNewOutletPage() {
                                       </Select>
                                     </div>
                                     <span className="text-xs font-bold text-muted-foreground mt-6">to</span>
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1.5 text-left">
                                       <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Close</Label>
                                       <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
                                         <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
@@ -545,7 +546,7 @@ export default function AddNewOutletPage() {
                     </TabsContent>
 
                     <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
-                      <section className="space-y-8">
+                      <section className="space-y-8 text-left">
                         <div className="text-left border-b pb-6">
                             <h3 className="text-xl font-bold text-slate-900">Gratuity Settings</h3>
                             <p className="text-sm text-muted-foreground font-medium mt-1">Configure customer tipping options.</p>
@@ -554,7 +555,7 @@ export default function AddNewOutletPage() {
                           <CardHeader className="text-left">
                             <CardTitle className="text-lg font-bold">Options</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-6 pt-2">
+                          <CardContent className="space-y-6 pt-2 text-left">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                               <div className="space-y-2 text-left">
                                 <Label className="text-sm font-bold text-slate-700">Max Tip Amount (%)</Label>
@@ -574,10 +575,10 @@ export default function AddNewOutletPage() {
                     </TabsContent>
                   </Tabs>
                 ) : (
-                  <div className="p-8 space-y-12">
-                    <section className="space-y-6">
+                  <div className="p-8 space-y-12 text-left">
+                    <section className="space-y-6 text-left">
                       <h3 className="text-lg font-bold">Outlet Identity</h3>
-                      <div className="flex flex-col md:flex-row gap-8">
+                      <div className="flex flex-col md:flex-row gap-8 text-left">
                         <div className="flex flex-col items-center gap-3 shrink-0">
                           <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
                             {logoImage ? (
@@ -597,7 +598,7 @@ export default function AddNewOutletPage() {
                         </div>
                         
                         <div className="flex-1 space-y-6 text-left">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                             <FormField 
                               control={form.control} 
                               name="name" 
@@ -638,7 +639,7 @@ export default function AddNewOutletPage() {
 
                     <section className="space-y-6 pt-8 border-t text-left">
                       <h3 className="text-lg font-bold">Address & Location</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField 
                           control={form.control} 
                           name="address" 
@@ -662,7 +663,7 @@ export default function AddNewOutletPage() {
                           )}
                         />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                         <FormField 
                           control={form.control} 
                           name="state" 
@@ -703,7 +704,7 @@ export default function AddNewOutletPage() {
                         />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-left">
                           <Label className="text-sm font-semibold">Phone <span className="text-red-500">*</span></Label>
                           <div className="flex gap-2">
                             <Select value={form.watch('phonePrefix')} onValueChange={(val) => form.setValue('phonePrefix', val)}>
@@ -739,7 +740,7 @@ export default function AddNewOutletPage() {
                     </section>
                     <section className="space-y-6 pt-8 border-t text-left">
                       <h3 className="text-lg font-bold">Operational Settings</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <FormField 
                           control={form.control} 
                           name="cuisine" 
@@ -759,7 +760,7 @@ export default function AddNewOutletPage() {
                           name="timezone" 
                           render={({ field }) => (
                             <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></FormLabel>
+                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent><SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem></SelectContent>
@@ -776,7 +777,7 @@ export default function AddNewOutletPage() {
             </form>
           </Form>
 
-          <div className="mt-8 flex justify-end gap-3 pb-12">
+          <div className="mt-8 flex justify-end gap-3 pb-12 text-right">
             <Button variant="outline" className="px-8 h-12 font-bold rounded-xl" type="button" onClick={() => router.back()}>Cancel</Button>
             <Button className="px-10 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl shadow-lg" onClick={form.handleSubmit(onSubmit)} disabled={isSaveDisabled}>
               <Save className="h-4 w-4" /> Save Changes

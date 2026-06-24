@@ -77,7 +77,6 @@ const outletFormSchema = z.object({
   description: z.string().optional(),
   address: z.string().min(1, 'Street address is required'),
   city: z.string().min(1, 'City is required'),
-  menuUrl: z.string().url().optional().or(z.literal('')),
   phonePrefix: z.string().default('+971'),
   phoneNumber: z.string().min(5, 'Valid phone number is required'),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
@@ -126,7 +125,6 @@ export default function AddNewOutletPage() {
       description: '',
       address: '',
       city: '',
-      menuUrl: '',
       phonePrefix: '+971',
       phoneNumber: '',
       email: '',
@@ -288,276 +286,10 @@ export default function AddNewOutletPage() {
               </div>
 
               <Card className="shadow-smooth border-0 overflow-hidden bg-background p-0">
-                {!isCreated ? (
-                  <div className="p-8 space-y-12">
-                    <section className="space-y-6">
-                      <h3 className="text-lg font-bold">Outlet Identity</h3>
-                      <div className="flex flex-col md:flex-row gap-8">
-                        <div className="flex flex-col items-center gap-3 shrink-0">
-                          <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
-                            {logoImage ? (
-                              <Image src={logoImage} alt="Logo preview" fill className="object-cover" />
-                            ) : (
-                              <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
-                            )}
-                          </div>
-                          <div className="flex flex-col items-center gap-1.5">
-                            <input 
-                              type="file" 
-                              ref={logoInputRef} 
-                              className="hidden" 
-                              accept="image/*" 
-                              onChange={handleLogoUpload} 
-                            />
-                            <Button 
-                              variant="outline" 
-                              type="button"
-                              className="gap-2 h-9 px-4 text-xs font-bold" 
-                              size="sm"
-                              onClick={() => logoInputRef.current?.click()}
-                            >
-                              <Upload className="h-3.5 w-3.5" />
-                              {logoImage ? 'Change Logo' : 'Upload Logo'}
-                            </Button>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 space-y-6">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Enter outlet name" {...field} className="h-11 bg-background" />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="slug"
-                              render={({ field }) => (
-                                <FormItem className="text-left">
-                                  <FormLabel className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></FormLabel>
-                                  <div className="relative">
-                                    <FormControl>
-                                      <Input placeholder="outlet-slug" {...field} className="h-11 bg-background pr-10" />
-                                    </FormControl>
-                                    <MoreHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                                  </div>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          
-                          <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                              <FormItem className="text-left">
-                                <FormLabel className="text-sm font-semibold">Description</FormLabel>
-                                <FormControl>
-                                  <Textarea 
-                                    placeholder="Enter outlet description..." 
-                                    className="min-h-[100px] resize-none bg-background"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                    </section>
-
-                    <section className="space-y-6 pt-8 border-t">
-                      <h3 className="text-lg font-bold">Address & Location</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Street address <span className="text-red-500">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="Street name and number" className="h-11 bg-background" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="city"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">City <span className="text-red-500">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="state"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
-                              <FormControl>
-                                <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="zip"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="country"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="h-11 bg-background">
-                                    <SelectValue placeholder="Select country" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                                  <SelectItem value="United States">United States</SelectItem>
-                                  <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2 text-left">
-                          <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
-                          <div className="flex gap-2">
-                            <Select value={form.watch('phonePrefix')} onValueChange={(val) => form.setValue('phonePrefix', val)}>
-                              <SelectTrigger className="w-24 h-11 bg-background font-medium">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="+971">+971</SelectItem>
-                                <SelectItem value="+1">+1</SelectItem>
-                                <SelectItem value="+44">+44</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormField
-                              control={form.control}
-                              name="phoneNumber"
-                              render={({ field }) => (
-                                <FormItem className="flex-1 space-y-0">
-                                  <FormControl>
-                                    <Input placeholder="581111111" className="h-11 bg-background font-medium" {...field} />
-                                  </FormControl>
-                                  <FormMessage className="mt-1" />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Email address</FormLabel>
-                              <FormControl>
-                                <Input placeholder="email@example.com" type="email" className="h-11 bg-background font-medium" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </section>
-
-                    <section className="space-y-6 pt-8 border-t">
-                      <h3 className="text-lg font-bold">Operational Settings</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="cuisine"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Cuisine type <span className="text-red-500">*</span></FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="h-11 bg-background">
-                                    <SelectValue placeholder="Select cuisine type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="timezone"
-                          render={({ field }) => (
-                            <FormItem className="text-left">
-                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="h-11 bg-background">
-                                    <SelectValue placeholder="Select timezone" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
-                                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
-                                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </section>
-                  </div>
-                ) : (
+                {isCreated ? (
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="w-full grid grid-cols-3 rounded-none border-b bg-background p-0 h-14 sticky top-0 z-20">
-                      <TabsTrigger 
-                        value="basic" 
-                        className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider"
-                      >
+                      <TabsTrigger value="basic" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider">
                         <Info className="h-4 w-4" /> Basic Information
                       </TabsTrigger>
                       <TabsTrigger value="hours" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none h-full gap-2 text-sm font-bold uppercase tracking-wider">
@@ -581,20 +313,8 @@ export default function AddNewOutletPage() {
                                 )}
                               </div>
                               <div className="flex flex-col items-center gap-1.5">
-                                <input 
-                                  type="file" 
-                                  ref={logoInputRef} 
-                                  className="hidden" 
-                                  accept="image/*" 
-                                  onChange={handleLogoUpload} 
-                                />
-                                <Button 
-                                  variant="outline" 
-                                  type="button"
-                                  className="gap-2 h-9 px-4 text-xs font-bold" 
-                                  size="sm"
-                                  onClick={() => logoInputRef.current?.click()}
-                                >
+                                <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                                <Button variant="outline" type="button" className="gap-2 h-9 px-4 text-xs font-bold" size="sm" onClick={() => logoInputRef.current?.click()}>
                                   <Upload className="h-3.5 w-3.5" />
                                   {logoImage ? 'Change Logo' : 'Upload Logo'}
                                 </Button>
@@ -603,9 +323,9 @@ export default function AddNewOutletPage() {
                             
                             <div className="flex-1 space-y-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField
-                                  control={form.control}
-                                  name="name"
+                                <FormField 
+                                  control={form.control} 
+                                  name="name" 
                                   render={({ field }) => (
                                     <FormItem className="text-left">
                                       <FormLabel className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></FormLabel>
@@ -616,9 +336,9 @@ export default function AddNewOutletPage() {
                                     </FormItem>
                                   )}
                                 />
-                                <FormField
-                                  control={form.control}
-                                  name="slug"
+                                <FormField 
+                                  control={form.control} 
+                                  name="slug" 
                                   render={({ field }) => (
                                     <FormItem className="text-left">
                                       <FormLabel className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></FormLabel>
@@ -630,18 +350,14 @@ export default function AddNewOutletPage() {
                                   )}
                                 />
                               </div>
-                              <FormField
-                                control={form.control}
-                                name="description"
+                              <FormField 
+                                control={form.control} 
+                                name="description" 
                                 render={({ field }) => (
                                   <FormItem className="text-left">
                                     <FormLabel className="text-sm font-semibold">Description</FormLabel>
                                     <FormControl>
-                                      <Textarea 
-                                        placeholder="Enter outlet description..." 
-                                        className="min-h-[100px] resize-none bg-background"
-                                        {...field}
-                                      />
+                                      <Textarea placeholder="Enter outlet description..." className="min-h-[100px] resize-none bg-background" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -654,20 +370,15 @@ export default function AddNewOutletPage() {
                         <section className="space-y-6 pt-8 border-t">
                             <h3 className="text-lg font-bold">Branding & Identity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                                <div className="md:col-span-7 space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
-                                    </div>
-                                    <div 
-                                        className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group"
-                                        onClick={() => bannerInputRef.current?.click()}
-                                    >
+                                <div className="md:col-span-7 space-y-4 text-left">
+                                    <Label className="text-sm font-semibold">Featured Image (Banner)</Label>
+                                    <div className="relative aspect-[21/9] w-full rounded-xl bg-muted/30 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors group" onClick={() => bannerInputRef.current?.click()}>
                                         {featuredImage ? (
                                         <Image src={featuredImage} alt="Banner" fill className="object-cover" />
                                         ) : (
                                         <div className="flex flex-col items-center gap-2 text-center p-4">
                                             <ImageIcon className="h-10 w-10 text-gray-300 mb-1" />
-                                            <p className="text-xs text-gray-400">Recommended: 1200 × 400px</p>
+                                            <p className="text-xs text-gray-400 font-bold uppercase">WIDESCREEN HEADER IMAGE</p>
                                         </div>
                                         )}
                                         <input type="file" ref={bannerInputRef} className="hidden" accept="image/*" onChange={handleBannerUpload} />
@@ -681,30 +392,21 @@ export default function AddNewOutletPage() {
                                         </div>
                                         <Card className="shadow-none border-gray-100 bg-white">
                                             <CardContent className="p-5 space-y-4">
-                                                <div className="flex items-center gap-4">
-                                                <div className="relative h-14 w-14 shrink-0">
-                                                    <input 
-                                                    type="color" 
-                                                    value={primaryColor} 
-                                                    onChange={(e) => setPrimaryColor(e.target.value)}
-                                                    className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 space-y-1.5">
-                                                    <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
-                                                    <Input 
-                                                        value={primaryColor} 
-                                                        onChange={(e) => setPrimaryColor(e.target.value)}
-                                                        className="h-11 bg-background font-mono font-bold uppercase rounded-lg text-sm border-gray-100"
-                                                    />
-                                                </div>
+                                                <div className="flex items-center gap-4 text-left">
+                                                  <div className="relative h-14 w-14 shrink-0">
+                                                      <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="absolute inset-0 h-full w-full cursor-pointer rounded-lg border-2 border-white shadow-sm p-0 overflow-hidden" />
+                                                  </div>
+                                                  <div className="flex-1 space-y-1.5">
+                                                      <Label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">BRAND HEX CODE</Label>
+                                                      <Input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="h-11 bg-background font-mono font-bold uppercase rounded-lg text-sm border-gray-100" />
+                                                  </div>
                                                 </div>
                                             </CardContent>
                                         </Card>
                                     </div>
                                     <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
                                         <CardContent className="p-5 flex items-center justify-between">
-                                            <div className="space-y-0.5">
+                                            <div className="space-y-0.5 text-left">
                                                 <p className="text-sm font-bold text-gray-900">Display Logo</p>
                                                 <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
                                             </div>
@@ -718,9 +420,9 @@ export default function AddNewOutletPage() {
                         <section className="space-y-6 pt-8 border-t">
                           <h3 className="text-lg font-bold">Address & Contact</h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormField
-                              control={form.control}
-                              name="address"
+                            <FormField 
+                              control={form.control} 
+                              name="address" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
                                   <FormLabel className="text-sm font-semibold">Street address <span className="text-red-500">*</span></FormLabel>
@@ -731,9 +433,9 @@ export default function AddNewOutletPage() {
                                 </FormItem>
                               )}
                             />
-                            <FormField
-                              control={form.control}
-                              name="city"
+                            <FormField 
+                              control={form.control} 
+                              name="city" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
                                   <FormLabel className="text-sm font-semibold">City <span className="text-red-500">*</span></FormLabel>
@@ -745,7 +447,6 @@ export default function AddNewOutletPage() {
                               )}
                             />
                           </div>
-
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <div className="space-y-2 text-left">
                               <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
@@ -757,12 +458,11 @@ export default function AddNewOutletPage() {
                                   <SelectContent>
                                     <SelectItem value="+971">+971</SelectItem>
                                     <SelectItem value="+1">+1</SelectItem>
-                                    <SelectItem value="+44">+44</SelectItem>
                                   </SelectContent>
                                 </Select>
-                                <FormField
-                                  control={form.control}
-                                  name="phoneNumber"
+                                <FormField 
+                                  control={form.control} 
+                                  name="phoneNumber" 
                                   render={({ field }) => (
                                     <FormItem className="flex-1 space-y-0">
                                       <FormControl>
@@ -774,9 +474,9 @@ export default function AddNewOutletPage() {
                                 />
                               </div>
                             </div>
-                            <FormField
-                              control={form.control}
-                              name="email"
+                            <FormField 
+                              control={form.control} 
+                              name="email" 
                               render={({ field }) => (
                                 <FormItem className="text-left">
                                   <FormLabel className="text-sm font-semibold">Email address</FormLabel>
@@ -794,81 +494,47 @@ export default function AddNewOutletPage() {
                     <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
                         <div className="space-y-1.5 max-w-2xl text-left">
-                          <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
-                            Operating Schedule
-                          </h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                            Define when your outlet is open. These hours dictate when customers can view and place orders from your Digital eMenu.
-                          </p>
+                          <h3 className="text-xl font-bold tracking-tight">Operating Schedule</h3>
+                          <p className="text-sm text-muted-foreground font-medium">Define when your outlet is open.</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 shrink-0">
-                          <Button variant="outline" type="button" size="sm" className="gap-2 font-bold text-xs h-10 px-4 rounded-xl shadow-sm" onClick={handleCopyToAllDays}>
-                            <RotateCcw className="h-3.5 w-3.5" /> Apply Monday to All Days
-                          </Button>
-                        </div>
+                        <Button variant="outline" type="button" size="sm" className="gap-2 font-bold text-xs h-10 px-4 rounded-xl shadow-sm" onClick={handleCopyToAllDays}>
+                          <RotateCcw className="h-3.5 w-3.5" /> Apply Monday to All Days
+                        </Button>
                       </div>
-
-                      <div className="space-y-6 text-left">
+                      <div className="space-y-6">
                         <Card className="border shadow-none overflow-hidden bg-muted/10 rounded-2xl">
                           <CardHeader className="bg-white border-b py-4 px-8 text-left">
                             <CardTitle className="text-sm font-bold text-foreground uppercase tracking-wider">Standard Hours</CardTitle>
-                            <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                           </CardHeader>
                           <CardContent className="p-0 divide-y bg-white">
                             {regularHours.map((hour, index) => (
-                              <div key={hour.day} className={cn(
-                                "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
-                                hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5"
-                              )}>
+                              <div key={hour.day} className={cn("flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors", hour.closed ? "bg-muted/20 opacity-60" : "hover:bg-muted/5")}>
                                 <div className="w-32 shrink-0 text-left">
                                   <span className="font-bold text-base text-foreground">{hour.day}</span>
                                 </div>
-                                
                                 <div className="flex-1 flex flex-wrap items-center gap-4 text-left">
                                   <div className={cn("flex items-center gap-3 transition-opacity", hour.closed && "pointer-events-none")}>
                                     <div className="space-y-1.5">
-                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Open At</Label>
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Open</Label>
                                       <Select value={hour.open} onValueChange={(val) => handleUpdateRegularHour(index, 'open', val)}>
-                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                        </SelectContent>
+                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                                       </Select>
                                     </div>
-                                    <span className="text-xs font-bold text-muted-foreground mt-6 uppercase">to</span>
+                                    <span className="text-xs font-bold text-muted-foreground mt-6">to</span>
                                     <div className="space-y-1.5">
-                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase tracking-wider">Close At</Label>
+                                      <Label className="text-xs font-bold text-muted-foreground ml-1 uppercase">Close</Label>
                                       <Select value={hour.close} onValueChange={(val) => handleUpdateRegularHour(index, 'close', val)}>
-                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                        </SelectContent>
+                                        <SelectTrigger className="w-36 h-10 bg-background font-bold text-sm rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                                       </Select>
                                     </div>
                                   </div>
                                 </div>
-
-                                <div className="flex items-center gap-3 self-end sm:self-center pt-2 sm:pt-0">
-                                  <div className={cn(
-                                    "flex items-center gap-3 px-4 py-2 rounded-xl border transition-all",
-                                    hour.closed ? "bg-destructive/5 border-destructive/20" : "bg-green-50/50 border-green-100"
-                                  )}>
-                                    <Checkbox 
-                                      id={`closed-${hour.day}`} 
-                                      checked={hour.closed} 
-                                      onCheckedChange={(checked) => handleUpdateRegularHour(index, 'closed', !!checked)} 
-                                      className="h-5 w-5 rounded-md"
-                                    />
-                                    <label htmlFor={`closed-${hour.day}`} className={cn(
-                                      "text-xs font-bold cursor-pointer",
-                                      hour.closed ? "text-destructive" : "text-green-700"
-                                    )}>
-                                      {hour.closed ? 'Closed Today' : 'Outlet Open'}
-                                    </label>
+                                <div className="flex items-center gap-3 self-end sm:self-center">
+                                  <div className={cn("flex items-center gap-3 px-4 py-2 rounded-xl border", hour.closed ? "bg-destructive/5 border-destructive/20" : "bg-green-50/50 border-green-100")}>
+                                    <Checkbox id={`closed-${hour.day}`} checked={hour.closed} onCheckedChange={(checked) => handleUpdateRegularHour(index, 'closed', !!checked)} />
+                                    <label htmlFor={`closed-${hour.day}`} className={cn("text-xs font-bold cursor-pointer", hour.closed ? "text-destructive" : "text-green-700")}>{hour.closed ? 'Closed' : 'Open'}</label>
                                   </div>
                                 </div>
                               </div>
@@ -880,29 +546,25 @@ export default function AddNewOutletPage() {
 
                     <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
                       <section className="space-y-8">
-                        <div className="flex items-center justify-between border-b pb-6 text-left">
-                          <div>
+                        <div className="text-left border-b pb-6">
                             <h3 className="text-xl font-bold text-slate-900">Gratuity Settings</h3>
-                            <p className="text-sm text-muted-foreground font-medium mt-1">Configure how customers can add tips to their orders.</p>
-                          </div>
+                            <p className="text-sm text-muted-foreground font-medium mt-1">Configure customer tipping options.</p>
                         </div>
-
                         <Card className="rounded-2xl border shadow-sm">
                           <CardHeader className="text-left">
-                            <CardTitle className="text-lg font-bold uppercase tracking-wider">Customer Tipping Options</CardTitle>
-                            <CardDescription className="text-sm font-medium text-slate-500">Control the options and limits your customers see during checkout.</CardDescription>
+                            <CardTitle className="text-lg font-bold">Options</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-6 pt-2 text-left">
+                          <CardContent className="space-y-6 pt-2">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                               <div className="space-y-2 text-left">
-                                <Label className="text-sm font-bold text-slate-700">Max Tip Amount Allowed (%)</Label>
+                                <Label className="text-sm font-bold text-slate-700">Max Tip Amount (%)</Label>
                                 <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-12 bg-background font-bold text-base rounded-xl" />
                               </div>
                               <div className="space-y-2 text-left">
                                 <Label className="text-sm font-bold text-slate-700">Allow Custom Tip</Label>
                                 <div className="flex items-center justify-between rounded-xl border p-4 h-[64px] bg-background">
-                                  <p className="text-xs text-muted-foreground font-medium">Let customers enter their own amount.</p>
-                                  <Switch id="custom-tip-enabled-new" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} className="data-[state=checked]:bg-primary" />
+                                  <p className="text-xs text-muted-foreground font-medium">Guests enter custom amount.</p>
+                                  <Switch id="custom-tip-enabled" checked={customEntryEnabled} onCheckedChange={setCustomEntryEnabled} />
                                 </div>
                               </div>
                             </div>
@@ -911,62 +573,233 @@ export default function AddNewOutletPage() {
                       </section>
                     </TabsContent>
                   </Tabs>
+                ) : (
+                  <div className="p-8 space-y-12">
+                    <section className="space-y-6">
+                      <h3 className="text-lg font-bold">Outlet Identity</h3>
+                      <div className="flex flex-col md:flex-row gap-8">
+                        <div className="flex flex-col items-center gap-3 shrink-0">
+                          <div className="w-32 h-32 rounded-xl bg-muted flex items-center justify-center border-2 border-dashed overflow-hidden relative">
+                            {logoImage ? (
+                              <Image src={logoImage} alt="Logo" fill className="object-cover" />
+                            ) : (
+                              <ImageIcon className="h-8 w-8 text-muted-foreground opacity-40" />
+                            )}
+                          </div>
+                          <div className="flex flex-col items-center gap-1.5 text-center">
+                            <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                            <Button variant="outline" type="button" className="gap-2 h-9 px-4 text-xs font-bold" size="sm" onClick={() => logoInputRef.current?.click()}>
+                              <Upload className="h-3.5 w-3.5" />
+                              {logoImage ? 'Change Logo' : 'Upload Logo'}
+                            </Button>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">PNG, JPG up to 1MB</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 space-y-6 text-left">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField 
+                              control={form.control} 
+                              name="name" 
+                              render={({ field }) => (
+                                <FormItem className="text-left">
+                                  <FormLabel className="text-sm font-semibold">Outlet name <span className="text-red-500">*</span></FormLabel>
+                                  <FormControl><Input placeholder="Enter outlet name" {...field} className="h-11 bg-background" /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField 
+                              control={form.control} 
+                              name="slug" 
+                              render={({ field }) => (
+                                <FormItem className="text-left">
+                                  <FormLabel className="text-sm font-semibold">Outlet slug <span className="text-red-500">*</span></FormLabel>
+                                  <FormControl><Input placeholder="outlet-slug" {...field} className="h-11 bg-background pr-10" /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField 
+                            control={form.control} 
+                            name="description" 
+                            render={({ field }) => (
+                              <FormItem className="text-left">
+                                <FormLabel className="text-sm font-semibold">Description</FormLabel>
+                                <FormControl><Textarea placeholder="Enter outlet description..." className="min-h-[100px] resize-none bg-background" {...field} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="space-y-6 pt-8 border-t text-left">
+                      <h3 className="text-lg font-bold">Address & Location</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField 
+                          control={form.control} 
+                          name="address" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Street address <span className="text-red-500">*</span></FormLabel>
+                              <FormControl><Input placeholder="Street name and number" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField 
+                          control={form.control} 
+                          name="city" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">City <span className="text-red-500">*</span></FormLabel>
+                              <FormControl><Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <FormField 
+                          control={form.control} 
+                          name="state" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></FormLabel>
+                              <FormControl><Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField 
+                          control={form.control} 
+                          name="zip" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Zip <span className="text-red-500">*</span></FormLabel>
+                              <FormControl><Input placeholder="e.g. 00000" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField 
+                          control={form.control} 
+                          name="country" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                  <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">Phone <span className="text-red-500">*</span></Label>
+                          <div className="flex gap-2">
+                            <Select value={form.watch('phonePrefix')} onValueChange={(val) => form.setValue('phonePrefix', val)}>
+                              <SelectTrigger className="w-24 h-11 bg-background font-medium"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="+971">+971</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormField 
+                              control={form.control} 
+                              name="phoneNumber" 
+                              render={({ field }) => (
+                                <FormItem className="flex-1 space-y-0 text-left">
+                                  <FormControl><Input placeholder="581111111" className="h-11 bg-background" {...field} /></FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <FormField 
+                          control={form.control} 
+                          name="email" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Email address</FormLabel>
+                              <FormControl><Input placeholder="email@example.com" type="email" className="h-11 bg-background" {...field} /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </section>
+                    <section className="space-y-6 pt-8 border-t text-left">
+                      <h3 className="text-lg font-bold">Operational Settings</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField 
+                          control={form.control} 
+                          name="cuisine" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Cuisine <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>{cuisines.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField 
+                          control={form.control} 
+                          name="timezone" 
+                          render={({ field }) => (
+                            <FormItem className="text-left">
+                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl><SelectTrigger className="h-11 bg-background"><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent><SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem></SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </section>
+                  </div>
                 )}
               </Card>
             </form>
           </Form>
 
-          <div className="mt-8 flex justify-end gap-3 text-right pb-12">
-            <Button variant="outline" className="px-8 h-12 font-bold rounded-xl" type="button" onClick={() => router.back()}>
-              Cancel
-            </Button>
-            <Button 
-              className="px-10 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl shadow-xl shadow-primary/20" 
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSaveDisabled}
-            >
-              <Save className="h-4 w-4" />
-              Save Changes
+          <div className="mt-8 flex justify-end gap-3 pb-12">
+            <Button variant="outline" className="px-8 h-12 font-bold rounded-xl" type="button" onClick={() => router.back()}>Cancel</Button>
+            <Button className="px-10 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold gap-2 rounded-xl shadow-lg" onClick={form.handleSubmit(onSubmit)} disabled={isSaveDisabled}>
+              <Save className="h-4 w-4" /> Save Changes
             </Button>
           </div>
         </div>
       </main>
 
-      <OutletOptionsModal 
-        open={isOptionsModalOpen}
-        onOpenChange={setIsOptionsModalOpen}
-        onConfirm={handleFinalConfirm}
-      />
+      <OutletOptionsModal open={isOptionsModalOpen} onOpenChange={setIsOptionsModalOpen} onConfirm={handleFinalConfirm} />
 
       <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
-        <DialogContent className="sm:max-w-md p-10 border-0 shadow-2xl overflow-hidden bg-white text-center rounded-3xl">
-          <div className="absolute -top-10 -right-10 p-8 opacity-10 pointer-events-none rotate-12">
-            <CheckCircle2 className="h-48 w-48 text-primary" />
-          </div>
-          
+        <DialogContent className="sm:max-w-md p-10 border-0 shadow-2xl bg-white text-center rounded-3xl">
+          <div className="absolute -top-10 -right-10 p-8 opacity-10 rotate-12"><CheckCircle2 className="h-48 w-48 text-primary" /></div>
           <div className="relative z-10 flex flex-col items-center space-y-6">
-            <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center shadow-sm border border-primary/20">
-              <CheckCircle2 className="h-10 w-10 text-primary animate-in zoom-in duration-500" />
-            </div>
-            
+            <div className="h-20 w-20 rounded-3xl bg-primary/10 flex items-center justify-center border border-primary/20"><CheckCircle2 className="h-10 w-10 text-primary" /></div>
             <div className="space-y-3">
-              <DialogTitle className="text-3xl font-bold tracking-tight text-foreground leading-tight">
-                Activation Successful
-              </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-base font-medium leading-relaxed max-w-[340px] mx-auto text-center">
+              <DialogTitle className="text-3xl font-bold tracking-tight text-foreground leading-tight">Activation Successful</DialogTitle>
+              <DialogDescription className="text-muted-foreground text-base font-medium max-w-[340px] mx-auto text-center leading-relaxed">
                 Your digital services are now active. You can now proceed to configure the remaining details, including operating hours and tip settings.
               </DialogDescription>
             </div>
-
-            <Button 
-              className="w-full h-12 font-bold uppercase tracking-widest bg-primary text-white hover:bg-primary/90 shadow-lg rounded-xl gap-2"
-              onClick={() => {
-                setIsSuccessDialogOpen(false);
-                setIsCreated(true);
-              }}
-            >
-              Continue to Configuration
-              <ChevronRight className="h-4 w-4" />
+            <Button className="w-full h-12 font-bold uppercase tracking-widest bg-primary text-white hover:bg-primary/90 rounded-xl gap-2" onClick={() => { setIsSuccessDialogOpen(false); setIsCreated(true); }}>
+              Continue to Configuration <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </DialogContent>

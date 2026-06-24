@@ -335,29 +335,29 @@ export function QuickSettingsSheet({
               </div>
             </SheetFooter>
           </div>
+
+          {/* Warning Popup (Nested inside SheetContent for stable focus management) */}
+          <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+            <AlertDialogContent className="rounded-3xl border-0 shadow-2xl">
+              <AlertDialogHeader className="text-left">
+                <AlertDialogTitle className="text-xl font-bold text-slate-900">{warningConfig?.title}</AlertDialogTitle>
+                <AlertDialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
+                  {warningConfig?.desc}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-4 gap-2">
+                <AlertDialogCancel className="rounded-xl font-bold h-11 border-slate-200">Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={warningConfig?.onConfirm}
+                  className="bg-destructive hover:bg-destructive/90 text-white font-bold h-11 rounded-xl px-6"
+                >
+                  Confirm Deactivation
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </SheetContent>
       </Sheet>
-
-      {/* Warning Popup */}
-      <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
-        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl">
-          <AlertDialogHeader className="text-left">
-            <AlertDialogTitle className="text-xl font-bold text-slate-900">{warningConfig?.title}</AlertDialogTitle>
-            <AlertDialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
-              {warningConfig?.desc}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2">
-            <AlertDialogCancel className="rounded-xl font-bold h-11 border-slate-200">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={warningConfig?.onConfirm}
-              className="bg-destructive hover:bg-destructive/90 text-white font-bold h-11 rounded-xl px-6"
-            >
-              Confirm Deactivation
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

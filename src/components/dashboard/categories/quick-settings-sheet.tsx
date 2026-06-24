@@ -148,7 +148,7 @@ export function QuickSettingsSheet({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={onOpenChange} modal={!isConfirmingToggle}>
+      <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent className="sm:max-w-md w-full p-0 border-l shadow-2xl bg-white">
           <div className="flex flex-col h-full">
             <SheetHeader className="p-6 border-b bg-muted/20 text-left">
@@ -244,31 +244,32 @@ export function QuickSettingsSheet({
                 </Button>
               </div>
             </SheetFooter>
+
+            {/* Nested Dialog to ensure focus remains within the drawer context */}
+            <AlertDialog open={isConfirmingToggle} onOpenChange={setIsConfirmingToggle}>
+                <AlertDialogContent className="rounded-2xl border-0 shadow-2xl">
+                    <AlertDialogHeader className="text-left">
+                        <AlertDialogTitle className="text-xl font-bold text-slate-900">Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm font-medium text-slate-500">
+                            {pendingOnlineState 
+                              ? "This will enable online ordering for this outlet. Customers will be able to place orders from the mobile menu."
+                              : "This will disable online ordering for this outlet. Customers will only be able to view the menu, not purchase items."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-4 gap-2">
+                        <AlertDialogCancel className="rounded-xl font-bold h-11 border-slate-200">Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl px-6"
+                          onClick={handleConfirmToggle}
+                        >
+                            {pendingOnlineState ? 'Enable' : 'Disable'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
           </div>
         </SheetContent>
       </Sheet>
-      
-      <AlertDialog open={isConfirmingToggle} onOpenChange={setIsConfirmingToggle}>
-          <AlertDialogContent className="rounded-2xl border-0 shadow-2xl">
-              <AlertDialogHeader className="text-left">
-                  <AlertDialogTitle className="text-xl font-bold text-slate-900">Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm font-medium text-slate-500">
-                      {pendingOnlineState 
-                        ? "This will enable online ordering for this outlet. Customers will be able to place orders from the mobile menu."
-                        : "This will disable online ordering for this outlet. Customers will only be able to view the menu, not purchase items."}
-                  </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="mt-4 gap-2">
-                  <AlertDialogCancel className="rounded-xl font-bold h-11 border-slate-200">Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    className="bg-primary hover:bg-primary/90 text-white font-bold h-11 rounded-xl px-6"
-                    onClick={handleConfirmToggle}
-                  >
-                      {pendingOnlineState ? 'Enable' : 'Disable'}
-                  </AlertDialogAction>
-              </AlertDialogFooter>
-          </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

@@ -275,8 +275,8 @@ export default function AddNewOutletPage() {
   return (
     <>
       <DashboardHeader />
-      <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-muted/30 min-h-[calc(100vh-4rem)]">
-        <div className="max-w-5xl mx-auto text-left">
+      <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-muted/30 min-h-[calc(100vh-4rem)] text-left">
+        <div className="max-w-5xl mx-auto">
           <Breadcrumbs items={breadcrumbItems} />
           
           <Form {...form}>
@@ -309,10 +309,10 @@ export default function AddNewOutletPage() {
                 </div>
               </div>
 
-              <Card className="shadow-smooth border-0 overflow-hidden text-left bg-background p-0">
+              <Card className="shadow-smooth border-0 overflow-hidden bg-background p-0">
                 {!isCreated ? (
                   <div className="p-8 space-y-12">
-                    <section className="space-y-6 text-left">
+                    <section className="space-y-6">
                       <h3 className="text-lg font-bold">Outlet Details</h3>
                       <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex flex-col items-center gap-3 shrink-0">
@@ -410,7 +410,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t text-left">
+                    <section className="space-y-6 pt-8 border-t">
                       <div className="space-y-1">
                         <h3 className="text-lg font-bold">Branding & Identity</h3>
                         <p className="text-sm text-muted-foreground">Manage the visual personality of your outlet&apos;s digital menu.</p>
@@ -484,7 +484,7 @@ export default function AddNewOutletPage() {
 
                           <Card className="shadow-none border-gray-100 bg-gradient-to-br from-yellow-50/50 via-white to-teal-50/50">
                             <CardContent className="p-5 flex items-center justify-between">
-                              <div className="space-y-0.5">
+                              <div className="space-y-0.5 text-left">
                                 <p className="text-sm font-bold text-gray-900">Display Logo</p>
                                 <p className="text-xs text-gray-500 font-medium">Show your outlet logo on the home screen.</p>
                               </div>
@@ -495,7 +495,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t text-left">
+                    <section className="space-y-6 pt-8 border-t">
                       <h3 className="text-lg font-bold">Address & Location</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
@@ -576,7 +576,7 @@ export default function AddNewOutletPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-semibold">Email address</Label>
+                              <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                               <FormControl>
                                 <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background" {...field} />
                               </FormControl>
@@ -587,7 +587,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </section>
 
-                    <section className="space-y-6 pt-8 border-t text-left">
+                    <section className="space-y-6 pt-8 border-t">
                       <h3 className="text-lg font-bold">Additional Settings</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
@@ -615,7 +615,7 @@ export default function AddNewOutletPage() {
                           name="country"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></Label>
+                              <FormLabel className="text-sm font-semibold">Country <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-11 bg-background">
@@ -628,56 +628,6 @@ export default function AddNewOutletPage() {
                                   <SelectItem value="United Kingdom">United Kingdom</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FormField
-                          control={form.control}
-                          name="state"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-semibold">State <span className="text-red-500">*</span></Label>
-                              <FormControl>
-                                <Input placeholder="e.g. Dubai" className="h-11 bg-background" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="timezone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-semibold">Timezone <span className="text-red-500">*</span></Label>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="h-11 bg-background">
-                                    <SelectValue placeholder="Select timezone" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Asia/Dubai (GMT+04:00)">Asia/Dubai (GMT+04:00)</SelectItem>
-                                  <SelectItem value="Europe/London (GMT+00:00)">Europe/London (GMT+00:00)</SelectItem>
-                                  <SelectItem value="America/New_York (GMT-05:00)">America/New_York (GMT-05:00)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="zip"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-semibold">Zip code <span className="text-red-500">*</span></Label>
-                              <FormControl>
-                                <Input placeholder="e.g. 99999" className="h-11 bg-background" {...field} />
-                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -702,9 +652,9 @@ export default function AddNewOutletPage() {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background text-left">
+                    <TabsContent value="basic" className="p-8 focus-visible:ring-0 mt-0 bg-background">
                       <div className="space-y-12">
-                        <section className="space-y-6 text-left">
+                        <section className="space-y-6">
                           <h3 className="text-lg font-bold">Outlet Details</h3>
                           <div className="flex flex-col md:flex-row gap-8">
                             <div className="flex flex-col items-center gap-3 shrink-0">
@@ -801,9 +751,9 @@ export default function AddNewOutletPage() {
                           </div>
                         </section>
 
-                        <section className="space-y-6 pt-8 border-t text-left">
+                        <section className="space-y-6 pt-8 border-t">
                           <h3 className="text-lg font-bold">Address & Location</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
                               control={form.control}
                               name="address"
@@ -836,8 +786,8 @@ export default function AddNewOutletPage() {
                             control={form.control}
                             name="menuUrl"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-sm font-semibold">Menu url</Label>
+                              <FormItem className="mt-4">
+                                <FormLabel className="text-sm font-semibold">Menu url</FormLabel>
                                 <div className="relative">
                                   <FormControl>
                                     <Input placeholder="Enter URL for your online menu (optional)" className="h-11 bg-background pr-10" {...field} />
@@ -849,7 +799,7 @@ export default function AddNewOutletPage() {
                             )}
                           />
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                             <div className="space-y-2">
                               <Label className="text-sm font-semibold">Phone number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
@@ -882,7 +832,7 @@ export default function AddNewOutletPage() {
                               name="email"
                               render={({ field }) => (
                                 <FormItem>
-                                  <FormLabel className="text-sm font-semibold">Email address</Label>
+                                  <FormLabel className="text-sm font-semibold">Email address</FormLabel>
                                   <FormControl>
                                     <Input placeholder="raffi.uae7@gmail.com" type="email" className="h-11 bg-background" {...field} />
                                   </FormControl>
@@ -895,7 +845,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
+                    <TabsContent value="hours" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b pb-8">
                         <div className="space-y-1.5 text-left max-w-2xl">
                           <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
@@ -907,7 +857,7 @@ export default function AddNewOutletPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-3 shrink-0">
                           <Button variant="outline" type="button" size="sm" className="gap-2 font-semibold text-xs h-10 px-4" onClick={handleCopyToAllDays}>
-                            <Copy className="h-3.5 w-3.5" /> Apply Monday to All Days
+                            <CopyIcon className="h-3.5 w-3.5" /> Apply Monday to All Days
                           </Button>
                           <Button variant="ghost" type="button" size="sm" className="gap-2 font-semibold text-xs h-10 px-4 text-muted-foreground" onClick={() => setRegularHours(DAYS.map(day => ({ day, open: '09:00 AM', close: '11:00 PM', closed: false })))}>
                             <RotateCcw className="h-3.5 w-3.5" /> Reset Schedule
@@ -921,7 +871,7 @@ export default function AddNewOutletPage() {
                             <CardTitle className="text-sm font-bold text-foreground">Standard Hours</CardTitle>
                             <p className="text-xs text-muted-foreground font-medium">Set your recurring weekly availability</p>
                           </CardHeader>
-                          <CardContent className="p-0 divide-y bg-white text-left">
+                          <CardContent className="p-0 divide-y bg-white">
                             {regularHours.map((hour, index) => (
                               <div key={hour.day} className={cn(
                                 "flex flex-col sm:flex-row sm:items-center gap-6 py-5 px-8 transition-colors",
@@ -985,7 +935,7 @@ export default function AddNewOutletPage() {
                       </div>
                     </TabsContent>
 
-                    <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background text-left">
+                    <TabsContent value="tip-fee" className="p-8 space-y-12 focus-visible:ring-0 mt-0 bg-background">
                       <section className="space-y-8">
                         <div className="flex items-center justify-between border-b pb-6 text-left">
                           <div>
@@ -999,13 +949,13 @@ export default function AddNewOutletPage() {
                             <CardTitle>Customer Tipping Options</CardTitle>
                             <CardDescription>Control the options and limits your customers see during checkout.</CardDescription>
                           </CardHeader>
-                          <CardContent className="space-y-6 pt-2 text-left">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start text-left">
-                              <div className="space-y-2">
+                          <CardContent className="space-y-6 pt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                              <div className="space-y-2 text-left">
                                 <Label>Max Tip Amount Allowed (%)</Label>
-                                <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="bg-background h-11"/>
+                                <Input value={maxRate} onChange={(e) => setMaxRate(e.target.value)} placeholder="e.g. 100" className="h-11 bg-background" />
                               </div>
-                              <div className="space-y-2">
+                              <div className="space-y-2 text-left">
                                 <Label>Allow Custom Tip</Label>
                                 <div className="flex items-center justify-between rounded-lg border p-3 h-[60px] bg-background">
                                   <p className="text-sm text-muted-foreground">Let customers enter their own amount.</p>
@@ -1044,5 +994,25 @@ export default function AddNewOutletPage() {
         onConfirm={handleFinalConfirm}
       />
     </>
+  );
+}
+
+function CopyIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </svg>
   );
 }
